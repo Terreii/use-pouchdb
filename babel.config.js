@@ -9,5 +9,6 @@ module.exports = {
       },
     ],
     '@babel/preset-typescript',
+    '@babel/preset-react',
   ],
 }

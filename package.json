@@ -2,9 +2,9 @@
   "name": "use-pouchdb",
   "version": "1.0.0",
   "description": "React Hooks for PouchDB",
-  "main": "dist/index.js",
-  "jsnext:main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "lib/index.js",
+  "jsnext:main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
     "build": "tsc",
     "format": "prettier --write .",

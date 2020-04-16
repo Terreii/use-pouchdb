@@ -41,8 +41,10 @@
   },
   "dependencies": {
     "@types/pouchdb-core": "^7.0.5",
+    "@types/pouchdb-mapreduce": "^6.1.4",
     "@types/react": "^16.9.34",
     "pouchdb-core": "^7.2.1",
+    "pouchdb-mapreduce": "^7.2.1",
     "react": "^16.13.1"
   },
   "husky": {

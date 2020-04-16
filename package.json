@@ -6,10 +6,9 @@
   "jsnext:main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "prepublish": "tsc",
     "build": "tsc",
     "format": "prettier --write .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --watch"
   },
   "keywords": [
     "react",
@@ -24,9 +23,14 @@
   },
   "license": "Apache-2.0",
   "devDependencies": {
+    "@testing-library/react-hooks": "^3.2.1",
+    "@types/jest": "^25.2.1",
     "husky": "^4.2.5",
+    "jest": "^25.3.0",
     "prettier": "2.0.4",
     "pretty-quick": "^2.0.1",
+    "react-test-renderer": "^16.13.1",
+    "ts-jest": "^25.3.1",
     "typescript": "^3.8.3"
   },
   "dependencies": {

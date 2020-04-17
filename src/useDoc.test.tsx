@@ -54,7 +54,11 @@ test('should return a default value while first loading', async () => {
     }
   )
 
-  expect(result.current.doc).toEqual({ value: 'doc' })
+  expect(result.current.doc).toEqual({
+    _id: 'test',
+    _rev: '',
+    value: 'doc',
+  })
   expect(result.current.error).toBeNull()
   expect(result.current.state).toBe('loading')
 
@@ -81,7 +85,11 @@ test('should return a default value from a function while first loading', async 
     }
   )
 
-  expect(result.current.doc).toEqual({ value: 'doc' })
+  expect(result.current.doc).toEqual({
+    _id: 'test',
+    _rev: '',
+    value: 'doc',
+  })
   expect(result.current.error).toBeNull()
   expect(result.current.state).toBe('loading')
 
@@ -122,13 +130,21 @@ test('should continue to return the default value in error-state', async () => {
     }
   )
 
-  expect(result.current.doc).toEqual({ other: 'doc' })
+  expect(result.current.doc).toEqual({
+    _id: 'test',
+    _rev: '',
+    other: 'doc',
+  })
   expect(result.current.error).toBeNull()
   expect(result.current.state).toBe('loading')
 
   await waitForNextUpdate()
 
-  expect(result.current.doc).toEqual({ other: 'doc' })
+  expect(result.current.doc).toEqual({
+    _id: 'test',
+    _rev: '',
+    other: 'doc',
+  })
   expect(result.current.state).toBe('error')
   expect(result.current.error).toBeInstanceOf(Error)
   expect(result.current.error.status).toBe(404)
@@ -246,7 +262,7 @@ test('should return the last doc when id did change and no initial value is pass
   expect(result.current.doc.value).toBe('changed')
 })
 
-test.only('should return the initial value when id did change', async () => {
+test('should return the initial value when id did change', async () => {
   await myPouch.bulkDocs([
     { _id: 'test', value: 42, greetings: 'Hello You!' },
     { _id: 'other', value: 'changed' },
@@ -277,4 +293,41 @@ test.only('should return the initial value when id did change', async () => {
   expect(result.current.state).toBe('done')
   expect(result.current.doc._id).toBe('other')
   expect(result.current.doc.value).toBe('changed')
+})
+
+test('should return a 404 error if the doc was deleted while it is shown', async () => {
+  const putResult = await myPouch.put({
+    _id: 'test',
+    value: 42,
+    greetings: 'Hello You!',
+  })
+
+  const { result, waitForNextUpdate } = renderHook(
+    () =>
+      useDoc<{ _id?: string; value: number | string; greetings: string }>(
+        'test'
+      ),
+    {
+      wrapper: ({ children }) => (
+        <Provider pouchdb={myPouch}>{children}</Provider>
+      ),
+    }
+  )
+
+  await waitForNextUpdate()
+
+  expect(result.current.state).toBe('done')
+  expect(result.current.doc._id).toBe('test')
+  expect(result.current.doc.value).toBe(42)
+
+  act(() => {
+    myPouch.remove(putResult.id, putResult.rev)
+  })
+
+  await waitForNextUpdate()
+
+  expect(result.current.state).toBe('error')
+  expect(result.current.doc).toBeNull()
+  expect(result.current.error).toBeInstanceOf(Error)
+  expect(result.current.error.status).toBe(404)
 })

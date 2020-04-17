@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useContext } from 'react'
+import { MISSING_DOC } from 'pouchdb-errors'
 
 import { PouchContext } from './context'
 
@@ -13,21 +14,27 @@ export default function useDoc<Content extends {}>(
     options || {}
 
   const [doc, setDoc] = useState<
-    Content | (PouchDB.Core.Document<Content> & PouchDB.Core.GetMeta)
+    Content | (PouchDB.Core.Document<Content> & PouchDB.Core.GetMeta) | null
   >(initialValue!)
   const [state, setState] = useState<'loading' | 'done' | 'error'>('loading')
   const [error, setError] = useState<PouchDB.Core.Error | null>(null)
+
+  const setToInitialValue = (fallBackToNull: boolean) => {
+    if (initialValue && typeof initialValue === 'object') {
+      setDoc(initialValue)
+    } else if (typeof initialValue === 'function') {
+      setDoc((initialValue as Function)())
+    } else if (fallBackToNull) {
+      setDoc(null)
+    }
+  }
 
   const lastId = useRef(id)
   useEffect(() => {
     if (id === lastId.current) return
     lastId.current = id
 
-    if (typeof initialValue === 'object') {
-      setDoc(initialValue)
-    } else if (typeof initialValue === 'function') {
-      setDoc((initialValue as Function)())
-    }
+    setToInitialValue(false)
   }, [id, initialValue])
 
   useEffect(() => {
@@ -56,6 +63,7 @@ export default function useDoc<Content extends {}>(
         if (isMounted) {
           setState('error')
           setError(err)
+          setToInitialValue(true)
         }
       }
     }
@@ -75,6 +83,9 @@ export default function useDoc<Content extends {}>(
         if (change.id !== id || !isMounted) return
 
         if (change.deleted) {
+          setToInitialValue(true)
+          setError(MISSING_DOC)
+          setState('error')
         } else {
           setDoc(
             change.doc as PouchDB.Core.Document<Content> & PouchDB.Core.GetMeta

@@ -8,9 +8,17 @@ import usePouchDB from './usePouchDB'
 
 PouchDB.plugin(memory)
 
-test('should return the pouchdb from the provider', () => {
-  const myPouch = new PouchDB('test', { adapter: 'memory' })
+let myPouch: PouchDB.Database
 
+beforeEach(() => {
+  myPouch = new PouchDB('test', { adapter: 'memory' })
+})
+
+afterEach(async () => {
+  await myPouch.destroy()
+})
+
+test('should return the pouchdb from the provider', () => {
   const { result } = renderHook(() => usePouchDB(), {
     wrapper: ({ children }) => (
       <Provider pouchdb={myPouch}>{children}</Provider>

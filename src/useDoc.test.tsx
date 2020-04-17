@@ -43,7 +43,10 @@ test('should return a default value while first loading', async () => {
   await myPouch.put({ _id: 'test', value: 42, greetings: 'Hello You!' })
 
   const { result, waitForNextUpdate } = renderHook(
-    () => useDoc('test', null, { other: 'doc' }),
+    () =>
+      useDoc<{ _id?: string; value: number | string }>('test', null, {
+        value: 'doc',
+      }),
     {
       wrapper: ({ children }) => (
         <Provider pouchdb={myPouch}>{children}</Provider>
@@ -51,7 +54,7 @@ test('should return a default value while first loading', async () => {
     }
   )
 
-  expect(result.current.doc).toEqual({ other: 'doc' })
+  expect(result.current.doc).toEqual({ value: 'doc' })
   expect(result.current.error).toBeNull()
   expect(result.current.state).toBe('loading')
 
@@ -67,7 +70,10 @@ test('should return a default value from a function while first loading', async 
   await myPouch.put({ _id: 'test', value: 42, greetings: 'Hello You!' })
 
   const { result, waitForNextUpdate } = renderHook(
-    () => useDoc('test', null, () => ({ other: 'doc' })),
+    () =>
+      useDoc<{ _id?: string; value: number | string }>('test', null, () => ({
+        value: 'doc',
+      })),
     {
       wrapper: ({ children }) => (
         <Provider pouchdb={myPouch}>{children}</Provider>
@@ -75,7 +81,7 @@ test('should return a default value from a function while first loading', async 
     }
   )
 
-  expect(result.current.doc).toEqual({ other: 'doc' })
+  expect(result.current.doc).toEqual({ value: 'doc' })
   expect(result.current.error).toBeNull()
   expect(result.current.state).toBe('loading')
 
@@ -103,7 +109,7 @@ test("should return a error if the doc doesn't exist", async () => {
   expect(result.current.doc).toBeFalsy()
   expect(result.current.state).toBe('error')
   expect(result.current.error).toBeInstanceOf(Error)
-  expect(result.current.error.state).toBe(404)
+  expect(result.current.error.status).toBe(404)
 })
 
 test('should continue to return the default value in error-state', async () => {
@@ -125,7 +131,7 @@ test('should continue to return the default value in error-state', async () => {
   expect(result.current.doc).toEqual({ other: 'doc' })
   expect(result.current.state).toBe('error')
   expect(result.current.error).toBeInstanceOf(Error)
-  expect(result.current.error.state).toBe(404)
+  expect(result.current.error.status).toBe(404)
 })
 
 test('should subscribe to updates of the document', async () => {
@@ -135,11 +141,17 @@ test('should subscribe to updates of the document', async () => {
     greetings: 'Hello You!',
   })
 
-  const { result, waitForNextUpdate } = renderHook(() => useDoc('test'), {
-    wrapper: ({ children }) => (
-      <Provider pouchdb={myPouch}>{children}</Provider>
-    ),
-  })
+  const { result, waitForNextUpdate } = renderHook(
+    () =>
+      useDoc<{ _id?: string; value: number | string; greetings: string }>(
+        'test'
+      ),
+    {
+      wrapper: ({ children }) => (
+        <Provider pouchdb={myPouch}>{children}</Provider>
+      ),
+    }
+  )
 
   await waitForNextUpdate()
 
@@ -158,12 +170,6 @@ test('should subscribe to updates of the document', async () => {
 
   await waitForNextUpdate()
 
-  expect(result.current.state).toBe('loading')
-  expect(result.current.doc._id).toBe('test')
-  expect(result.current.doc.value).toBe(42)
-
-  await waitForNextUpdate()
-
   expect(result.current.state).toBe('done')
   expect(result.current.doc._id).toBe('test')
   expect(result.current.doc.value).toBe(43)
@@ -171,18 +177,24 @@ test('should subscribe to updates of the document', async () => {
 })
 
 test('should update when a none existing document is created', async () => {
-  const { result, waitForNextUpdate } = renderHook(() => useDoc('test'), {
-    wrapper: ({ children }) => (
-      <Provider pouchdb={myPouch}>{children}</Provider>
-    ),
-  })
+  const { result, waitForNextUpdate } = renderHook(
+    () =>
+      useDoc<{ _id?: string; value: number | string; greetings: string }>(
+        'test'
+      ),
+    {
+      wrapper: ({ children }) => (
+        <Provider pouchdb={myPouch}>{children}</Provider>
+      ),
+    }
+  )
 
   await waitForNextUpdate()
 
   expect(result.current.doc).toBeFalsy()
   expect(result.current.state).toBe('error')
   expect(result.current.error).toBeInstanceOf(Error)
-  expect(result.current.error.state).toBe(404)
+  expect(result.current.error.status).toBe(404)
 
   act(() => {
     myPouch.put({
@@ -191,12 +203,6 @@ test('should update when a none existing document is created', async () => {
       greetings: 'Hello You!',
     })
   })
-
-  await waitForNextUpdate()
-
-  expect(result.current.state).toBe('loading')
-  expect(result.current.error).toBeInstanceOf(Error)
-  expect(result.current.doc).toBeFalsy()
 
   await waitForNextUpdate()
 
@@ -213,20 +219,22 @@ test('should return the last doc when id did change and no initial value is pass
     { _id: 'other', value: 'changed' },
   ])
 
-  const { result, waitForNextUpdate, rerender } = renderHook(id => useDoc(id), {
-    initialProps: 'test',
-    wrapper: ({ children }) => (
-      <Provider pouchdb={myPouch}>{children}</Provider>
-    ),
-  })
+  const { result, waitForNextUpdate, rerender } = renderHook(
+    id =>
+      useDoc<{ _id?: string; value: number | string; greetings: string }>(id),
+    {
+      initialProps: 'test',
+      wrapper: ({ children }) => (
+        <Provider pouchdb={myPouch}>{children}</Provider>
+      ),
+    }
+  )
 
   await waitForNextUpdate()
 
   expect(result.current.doc._id).toBe('test')
 
   rerender('other')
-
-  await waitForNextUpdate()
 
   expect(result.current.state).toBe('loading')
   expect(result.current.doc._id).toBe('test')
@@ -238,14 +246,17 @@ test('should return the last doc when id did change and no initial value is pass
   expect(result.current.doc.value).toBe('changed')
 })
 
-test('should return the initial value when id did change', async () => {
+test.only('should return the initial value when id did change', async () => {
   await myPouch.bulkDocs([
     { _id: 'test', value: 42, greetings: 'Hello You!' },
     { _id: 'other', value: 'changed' },
   ])
 
   const { result, waitForNextUpdate, rerender } = renderHook(
-    id => useDoc(id, null, () => ({ value: 'initial' })),
+    id =>
+      useDoc<{ _id?: string; value: number | string }>(id, null, () => ({
+        value: 'initial',
+      })),
     {
       initialProps: 'test',
       wrapper: ({ children }) => (
@@ -260,12 +271,6 @@ test('should return the initial value when id did change', async () => {
   expect(result.current.doc.value).toBe(42)
 
   rerender('other')
-
-  await waitForNextUpdate()
-
-  expect(result.current.state).toBe('loading')
-  expect(result.current.doc._id).toBeFalsy()
-  expect(result.current.doc.value).toBe('initial')
 
   await waitForNextUpdate()
 

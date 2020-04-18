@@ -5,7 +5,7 @@ import { PouchContext } from './context'
 /**
  * Get access to the PouchDB database that is provided by the provider.
  */
-export default function usePouchDB() {
+export default function usePouch() {
   const pouch = useContext(PouchContext)
 
   if (process.env.NODE_ENV !== 'production' && !pouch) {

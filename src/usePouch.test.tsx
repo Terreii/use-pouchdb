@@ -4,7 +4,7 @@ import PouchDB from 'pouchdb-core'
 import memory from 'pouchdb-adapter-memory'
 
 import { Provider } from './context'
-import usePouchDB from './usePouchDB'
+import usePouch from './usePouch'
 
 PouchDB.plugin(memory)
 
@@ -19,7 +19,7 @@ afterEach(async () => {
 })
 
 test('should throw an error if there is no pouchdb context', () => {
-  const { result } = renderHook(() => usePouchDB())
+  const { result } = renderHook(() => usePouch())
 
   expect(result.error).toBeInstanceOf(Error)
   expect(result.error.message).toBe(
@@ -28,7 +28,7 @@ test('should throw an error if there is no pouchdb context', () => {
 })
 
 test('should return the pouchdb from the provider', () => {
-  const { result } = renderHook(() => usePouchDB(), {
+  const { result } = renderHook(() => usePouch(), {
     wrapper: ({ children }) => (
       <Provider pouchdb={myPouch}>{children}</Provider>
     ),

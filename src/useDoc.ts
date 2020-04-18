@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { MISSING_DOC } from 'pouchdb-errors'
 
-import usePouchDB from './usePouchDB'
+import usePouchDB from './usePouch'
 
 export default function useDoc<Content extends {}>(
   id: PouchDB.Core.DocumentId,

@@ -201,6 +201,48 @@ test('should subscribe to updates of the document', async () => {
   expect(result.current.doc.greetings).toBe('to you, too!')
 })
 
+test('should ignore updates to other docs', async () => {
+  const { rev } = await myPouch.put({
+    _id: 'test',
+    value: 42,
+  })
+
+  const { result, waitForNextUpdate } = renderHook(
+    () => useDoc<{ _id?: string; value: number | string }>('test'),
+    {
+      wrapper: ({ children }) => (
+        <Provider pouchdb={myPouch}>{children}</Provider>
+      ),
+    }
+  )
+
+  await waitForNextUpdate()
+
+  expect(result.current.state).toBe('done')
+  expect(result.current.doc._id).toBe('test')
+  expect(result.current.doc.value).toBe(42)
+
+  act(() => {
+    myPouch.bulkDocs([
+      {
+        _id: 'test',
+        _rev: rev,
+        value: 43,
+      },
+      {
+        _id: 'other',
+        value: 128,
+      },
+    ])
+  })
+
+  await waitForNextUpdate()
+
+  expect(result.current.state).toBe('done')
+  expect(result.current.doc._id).toBe('test')
+  expect(result.current.doc.value).toBe(43)
+})
+
 test('should update when a none existing document is created', async () => {
   const { result, waitForNextUpdate } = renderHook(
     () =>

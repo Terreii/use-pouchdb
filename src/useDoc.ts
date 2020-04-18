@@ -74,13 +74,14 @@ export default function useDoc<Content extends {}>(
       .changes({
         live: true,
         since: 'now',
+        doc_ids: [id],
         include_docs: true,
         conflicts,
         attachments,
         binary,
       })
       .on('change', change => {
-        if (change.id !== id || !isMounted) return
+        if (!isMounted) return
 
         if (change.deleted) {
           setToInitialValue(true)

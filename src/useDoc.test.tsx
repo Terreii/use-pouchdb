@@ -331,3 +331,266 @@ test('should return a 404 error if the doc was deleted while it is shown', async
   expect(result.current.error).toBeInstanceOf(Error)
   expect(result.current.error.status).toBe(404)
 })
+
+describe('pouchdb get options', () => {
+  test('should returns a specific rev if rev is set', async () => {
+    const firstPutResult = await myPouch.put({
+      _id: 'test',
+      value: 'first',
+    })
+
+    const resultUpdate = await myPouch.put({
+      _id: 'test',
+      _rev: firstPutResult.rev,
+      value: 'update',
+    })
+
+    const conflictResult = await myPouch.put(
+      {
+        _id: 'test',
+        _rev: firstPutResult.rev,
+        value: 'conflict',
+      },
+      { force: true }
+    )
+
+    const { result, waitForNextUpdate, rerender } = renderHook(
+      (rev: string) => useDoc<{ _id?: string; value: string }>('test', { rev }),
+      {
+        initialProps: resultUpdate.rev,
+        wrapper: ({ children }) => (
+          <Provider pouchdb={myPouch}>{children}</Provider>
+        ),
+      }
+    )
+
+    await waitForNextUpdate()
+
+    expect(result.current.doc).toEqual({
+      _id: 'test',
+      _rev: resultUpdate.rev,
+      value: 'update',
+    })
+
+    rerender(conflictResult.rev)
+
+    await waitForNextUpdate()
+
+    expect(result.current.doc).toEqual({
+      _id: 'test',
+      _rev: conflictResult.rev,
+      value: 'conflict',
+    })
+  })
+
+  test('should include revision history if revs is set', async () => {
+    const firstPutResult = await myPouch.put({
+      _id: 'test',
+      value: 'first',
+    })
+
+    const updateResult = await myPouch.put({
+      _id: 'test',
+      _rev: firstPutResult.rev,
+      value: 'update',
+    })
+
+    const { result, waitForNextUpdate } = renderHook(
+      () => useDoc<{ _id?: string; value: string }>('test', { revs: true }),
+      {
+        wrapper: ({ children }) => (
+          <Provider pouchdb={myPouch}>{children}</Provider>
+        ),
+      }
+    )
+
+    await waitForNextUpdate()
+
+    expect(result.current.doc._revisions).toEqual({
+      ids: [updateResult.rev, firstPutResult.rev].map(rev => rev.split('-')[1]),
+      start: 2,
+    })
+  })
+
+  test('should include revs_info if revs_info is set to true', async () => {
+    const firstPutResult = await myPouch.put({
+      _id: 'test',
+      value: 'first',
+    })
+
+    const updateResult = await myPouch.put({
+      _id: 'test',
+      _rev: firstPutResult.rev,
+      value: 'update',
+    })
+
+    const { result, waitForNextUpdate } = renderHook(
+      () =>
+        useDoc<{ _id?: string; value: string }>('test', { revs_info: true }),
+      {
+        wrapper: ({ children }) => (
+          <Provider pouchdb={myPouch}>{children}</Provider>
+        ),
+      }
+    )
+
+    await waitForNextUpdate()
+
+    expect(result.current.doc._revs_info).toEqual([
+      { rev: updateResult.rev, status: 'available' },
+      { rev: firstPutResult.rev, status: 'available' },
+    ])
+  })
+
+  test('should return a list of conflicts if conflicts is set to true', async () => {
+    const firstPutResult = await myPouch.put({
+      _id: 'test',
+      value: 'first',
+    })
+
+    const resultUpdate = await myPouch.put({
+      _id: 'test',
+      _rev: firstPutResult.rev,
+      value: 'update',
+    })
+
+    const conflictResult = await myPouch.put(
+      {
+        _id: 'test',
+        _rev: firstPutResult.rev,
+        value: 'conflict',
+      },
+      { force: true }
+    )
+
+    const { result, waitForNextUpdate } = renderHook(
+      () =>
+        useDoc<{ _id?: string; value: string }>('test', { conflicts: true }),
+      {
+        wrapper: ({ children }) => (
+          <Provider pouchdb={myPouch}>{children}</Provider>
+        ),
+      }
+    )
+
+    await waitForNextUpdate()
+
+    expect(result.current.doc._conflicts).toEqual(
+      result.current.doc._rev === resultUpdate.rev
+        ? [conflictResult.rev]
+        : [resultUpdate.rev]
+    )
+  })
+
+  test('should include attachments if attachments is set to true', async () => {
+    await myPouch.put({
+      _id: 'test',
+      _attachments: {
+        'info.txt': {
+          content_type: 'text/plain',
+          data: Buffer.from('Is there life on Mars?\n'),
+        },
+      },
+      value: 'first',
+    })
+
+    const { result, waitForNextUpdate, rerender } = renderHook(
+      (attachments: boolean) =>
+        useDoc<{ _id?: string; value: string }>('test', { attachments }),
+      {
+        initialProps: false,
+        wrapper: ({ children }) => (
+          <Provider pouchdb={myPouch}>{children}</Provider>
+        ),
+      }
+    )
+
+    await waitForNextUpdate()
+
+    expect(typeof result.current.doc._attachments).toBe('object')
+    expect(result.current.doc._attachments['info.txt']).toEqual({
+      content_type: 'text/plain',
+      digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
+      length: 23,
+      revpos: 1,
+      stub: true,
+    })
+
+    rerender(true)
+
+    await waitForNextUpdate()
+
+    expect(result.current.doc._attachments['info.txt']).toEqual({
+      content_type: 'text/plain',
+      data: 'SXMgdGhlcmUgbGlmZSBvbiBNYXJzPwo=',
+      digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
+      revpos: 1,
+    })
+  })
+
+  test('should include attachments as buffer/blob if attachments and binary are true', async () => {
+    await myPouch.put({
+      _id: 'test',
+      _attachments: {
+        'info.txt': {
+          content_type: 'text/plain',
+          data: Buffer.from('Is there life on Mars?\n'),
+        },
+      },
+      value: 'first',
+    })
+
+    const { result, waitForNextUpdate } = renderHook(
+      () =>
+        useDoc<{ _id?: string; value: string }>('test', {
+          attachments: true,
+          binary: true,
+        }),
+      {
+        wrapper: ({ children }) => (
+          <Provider pouchdb={myPouch}>{children}</Provider>
+        ),
+      }
+    )
+
+    await waitForNextUpdate()
+
+    expect(result.current.doc._attachments).toBeTruthy()
+    expect(result.current.doc._attachments['info.txt']).toEqual({
+      content_type: 'text/plain',
+      data: Buffer.from('Is there life on Mars?\n'),
+      digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
+      revpos: 1,
+    })
+  })
+
+  test('should return the latest leaf revision if latest is set to true', async () => {
+    const firstPutResult = await myPouch.put({
+      _id: 'test',
+      value: 'first',
+    })
+
+    const updateResult = await myPouch.put({
+      _id: 'test',
+      _rev: firstPutResult.rev,
+      value: 'update',
+    })
+
+    const { result, waitForNextUpdate } = renderHook(
+      () =>
+        useDoc<{ _id?: string; value: string }>('test', {
+          rev: firstPutResult.rev,
+          latest: true,
+        }),
+      {
+        wrapper: ({ children }) => (
+          <Provider pouchdb={myPouch}>{children}</Provider>
+        ),
+      }
+    )
+
+    await waitForNextUpdate()
+
+    expect(result.current.doc._rev).toBe(updateResult.rev)
+  })
+})

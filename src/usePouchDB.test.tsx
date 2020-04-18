@@ -18,6 +18,15 @@ afterEach(async () => {
   await myPouch.destroy()
 })
 
+test('should throw an error if there is no pouchdb context', () => {
+  const { result } = renderHook(() => usePouchDB())
+
+  expect(result.error).toBeInstanceOf(Error)
+  expect(result.error.message).toBe(
+    'could not find PouchDB context value; please ensure the component is wrapped in a <Provider>'
+  )
+})
+
 test('should return the pouchdb from the provider', () => {
   const { result } = renderHook(() => usePouchDB(), {
     wrapper: ({ children }) => (

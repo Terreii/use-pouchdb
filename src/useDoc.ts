@@ -1,14 +1,14 @@
-import { useState, useEffect, useRef, useMemo, useContext } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { MISSING_DOC } from 'pouchdb-errors'
 
-import { PouchContext } from './context'
+import usePouchDB from './usePouchDB'
 
 export default function useDoc<Content extends {}>(
   id: PouchDB.Core.DocumentId,
   options?: PouchDB.Core.GetOptions,
   initialValue?: (() => Content) | Content
 ) {
-  const pouch = useContext(PouchContext)
+  const pouch = usePouchDB()
 
   const { rev, revs, revs_info, conflicts, attachments, binary, latest } =
     options || {}
@@ -44,7 +44,7 @@ export default function useDoc<Content extends {}>(
       setState('loading')
 
       try {
-        const doc = await pouch!.get<Content>(id, {
+        const doc = await pouch.get<Content>(id, {
           rev,
           revs,
           revs_info,
@@ -70,7 +70,7 @@ export default function useDoc<Content extends {}>(
 
     fetchDoc()
 
-    const subscription = pouch!
+    const subscription = pouch
       .changes({
         live: true,
         since: 'now',

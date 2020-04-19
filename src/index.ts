@@ -1,2 +1,3 @@
 export { Provider } from './context'
-export { default as usePouchDB } from './usePouchDB'
+export { default as usePouch } from './usePouch'
+export { default as useDoc } from './useDoc'

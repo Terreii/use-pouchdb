@@ -1,9 +1,7 @@
-import React from 'react'
-import { renderHook } from '@testing-library/react-hooks'
 import PouchDB from 'pouchdb-core'
 import memory from 'pouchdb-adapter-memory'
 
-import { Provider } from './context'
+import { renderHook } from './test-utils'
 import usePouch from './usePouch'
 
 PouchDB.plugin(memory)
@@ -29,9 +27,7 @@ test('should throw an error if there is no pouchdb context', () => {
 
 test('should return the pouchdb from the provider', () => {
   const { result } = renderHook(() => usePouch(), {
-    wrapper: ({ children }) => (
-      <Provider pouchdb={myPouch}>{children}</Provider>
-    ),
+    pouchdb: myPouch,
   })
 
   expect(result.current).toBe(myPouch)

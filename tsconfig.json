@@ -66,9 +66,9 @@
   "include": ["src/*", "src/**/*"],
   "exclude": [
     "node_modules",
+    "src/test-utils.tsx",
     "**/*.test.ts",
     "**/*.test.tsx",
-    "**/*.test.js",
-    "**/*.test.jsx"
+    "**/*.test.js"
   ]
 }

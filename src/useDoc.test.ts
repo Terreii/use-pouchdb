@@ -1,9 +1,7 @@
-import React from 'react'
-import { renderHook, act } from '@testing-library/react-hooks'
 import PouchDB from 'pouchdb-core'
 import memory from 'pouchdb-adapter-memory'
 
-import { Provider } from './context'
+import { renderHook, act } from './test-utils'
 import useDoc from './useDoc'
 
 PouchDB.plugin(memory)
@@ -31,9 +29,7 @@ test('should return a doc', async () => {
   await myPouch.put({ _id: 'test', value: 42, greetings: 'Hello You!' })
 
   const { result, waitForNextUpdate } = renderHook(() => useDoc('test'), {
-    wrapper: ({ children }) => (
-      <Provider pouchdb={myPouch}>{children}</Provider>
-    ),
+    pouchdb: myPouch,
   })
 
   expect(result.current.doc).toBeFalsy()
@@ -57,9 +53,7 @@ test('should return a default value while first loading', async () => {
         value: 'doc',
       }),
     {
-      wrapper: ({ children }) => (
-        <Provider pouchdb={myPouch}>{children}</Provider>
-      ),
+      pouchdb: myPouch,
     }
   )
 
@@ -88,9 +82,7 @@ test('should return a default value from a function while first loading', async 
         value: 'doc',
       })),
     {
-      wrapper: ({ children }) => (
-        <Provider pouchdb={myPouch}>{children}</Provider>
-      ),
+      pouchdb: myPouch,
     }
   )
 
@@ -112,9 +104,7 @@ test('should return a default value from a function while first loading', async 
 
 test("should return a error if the doc doesn't exist", async () => {
   const { result, waitForNextUpdate } = renderHook(() => useDoc('test'), {
-    wrapper: ({ children }) => (
-      <Provider pouchdb={myPouch}>{children}</Provider>
-    ),
+    pouchdb: myPouch,
   })
 
   expect(result.current.doc).toBeFalsy()
@@ -133,9 +123,7 @@ test('should continue to return the default value in error-state', async () => {
   const { result, waitForNextUpdate } = renderHook(
     () => useDoc('test', null, () => ({ other: 'doc' })),
     {
-      wrapper: ({ children }) => (
-        <Provider pouchdb={myPouch}>{children}</Provider>
-      ),
+      pouchdb: myPouch,
     }
   )
 
@@ -172,9 +160,7 @@ test('should subscribe to updates of the document', async () => {
         'test'
       ),
     {
-      wrapper: ({ children }) => (
-        <Provider pouchdb={myPouch}>{children}</Provider>
-      ),
+      pouchdb: myPouch,
     }
   )
 
@@ -210,9 +196,7 @@ test('should ignore updates to other docs', async () => {
   const { result, waitForNextUpdate } = renderHook(
     () => useDoc<{ _id?: string; value: number | string }>('test'),
     {
-      wrapper: ({ children }) => (
-        <Provider pouchdb={myPouch}>{children}</Provider>
-      ),
+      pouchdb: myPouch,
     }
   )
 
@@ -250,9 +234,7 @@ test('should update when a none existing document is created', async () => {
         'test'
       ),
     {
-      wrapper: ({ children }) => (
-        <Provider pouchdb={myPouch}>{children}</Provider>
-      ),
+      pouchdb: myPouch,
     }
   )
 
@@ -291,9 +273,7 @@ test('should return the last doc when id did change and no initial value is pass
       useDoc<{ _id?: string; value: number | string; greetings: string }>(id),
     {
       initialProps: 'test',
-      wrapper: ({ children }) => (
-        <Provider pouchdb={myPouch}>{children}</Provider>
-      ),
+      pouchdb: myPouch,
     }
   )
 
@@ -326,9 +306,7 @@ test('should return the initial value when id did change', async () => {
       })),
     {
       initialProps: 'test',
-      wrapper: ({ children }) => (
-        <Provider pouchdb={myPouch}>{children}</Provider>
-      ),
+      pouchdb: myPouch,
     }
   )
 
@@ -359,9 +337,7 @@ test('should return a 404 error if the doc was deleted while it is shown', async
         'test'
       ),
     {
-      wrapper: ({ children }) => (
-        <Provider pouchdb={myPouch}>{children}</Provider>
-      ),
+      pouchdb: myPouch,
     }
   )
 
@@ -409,9 +385,7 @@ describe('pouchdb get options', () => {
       (rev: string) => useDoc<{ _id?: string; value: string }>('test', { rev }),
       {
         initialProps: resultUpdate.rev,
-        wrapper: ({ children }) => (
-          <Provider pouchdb={myPouch}>{children}</Provider>
-        ),
+        pouchdb: myPouch,
       }
     )
 
@@ -449,9 +423,7 @@ describe('pouchdb get options', () => {
     const { result, waitForNextUpdate } = renderHook(
       () => useDoc<{ _id?: string; value: string }>('test', { revs: true }),
       {
-        wrapper: ({ children }) => (
-          <Provider pouchdb={myPouch}>{children}</Provider>
-        ),
+        pouchdb: myPouch,
       }
     )
 
@@ -479,9 +451,7 @@ describe('pouchdb get options', () => {
       () =>
         useDoc<{ _id?: string; value: string }>('test', { revs_info: true }),
       {
-        wrapper: ({ children }) => (
-          <Provider pouchdb={myPouch}>{children}</Provider>
-        ),
+        pouchdb: myPouch,
       }
     )
 
@@ -518,9 +488,7 @@ describe('pouchdb get options', () => {
       () =>
         useDoc<{ _id?: string; value: string }>('test', { conflicts: true }),
       {
-        wrapper: ({ children }) => (
-          <Provider pouchdb={myPouch}>{children}</Provider>
-        ),
+        pouchdb: myPouch,
       }
     )
 
@@ -550,9 +518,7 @@ describe('pouchdb get options', () => {
         useDoc<{ _id?: string; value: string }>('test', { attachments }),
       {
         initialProps: false,
-        wrapper: ({ children }) => (
-          <Provider pouchdb={myPouch}>{children}</Provider>
-        ),
+        pouchdb: myPouch,
       }
     )
 
@@ -598,9 +564,7 @@ describe('pouchdb get options', () => {
           binary: true,
         }),
       {
-        wrapper: ({ children }) => (
-          <Provider pouchdb={myPouch}>{children}</Provider>
-        ),
+        pouchdb: myPouch,
       }
     )
 
@@ -634,9 +598,7 @@ describe('pouchdb get options', () => {
           latest: true,
         }),
       {
-        wrapper: ({ children }) => (
-          <Provider pouchdb={myPouch}>{children}</Provider>
-        ),
+        pouchdb: myPouch,
       }
     )
 

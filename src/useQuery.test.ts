@@ -1,16 +1,17 @@
-import React from 'react'
-import { renderHook, act } from '@testing-library/react-hooks'
 import PouchDB from 'pouchdb-core'
 import memory from 'pouchdb-adapter-memory'
 import mapReduce from 'pouchdb-mapreduce'
 
-import { Provider } from './context'
-import useQuery, { QueryState } from './useQuery'
+import { renderHook } from './test-utils'
+import useQuery from './useQuery'
 
 PouchDB.plugin(memory)
 PouchDB.plugin(mapReduce)
 
-let myPouch = null
+let myPouch: PouchDB.Database
+
+// mock for the view emit function
+const emit = (_key: any, _value?: any) => {}
 
 beforeEach(() => {
   myPouch = new PouchDB('test', { adapter: 'memory' })
@@ -22,24 +23,21 @@ afterEach(async () => {
 
 test('should call query on the pouchdb instance of the provider', () => {
   const query = myPouch.query
-  myPouch.query = jest.fn(query)
+  const pouch: any = myPouch
+  pouch.query = jest.fn(query)
 
-  const { result } = renderHook(() => useQuery('test'), {
-    wrapper: ({ children }) => (
-      <Provider pouchdb={myPouch}>{children}</Provider>
-    ),
+  renderHook(() => useQuery('test'), {
+    pouchdb: myPouch,
   })
 
-  expect(myPouch.query).toHaveBeenCalled()
+  expect(pouch.query).toHaveBeenCalled()
 })
 
 test('should return an error if the PouchDB database as no query', () => {
   myPouch.query = undefined
 
   const { result } = renderHook(() => useQuery('test'), {
-    wrapper: ({ children }) => (
-      <Provider pouchdb={myPouch}>{children}</Provider>
-    ),
+    pouchdb: myPouch,
   })
 
   expect(result.error).toBeInstanceOf(Error)
@@ -55,7 +53,10 @@ test("should query a view and it's result return", async () => {
   ])
 
   const view = {
-    map: (doc, emit) => {
+    map: (
+      doc: PouchDB.Core.Document<any>,
+      emit: (key: any, value?: any) => void
+    ) => {
       if (doc.type === 'tester') {
         emit(doc.test, 42)
       }
@@ -63,9 +64,7 @@ test("should query a view and it's result return", async () => {
   }
 
   const { result, waitForNextUpdate } = renderHook(() => useQuery(view), {
-    wrapper: ({ children }) => (
-      <Provider pouchdb={myPouch}>{children}</Provider>
-    ),
+    pouchdb: myPouch,
   })
 
   expect(result.current).toEqual({
@@ -99,7 +98,7 @@ test('should query a view from a design document', async () => {
     _id: '_design/ddoc',
     views: {
       test: {
-        map: function (doc) {
+        map: function (doc: PouchDB.Core.Document<any>) {
           if (doc.type === 'tester') {
             emit(doc.test, 42)
           }
@@ -113,9 +112,7 @@ test('should query a view from a design document', async () => {
   const { result, waitForNextUpdate } = renderHook(
     () => useQuery('ddoc/test'),
     {
-      wrapper: ({ children }) => (
-        <Provider pouchdb={myPouch}>{children}</Provider>
-      ),
+      pouchdb: myPouch,
     }
   )
 
@@ -138,9 +135,7 @@ test("should result in an error if the view doesn't exist", async () => {
   ])
 
   const { result, waitForNextUpdate } = renderHook(() => useQuery('view'), {
-    wrapper: ({ children }) => (
-      <Provider pouchdb={myPouch}>{children}</Provider>
-    ),
+    pouchdb: myPouch,
   })
 
   await waitForNextUpdate()
@@ -162,7 +157,7 @@ test('should subscribe to changes to the view', async () => {
     _id: '_design/ddoc',
     views: {
       test: {
-        map: function (doc) {
+        map: function (doc: PouchDB.Core.Document<any>) {
           if (doc.type === 'tester') {
             emit(doc.test, 42)
           }
@@ -176,9 +171,7 @@ test('should subscribe to changes to the view', async () => {
   const { result, waitForNextUpdate } = renderHook(
     () => useQuery('ddoc/test'),
     {
-      wrapper: ({ children }) => (
-        <Provider pouchdb={myPouch}>{children}</Provider>
-      ),
+      pouchdb: myPouch,
     }
   )
 
@@ -213,7 +206,7 @@ test("should query a view if the ddoc didn't exist but then synced", async () =>
     _id: '_design/ddoc',
     views: {
       test: {
-        map: function (doc) {
+        map: function (doc: PouchDB.Core.Document<any>) {
           if (doc.type === 'tester') {
             emit(doc.test, 42)
           }
@@ -225,9 +218,7 @@ test("should query a view if the ddoc didn't exist but then synced", async () =>
   const { result, waitForNextUpdate } = renderHook(
     () => useQuery('ddoc/test'),
     {
-      wrapper: ({ children }) => (
-        <Provider pouchdb={myPouch}>{children}</Provider>
-      ),
+      pouchdb: myPouch,
     }
   )
 

@@ -12,7 +12,7 @@ export type QueryState = 'loading' | 'done' | 'error'
 
 export interface QueryResponse<Result> extends PouchDB.Query.Response<Result> {
   state: QueryState
-  error: Error | null
+  error: PouchDB.Core.Error | null
   loading: boolean
 }
 

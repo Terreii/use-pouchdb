@@ -55,7 +55,7 @@ test('should return an error if the PouchDB database as no query', () => {
   )
 })
 
-describe.skip('temporary views', () => {
+describe('temporary views', () => {
   test("should query a view and return it's result", async () => {
     await myPouch.bulkDocs([
       { _id: 'a', test: 'value', type: 'tester' },
@@ -124,7 +124,12 @@ describe.skip('temporary views', () => {
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([{ id: 'a', key: 'value', value: 42 }])
 
-    await myPouch.put({ _id: 'c', test: 'Hallo!', type: 'tester' })
+    act(() => {
+      myPouch.bulkDocs([
+        { _id: 'c', test: 'Hallo!', type: 'tester' },
+        { _id: 'd', test: 'world!', type: 'checker' },
+      ])
+    })
 
     await waitForNextUpdate()
 
@@ -135,8 +140,8 @@ describe.skip('temporary views', () => {
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([
+      { id: 'c', key: 'Hallo!', value: 42 },
       { id: 'a', key: 'value', value: 42 },
-      { id: 'c', key: 'Hallo', value: 42 },
     ])
   })
 })
@@ -210,7 +215,7 @@ describe('design documents', () => {
     expect(result.current.rows).toEqual([])
   })
 
-  test.only('should subscribe to changes to the view', async () => {
+  test('should subscribe to changes to the view', async () => {
     await myPouch.bulkDocs([
       { _id: 'a', test: 'value', type: 'tester' },
       { _id: 'b', test: 'other', type: 'checker' },
@@ -244,14 +249,21 @@ describe('design documents', () => {
     expect(result.current.rows).toEqual([{ id: 'a', key: 'value', value: 42 }])
 
     act(() => {
-      myPouch.put({ _id: 'c', test: 'Hallo!', type: 'tester' })
+      myPouch.bulkDocs([
+        { _id: 'c', test: 'Hallo!', type: 'tester' },
+        { _id: 'd', test: 'world!', type: 'checker' },
+      ])
     })
+
+    await waitForNextUpdate()
+
+    expect(result.current.loading).toBeTruthy()
 
     await waitForNextUpdate()
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([
-      { id: 'c', key: 'Hallo', value: 42 },
+      { id: 'c', key: 'Hallo!', value: 42 },
       { id: 'a', key: 'value', value: 42 },
     ])
   })

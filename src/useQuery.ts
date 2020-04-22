@@ -1,6 +1,6 @@
-import { useContext, useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 
-import { PouchContext } from './context'
+import usePouch from './usePouch'
 
 enum EQueryState {
   loading,
@@ -20,7 +20,7 @@ export default function useQuery<Content extends {}, Result, Model = Content>(
   fun: string | PouchDB.Map<Model, Result> | PouchDB.Filter<Model, Result>,
   opts?: PouchDB.Query.Options<Model, Result>
 ): QueryResponse<Result> {
-  const pouch = useContext(PouchContext)
+  const pouch = usePouch()
 
   const [result, setResult] = useState<PouchDB.Query.Response<Result>>(() => ({
     rows: [],
@@ -34,20 +34,10 @@ export default function useQuery<Content extends {}, Result, Model = Content>(
     let isMounted = true
 
     const query = async () => {
-      if (pouch?.query == null) {
-        setState(EQueryState.error)
-        setError(
-          new TypeError(
-            'db.query() is not defined. Please install "pouchdb-mapreduce"'
-          )
-        )
-        return
-      }
-
       setState(EQueryState.loading)
 
       try {
-        const result = await pouch?.query(fun, opts)!
+        const result = await pouch.query(fun, opts)
         if (isMounted) {
           setState(EQueryState.done)
           setError(null)
@@ -63,8 +53,41 @@ export default function useQuery<Content extends {}, Result, Model = Content>(
 
     query()
 
+    let subscription: PouchDB.Core.Changes<any>
+
+    if (typeof fun === 'string') {
+      subscription = pouch
+        .changes({
+          live: true,
+          since: 'now',
+          filter: '_view',
+          view: fun,
+        })
+        .on('change', query)
+    } else {
+      subscription = pouch
+        .changes({
+          live: true,
+          since: 'now',
+          filter: doc => {
+            let isDocInView: boolean = false
+
+            const viewFunction = fun as {
+              map: (doc: any, emit: (key: any, value?: any) => void) => void
+            }
+            viewFunction.map(doc, (_key: any, _value?: any) => {
+              isDocInView = true
+            })
+
+            return isDocInView
+          },
+        })
+        .on('change', query)
+    }
+
     return () => {
       isMounted = false
+      subscription.cancel()
     }
   }, [fun])
 

@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
+import { MISSING_DOC } from 'pouchdb-errors'
 
 import usePouch from './usePouch'
 
@@ -28,7 +29,7 @@ export default function useQuery<Content extends {}, Result, Model = Content>(
     offset: 0,
   }))
   const [state, setState] = useState<EQueryState>(EQueryState.loading)
-  const [error, setError] = useState<Error | null>(null)
+  const [error, setError] = useState<PouchDB.Core.Error | null>(null)
 
   useEffect(() => {
     let isMounted = true
@@ -54,6 +55,7 @@ export default function useQuery<Content extends {}, Result, Model = Content>(
     query()
 
     let subscription: PouchDB.Core.Changes<any>
+    let ddocSubscription: PouchDB.Core.Changes<any> | null = null
 
     if (typeof fun === 'string') {
       subscription = pouch
@@ -64,6 +66,29 @@ export default function useQuery<Content extends {}, Result, Model = Content>(
           view: fun,
         })
         .on('change', query)
+
+      const id = '_design/' + fun.split('/')[0]
+      ddocSubscription = pouch
+        .changes({
+          live: true,
+          since: 'now',
+          doc_ids: [id],
+        })
+        .on('change', change => {
+          if (!isMounted) return
+
+          if (change.deleted) {
+            setState(EQueryState.error)
+            setError(MISSING_DOC)
+            setResult({
+              rows: [],
+              total_rows: 0,
+              offset: 0,
+            })
+          } else {
+            query()
+          }
+        })
     } else {
       let viewFunction: (
         doc: any,
@@ -96,6 +121,10 @@ export default function useQuery<Content extends {}, Result, Model = Content>(
     return () => {
       isMounted = false
       subscription.cancel()
+
+      if (ddocSubscription) {
+        ddocSubscription.cancel()
+      }
     }
   }, [fun])
 

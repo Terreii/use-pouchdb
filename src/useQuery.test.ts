@@ -30,18 +30,6 @@ test('should throw an error if there is no pouchdb context', () => {
   )
 })
 
-test('should call query on the pouchdb instance of the provider', () => {
-  const query = myPouch.query
-  const pouch: any = myPouch
-  pouch.query = jest.fn(query)
-
-  renderHook(() => useQuery('test'), {
-    pouchdb: myPouch,
-  })
-
-  expect(pouch.query).toHaveBeenCalled()
-})
-
 test('should return an error if the PouchDB database as no query', () => {
   myPouch.query = undefined
 
@@ -388,6 +376,8 @@ describe('design documents', () => {
     act(() => {
       myPouch.remove(ddocResult.id, ddocResult.rev)
     })
+
+    await waitForNextUpdate()
 
     expect(result.current.state).toBe('error')
     expect(result.current.error).toBeInstanceOf(Error)

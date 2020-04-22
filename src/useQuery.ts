@@ -65,6 +65,17 @@ export default function useQuery<Content extends {}, Result, Model = Content>(
         })
         .on('change', query)
     } else {
+      let viewFunction: (
+        doc: any,
+        emit: (key: any, value?: any) => void
+      ) => void
+
+      if (typeof fun === 'function') {
+        viewFunction = fun
+      } else if (typeof fun === 'object' && typeof fun.map === 'function') {
+        viewFunction = fun.map
+      }
+
       subscription = pouch
         .changes({
           live: true,
@@ -72,10 +83,7 @@ export default function useQuery<Content extends {}, Result, Model = Content>(
           filter: doc => {
             let isDocInView: boolean = false
 
-            const viewFunction = fun as {
-              map: (doc: any, emit: (key: any, value?: any) => void) => void
-            }
-            viewFunction.map(doc, (_key: any, _value?: any) => {
+            viewFunction(doc, (_key: any, _value?: any) => {
               isDocInView = true
             })
 

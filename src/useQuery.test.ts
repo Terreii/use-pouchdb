@@ -55,7 +55,94 @@ test('should return an error if the PouchDB database as no query', () => {
   )
 })
 
-describe('temporary views', () => {
+describe('temporary function only views', () => {
+  test("should query a view and return it's result", async () => {
+    await myPouch.bulkDocs([
+      { _id: 'a', test: 'value', type: 'tester' },
+      { _id: 'b', test: 'other', type: 'checker' },
+    ])
+
+    const view = (
+      doc: PouchDB.Core.Document<any>,
+      emit: (key: any, value?: any) => void
+    ) => {
+      if (doc.type === 'tester') {
+        emit(doc.test, 42)
+      }
+    }
+
+    const { result, waitForNextUpdate } = renderHook(() => useQuery(view), {
+      pouchdb: myPouch,
+    })
+
+    expect(result.current).toEqual({
+      error: null,
+      loading: true,
+      state: 'loading',
+      offset: 0,
+      rows: [],
+      total_rows: 0,
+    })
+
+    await waitForNextUpdate()
+
+    expect(result.current).toEqual({
+      error: null,
+      loading: false,
+      state: 'done',
+      offset: 0,
+      rows: [{ id: 'a', key: 'value', value: 42 }],
+      total_rows: 1,
+    })
+  })
+
+  test('should subscribe to changes to the view', async () => {
+    await myPouch.bulkDocs([
+      { _id: 'a', test: 'value', type: 'tester' },
+      { _id: 'b', test: 'other', type: 'checker' },
+    ])
+
+    const view = (
+      doc: PouchDB.Core.Document<any>,
+      emit: (key: any, value?: any) => void
+    ) => {
+      if (doc.type === 'tester') {
+        emit(doc.test, 42)
+      }
+    }
+
+    const { result, waitForNextUpdate } = renderHook(() => useQuery(view), {
+      pouchdb: myPouch,
+    })
+
+    await waitForNextUpdate()
+
+    expect(result.current.state).toBe('done')
+    expect(result.current.rows).toEqual([{ id: 'a', key: 'value', value: 42 }])
+
+    act(() => {
+      myPouch.bulkDocs([
+        { _id: 'c', test: 'Hallo!', type: 'tester' },
+        { _id: 'd', test: 'world!', type: 'checker' },
+      ])
+    })
+
+    await waitForNextUpdate()
+
+    expect(result.current.state).toBe('loading')
+    expect(result.current.rows).toEqual([{ id: 'a', key: 'value', value: 42 }])
+
+    await waitForNextUpdate()
+
+    expect(result.current.state).toBe('done')
+    expect(result.current.rows).toEqual([
+      { id: 'c', key: 'Hallo!', value: 42 },
+      { id: 'a', key: 'value', value: 42 },
+    ])
+  })
+})
+
+describe('temporary views objects', () => {
   test("should query a view and return it's result", async () => {
     await myPouch.bulkDocs([
       { _id: 'a', test: 'value', type: 'tester' },

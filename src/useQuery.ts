@@ -23,6 +23,25 @@ export default function useQuery<Content extends {}, Result, Model = Content>(
 ): QueryResponse<Result> {
   const pouch = usePouch()
 
+  const {
+    reduce,
+    include_docs,
+    conflicts,
+    attachments,
+    binary,
+    inclusive_end,
+    limit,
+    skip,
+    descending,
+    group,
+    group_level,
+  } = opts || {}
+
+  const startkey = optionToString(opts?.startkey)
+  const endkey = optionToString(opts?.endkey)
+  const key = optionToString(opts?.key)
+  const keys = optionToString(opts?.keys)
+
   const [result, setResult] = useState<PouchDB.Query.Response<Result>>(() => ({
     rows: [],
     total_rows: 0,
@@ -126,7 +145,24 @@ export default function useQuery<Content extends {}, Result, Model = Content>(
         ddocSubscription.cancel()
       }
     }
-  }, [fun])
+  }, [
+    fun,
+    reduce,
+    include_docs,
+    conflicts,
+    attachments,
+    binary,
+    startkey,
+    endkey,
+    inclusive_end,
+    limit,
+    skip,
+    descending,
+    key,
+    keys,
+    group,
+    group_level,
+  ])
 
   const returnObject = useMemo(
     () => ({
@@ -145,4 +181,17 @@ export default function useQuery<Content extends {}, Result, Model = Content>(
   }
 
   return returnObject
+}
+
+function optionToString(
+  option: any | null | undefined
+): string | number | boolean | undefined {
+  if (option != null && typeof option === 'object') {
+    // also arrays
+    return '_usePouchDB_json_encoded:' + JSON.stringify(option)
+  } else if (option) {
+    return option
+  } else {
+    return undefined
+  }
 }

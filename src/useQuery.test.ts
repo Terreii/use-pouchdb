@@ -128,6 +128,728 @@ describe('temporary function only views', () => {
       { id: 'a', key: 'value', value: 42 },
     ])
   })
+
+  describe('options', () => {
+    test('should handle the include_docs option', async () => {
+      const putResults = await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'checker' },
+      ])
+
+      const view = (
+        doc: PouchDB.Core.Document<any>,
+        emit: (key: any, value?: any) => void
+      ) => {
+        if (doc.type === 'tester') {
+          emit(doc.test, 42)
+        }
+      }
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (include_docs: boolean) => useQuery(view, { include_docs }),
+        {
+          initialProps: false,
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: 'value', value: 42 },
+      ])
+
+      rerender(true)
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        {
+          doc: {
+            _id: 'a',
+            _rev: putResults[0].rev,
+            test: 'value',
+            type: 'tester',
+          },
+          id: 'a',
+          key: 'value',
+          value: 42,
+        },
+      ])
+    })
+
+    test('should handle the conflicts option', async () => {
+      const putResults = await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'checker' },
+      ])
+
+      const updateResult = await myPouch.put({
+        _id: 'a',
+        _rev: putResults[0].rev,
+        test: 'update',
+        type: 'tester',
+      })
+
+      const conflictResult = await myPouch.put(
+        {
+          _id: 'a',
+          _rev: putResults[0].rev,
+          test: 'conflict',
+          type: 'tester',
+        },
+        { force: true }
+      )
+
+      const view = (
+        doc: PouchDB.Core.Document<any>,
+        emit: (key: any, value?: any) => void
+      ) => {
+        if (doc.type === 'tester') {
+          emit(doc.test, 42)
+        }
+      }
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (conflicts: boolean) =>
+          useQuery(view, { include_docs: true, conflicts }),
+        {
+          initialProps: false,
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows[0].doc._conflicts).toBeUndefined()
+
+      rerender(true)
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows[0].doc._conflicts).toEqual(
+        result.current.rows[0].doc._rev === updateResult.rev
+          ? [conflictResult.rev]
+          : [updateResult.rev]
+      )
+    })
+
+    test('should handle the attachments option', async () => {
+      await myPouch.bulkDocs([
+        {
+          _attachments: {
+            'info.txt': {
+              content_type: 'text/plain',
+              data: Buffer.from('Is there life on Mars?\n'),
+            },
+          },
+          _id: 'a',
+          test: 'value',
+          type: 'tester',
+        },
+        { _id: 'b', test: 'other', type: 'checker' },
+      ])
+
+      const view = (
+        doc: PouchDB.Core.Document<any>,
+        emit: (key: any, value?: any) => void
+      ) => {
+        if (doc.type === 'tester') {
+          emit(doc.test, 42)
+        }
+      }
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (attachments: boolean) =>
+          useQuery(view, { include_docs: true, attachments }),
+        {
+          initialProps: false,
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows[0].doc._attachments['info.txt']).toEqual({
+        content_type: 'text/plain',
+        digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
+        length: 23,
+        revpos: 1,
+        stub: true,
+      })
+
+      rerender(true)
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows[0].doc._attachments['info.txt']).toEqual({
+        content_type: 'text/plain',
+        data: 'SXMgdGhlcmUgbGlmZSBvbiBNYXJzPwo=',
+        digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
+        revpos: 1,
+      })
+    })
+
+    test('should handle the binary option', async () => {
+      await myPouch.bulkDocs([
+        {
+          _attachments: {
+            'info.txt': {
+              content_type: 'text/plain',
+              data: Buffer.from('Is there life on Mars?\n'),
+            },
+          },
+          _id: 'a',
+          test: 'value',
+          type: 'tester',
+        },
+        { _id: 'b', test: 'other', type: 'checker' },
+      ])
+
+      const view = (
+        doc: PouchDB.Core.Document<any>,
+        emit: (key: any, value?: any) => void
+      ) => {
+        if (doc.type === 'tester') {
+          emit(doc.test, 42)
+        }
+      }
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (binary: boolean) =>
+          useQuery(view, { include_docs: true, attachments: true, binary }),
+        {
+          initialProps: false,
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows[0].doc._attachments['info.txt']).toEqual({
+        content_type: 'text/plain',
+        data: 'SXMgdGhlcmUgbGlmZSBvbiBNYXJzPwo=',
+        digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
+        revpos: 1,
+      })
+
+      rerender(true)
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows[0].doc._attachments['info.txt']).toEqual({
+        content_type: 'text/plain',
+        data: Buffer.from('Is there life on Mars?\n'),
+        digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
+        revpos: 1,
+      })
+    })
+
+    test('should handle the startkey option', async () => {
+      await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'checker' },
+        { _id: 'c', test: 'x-value', type: 'tester' },
+      ])
+
+      const view = (
+        doc: PouchDB.Core.Document<any>,
+        emit: (key: any, value?: any) => void
+      ) => {
+        if (doc.type === 'tester') {
+          emit(doc.test, 42)
+        }
+      }
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (startkey: any) => useQuery(view, { startkey }),
+        {
+          initialProps: 'x',
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'c', key: 'x-value', value: 42 },
+      ])
+
+      rerender('a')
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: 'value', value: 42 },
+        { id: 'c', key: 'x-value', value: 42 },
+      ])
+    })
+
+    test('should handle the endkey option', async () => {
+      await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'checker' },
+        { _id: 'c', test: 'x-value', type: 'tester' },
+      ])
+
+      const view = (
+        doc: PouchDB.Core.Document<any>,
+        emit: (key: any, value?: any) => void
+      ) => {
+        if (doc.type === 'tester') {
+          emit(doc.test, 42)
+        }
+      }
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (endkey: any) => useQuery(view, { endkey }),
+        {
+          initialProps: 'value\uffff',
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: 'value', value: 42 },
+      ])
+
+      rerender('a')
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([])
+    })
+
+    test("should not query if startkey or endkey are objects or arrays and their content didn't change", async () => {
+      await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'tester' },
+        { _id: 'c', test: 'x-value', type: 'tester' },
+      ])
+
+      const view = (
+        doc: PouchDB.Core.Document<any>,
+        emit: (key: any, value?: any) => void
+      ) => {
+        if (doc.type === 'tester') {
+          emit([doc._id, doc.test], 42)
+        }
+      }
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        ({ startkey, endkey }: { startkey: any; endkey: any }) =>
+          useQuery(view, { startkey, endkey }),
+        {
+          initialProps: {
+            startkey: ['b'],
+            endkey: ['c'],
+          },
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'b', key: ['b', 'other'], value: 42 },
+      ])
+
+      rerender({
+        startkey: ['b'],
+        endkey: ['c'],
+      })
+
+      expect(result.current.loading).toBe(false)
+
+      rerender({
+        startkey: ['b'],
+        endkey: [{}],
+      })
+
+      expect(result.current.loading).toBe(true)
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'b', key: ['b', 'other'], value: 42 },
+        { id: 'c', key: ['c', 'x-value'], value: 42 },
+      ])
+
+      rerender({
+        startkey: [''],
+        endkey: [{}],
+      })
+
+      expect(result.current.loading).toBe(true)
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: ['a', 'value'], value: 42 },
+        { id: 'b', key: ['b', 'other'], value: 42 },
+        { id: 'c', key: ['c', 'x-value'], value: 42 },
+      ])
+    })
+
+    test('should handle the inclusive_end option', async () => {
+      await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'checker' },
+        { _id: 'c', test: 'x-value', type: 'tester' },
+      ])
+
+      const view = (
+        doc: PouchDB.Core.Document<any>,
+        emit: (key: any, value?: any) => void
+      ) => {
+        if (doc.type === 'tester') {
+          emit(doc.test, 42)
+        }
+      }
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (inclusive_end: boolean) =>
+          useQuery(view, { endkey: 'x-value', inclusive_end }),
+        {
+          initialProps: true,
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: 'value', value: 42 },
+        { id: 'c', key: 'x-value', value: 42 },
+      ])
+
+      rerender(false)
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: 'value', value: 42 },
+      ])
+    })
+
+    test('should handle the limit option', async () => {
+      await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'checker' },
+        { _id: 'c', test: 'x-value', type: 'tester' },
+      ])
+
+      const view = (
+        doc: PouchDB.Core.Document<any>,
+        emit: (key: any, value?: any) => void
+      ) => {
+        if (doc.type === 'tester') {
+          emit(doc.test, 42)
+        }
+      }
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (limit?: number) => useQuery(view, { limit }),
+        {
+          initialProps: 1,
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: 'value', value: 42 },
+      ])
+
+      rerender(5)
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: 'value', value: 42 },
+        { id: 'c', key: 'x-value', value: 42 },
+      ])
+    })
+
+    test('should handle the skip option', async () => {
+      await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'checker' },
+        { _id: 'c', test: 'x-value', type: 'tester' },
+      ])
+
+      const view = (
+        doc: PouchDB.Core.Document<any>,
+        emit: (key: any, value?: any) => void
+      ) => {
+        if (doc.type === 'tester') {
+          emit(doc.test, 42)
+        }
+      }
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (skip?: number) => useQuery(view, { skip }),
+        {
+          initialProps: 1,
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'c', key: 'x-value', value: 42 },
+      ])
+
+      rerender(5)
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([])
+    })
+
+    test('should handle the descending option', async () => {
+      await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'checker' },
+        { _id: 'c', test: 'x-value', type: 'tester' },
+      ])
+
+      const view = (
+        doc: PouchDB.Core.Document<any>,
+        emit: (key: any, value?: any) => void
+      ) => {
+        if (doc.type === 'tester') {
+          emit(doc.test, 42)
+        }
+      }
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (descending: boolean) => useQuery(view, { descending }),
+        {
+          initialProps: false,
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: 'value', value: 42 },
+        { id: 'c', key: 'x-value', value: 42 },
+      ])
+
+      rerender(true)
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'c', key: 'x-value', value: 42 },
+        { id: 'a', key: 'value', value: 42 },
+      ])
+    })
+
+    test('should handle the key option', async () => {
+      await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'checker' },
+        { _id: 'c', test: 'x-value', type: 'tester' },
+      ])
+
+      const view = (
+        doc: PouchDB.Core.Document<any>,
+        emit: (key: any, value?: any) => void
+      ) => {
+        if (doc.type === 'tester') {
+          emit(doc.test, 42)
+        }
+      }
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (key: any) => useQuery(view, { key }),
+        {
+          initialProps: 'value',
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: 'value', value: 42 },
+      ])
+
+      rerender('x-value')
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'c', key: 'x-value', value: 42 },
+      ])
+    })
+
+    test('should handle the keys option', async () => {
+      await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'tester' },
+        { _id: 'c', test: 'x-value', type: 'tester' },
+      ])
+
+      const view = (
+        doc: PouchDB.Core.Document<any>,
+        emit: (key: any, value?: any) => void
+      ) => {
+        if (doc.type === 'tester') {
+          emit(doc.test, 42)
+        }
+      }
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (keys: any[]) => useQuery(view, { keys }),
+        {
+          initialProps: ['value'],
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: 'value', value: 42 },
+      ])
+
+      rerender(['x-value', 'value'])
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'c', key: 'x-value', value: 42 },
+        { id: 'a', key: 'value', value: 42 },
+      ])
+    })
+
+    test("should not query if key or keys are objects or arrays and their content didn't change", async () => {
+      await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'tester' },
+        { _id: 'c', test: 'x-value', type: 'tester' },
+      ])
+
+      const view = (
+        doc: PouchDB.Core.Document<any>,
+        emit: (key: any, value?: any) => void
+      ) => {
+        if (doc.type === 'tester') {
+          emit([doc._id, doc.test], 42)
+        }
+      }
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (option: { key?: any; keys?: any[] }) => useQuery(view, option),
+        {
+          initialProps: {
+            key: ['b', 'other'],
+          },
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'b', key: ['b', 'other'], value: 42 },
+      ])
+
+      rerender({
+        key: ['b', 'other'],
+      })
+
+      expect(result.current.loading).toBe(false)
+
+      rerender({
+        key: ['a', 'value'],
+      })
+
+      expect(result.current.loading).toBe(true)
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: ['a', 'value'], value: 42 },
+      ])
+
+      rerender({
+        keys: [
+          ['a', 'value'],
+          ['c', 'x-value'],
+        ],
+      })
+
+      expect(result.current.loading).toBe(true)
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: ['a', 'value'], value: 42 },
+        { id: 'c', key: ['c', 'x-value'], value: 42 },
+      ])
+
+      rerender({
+        keys: [
+          ['a', 'value'],
+          ['c', 'x-value'],
+        ],
+      })
+
+      expect(result.current.loading).toBe(false)
+
+      rerender({
+        keys: [
+          ['a', 'value'],
+          ['b', 'other'],
+        ],
+      })
+
+      expect(result.current.loading).toBe(true)
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: ['a', 'value'], value: 42 },
+        { id: 'b', key: ['b', 'other'], value: 42 },
+      ])
+    })
+  })
 })
 
 describe('temporary views objects', () => {
@@ -218,6 +940,883 @@ describe('temporary views objects', () => {
       { id: 'c', key: 'Hallo!', value: 42 },
       { id: 'a', key: 'value', value: 42 },
     ])
+  })
+
+  describe('options', () => {
+    test('should handle the reduce option', async () => {
+      await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'checker' },
+      ])
+
+      const view = {
+        map: (
+          doc: PouchDB.Core.Document<any>,
+          emit: (key: any, value?: any) => void
+        ) => {
+          if (doc.type === 'tester') {
+            emit(doc.test, 42)
+          }
+        },
+        reduce: '_count',
+      }
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (reduce: boolean) => useQuery(view, { reduce }),
+        {
+          initialProps: true,
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([{ key: null, value: 1 }])
+
+      rerender(false)
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: 'value', value: 42 },
+      ])
+    })
+
+    test('should handle the include_docs option', async () => {
+      const putResults = await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'checker' },
+      ])
+
+      const view = {
+        map: (
+          doc: PouchDB.Core.Document<any>,
+          emit: (key: any, value?: any) => void
+        ) => {
+          if (doc.type === 'tester') {
+            emit(doc.test, 42)
+          }
+        },
+      }
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (include_docs: boolean) => useQuery(view, { include_docs }),
+        {
+          initialProps: false,
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: 'value', value: 42 },
+      ])
+
+      rerender(true)
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        {
+          doc: {
+            _id: 'a',
+            _rev: putResults[0].rev,
+            test: 'value',
+            type: 'tester',
+          },
+          id: 'a',
+          key: 'value',
+          value: 42,
+        },
+      ])
+    })
+
+    test('should handle the conflicts option', async () => {
+      const putResults = await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'checker' },
+      ])
+
+      const updateResult = await myPouch.put({
+        _id: 'a',
+        _rev: putResults[0].rev,
+        test: 'update',
+        type: 'tester',
+      })
+
+      const conflictResult = await myPouch.put(
+        {
+          _id: 'a',
+          _rev: putResults[0].rev,
+          test: 'conflict',
+          type: 'tester',
+        },
+        { force: true }
+      )
+
+      const view = {
+        map: (
+          doc: PouchDB.Core.Document<any>,
+          emit: (key: any, value?: any) => void
+        ) => {
+          if (doc.type === 'tester') {
+            emit(doc.test, 42)
+          }
+        },
+      }
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (conflicts: boolean) =>
+          useQuery(view, { include_docs: true, conflicts }),
+        {
+          initialProps: false,
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows[0].doc._conflicts).toBeUndefined()
+
+      rerender(true)
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows[0].doc._conflicts).toEqual(
+        result.current.rows[0].doc._rev === updateResult.rev
+          ? [conflictResult.rev]
+          : [updateResult.rev]
+      )
+    })
+
+    test('should handle the attachments option', async () => {
+      await myPouch.bulkDocs([
+        {
+          _attachments: {
+            'info.txt': {
+              content_type: 'text/plain',
+              data: Buffer.from('Is there life on Mars?\n'),
+            },
+          },
+          _id: 'a',
+          test: 'value',
+          type: 'tester',
+        },
+        { _id: 'b', test: 'other', type: 'checker' },
+      ])
+
+      const view = {
+        map: (
+          doc: PouchDB.Core.Document<any>,
+          emit: (key: any, value?: any) => void
+        ) => {
+          if (doc.type === 'tester') {
+            emit(doc.test, 42)
+          }
+        },
+      }
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (attachments: boolean) =>
+          useQuery(view, { include_docs: true, attachments }),
+        {
+          initialProps: false,
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows[0].doc._attachments['info.txt']).toEqual({
+        content_type: 'text/plain',
+        digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
+        length: 23,
+        revpos: 1,
+        stub: true,
+      })
+
+      rerender(true)
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows[0].doc._attachments['info.txt']).toEqual({
+        content_type: 'text/plain',
+        data: 'SXMgdGhlcmUgbGlmZSBvbiBNYXJzPwo=',
+        digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
+        revpos: 1,
+      })
+    })
+
+    test('should handle the binary option', async () => {
+      await myPouch.bulkDocs([
+        {
+          _attachments: {
+            'info.txt': {
+              content_type: 'text/plain',
+              data: Buffer.from('Is there life on Mars?\n'),
+            },
+          },
+          _id: 'a',
+          test: 'value',
+          type: 'tester',
+        },
+        { _id: 'b', test: 'other', type: 'checker' },
+      ])
+
+      const view = {
+        map: (
+          doc: PouchDB.Core.Document<any>,
+          emit: (key: any, value?: any) => void
+        ) => {
+          if (doc.type === 'tester') {
+            emit(doc.test, 42)
+          }
+        },
+      }
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (binary: boolean) =>
+          useQuery(view, { include_docs: true, attachments: true, binary }),
+        {
+          initialProps: false,
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows[0].doc._attachments['info.txt']).toEqual({
+        content_type: 'text/plain',
+        data: 'SXMgdGhlcmUgbGlmZSBvbiBNYXJzPwo=',
+        digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
+        revpos: 1,
+      })
+
+      rerender(true)
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows[0].doc._attachments['info.txt']).toEqual({
+        content_type: 'text/plain',
+        data: Buffer.from('Is there life on Mars?\n'),
+        digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
+        revpos: 1,
+      })
+    })
+
+    test('should handle the startkey option', async () => {
+      await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'checker' },
+        { _id: 'c', test: 'x-value', type: 'tester' },
+      ])
+
+      const view = {
+        map: (
+          doc: PouchDB.Core.Document<any>,
+          emit: (key: any, value?: any) => void
+        ) => {
+          if (doc.type === 'tester') {
+            emit(doc.test, 42)
+          }
+        },
+      }
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (startkey: any) => useQuery(view, { startkey }),
+        {
+          initialProps: 'x',
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'c', key: 'x-value', value: 42 },
+      ])
+
+      rerender('a')
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: 'value', value: 42 },
+        { id: 'c', key: 'x-value', value: 42 },
+      ])
+    })
+
+    test('should handle the endkey option', async () => {
+      await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'checker' },
+        { _id: 'c', test: 'x-value', type: 'tester' },
+      ])
+
+      const view = {
+        map: (
+          doc: PouchDB.Core.Document<any>,
+          emit: (key: any, value?: any) => void
+        ) => {
+          if (doc.type === 'tester') {
+            emit(doc.test, 42)
+          }
+        },
+      }
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (endkey: any) => useQuery(view, { endkey }),
+        {
+          initialProps: 'value\uffff',
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: 'value', value: 42 },
+      ])
+
+      rerender('a')
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([])
+    })
+
+    test("should not query if startkey or endkey are objects or arrays and their content didn't change", async () => {
+      await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'tester' },
+        { _id: 'c', test: 'x-value', type: 'tester' },
+      ])
+
+      const view = {
+        map: (
+          doc: PouchDB.Core.Document<any>,
+          emit: (key: any, value?: any) => void
+        ) => {
+          if (doc.type === 'tester') {
+            emit([doc._id, doc.test], 42)
+          }
+        },
+      }
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        ({ startkey, endkey }: { startkey: any; endkey: any }) =>
+          useQuery(view, { startkey, endkey }),
+        {
+          initialProps: {
+            startkey: ['b'],
+            endkey: ['c'],
+          },
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'b', key: ['b', 'other'], value: 42 },
+      ])
+
+      rerender({
+        startkey: ['b'],
+        endkey: ['c'],
+      })
+
+      expect(result.current.loading).toBe(false)
+
+      rerender({
+        startkey: ['b'],
+        endkey: [{}],
+      })
+
+      expect(result.current.loading).toBe(true)
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'b', key: ['b', 'other'], value: 42 },
+        { id: 'c', key: ['c', 'x-value'], value: 42 },
+      ])
+
+      rerender({
+        startkey: [''],
+        endkey: [{}],
+      })
+
+      expect(result.current.loading).toBe(true)
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: ['a', 'value'], value: 42 },
+        { id: 'b', key: ['b', 'other'], value: 42 },
+        { id: 'c', key: ['c', 'x-value'], value: 42 },
+      ])
+    })
+
+    test('should handle the inclusive_end option', async () => {
+      await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'checker' },
+        { _id: 'c', test: 'x-value', type: 'tester' },
+      ])
+
+      const view = {
+        map: (
+          doc: PouchDB.Core.Document<any>,
+          emit: (key: any, value?: any) => void
+        ) => {
+          if (doc.type === 'tester') {
+            emit(doc.test, 42)
+          }
+        },
+      }
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (inclusive_end: boolean) =>
+          useQuery(view, { endkey: 'x-value', inclusive_end }),
+        {
+          initialProps: true,
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: 'value', value: 42 },
+        { id: 'c', key: 'x-value', value: 42 },
+      ])
+
+      rerender(false)
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: 'value', value: 42 },
+      ])
+    })
+
+    test('should handle the limit option', async () => {
+      await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'checker' },
+        { _id: 'c', test: 'x-value', type: 'tester' },
+      ])
+
+      const view = {
+        map: (
+          doc: PouchDB.Core.Document<any>,
+          emit: (key: any, value?: any) => void
+        ) => {
+          if (doc.type === 'tester') {
+            emit(doc.test, 42)
+          }
+        },
+      }
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (limit?: number) => useQuery(view, { limit }),
+        {
+          initialProps: 1,
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: 'value', value: 42 },
+      ])
+
+      rerender(5)
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: 'value', value: 42 },
+        { id: 'c', key: 'x-value', value: 42 },
+      ])
+    })
+
+    test('should handle the skip option', async () => {
+      await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'checker' },
+        { _id: 'c', test: 'x-value', type: 'tester' },
+      ])
+
+      const view = {
+        map: (
+          doc: PouchDB.Core.Document<any>,
+          emit: (key: any, value?: any) => void
+        ) => {
+          if (doc.type === 'tester') {
+            emit(doc.test, 42)
+          }
+        },
+      }
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (skip?: number) => useQuery(view, { skip }),
+        {
+          initialProps: 1,
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'c', key: 'x-value', value: 42 },
+      ])
+
+      rerender(5)
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([])
+    })
+
+    test('should handle the descending option', async () => {
+      await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'checker' },
+        { _id: 'c', test: 'x-value', type: 'tester' },
+      ])
+
+      const view = {
+        map: (
+          doc: PouchDB.Core.Document<any>,
+          emit: (key: any, value?: any) => void
+        ) => {
+          if (doc.type === 'tester') {
+            emit(doc.test, 42)
+          }
+        },
+      }
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (descending: boolean) => useQuery(view, { descending }),
+        {
+          initialProps: false,
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: 'value', value: 42 },
+        { id: 'c', key: 'x-value', value: 42 },
+      ])
+
+      rerender(true)
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'c', key: 'x-value', value: 42 },
+        { id: 'a', key: 'value', value: 42 },
+      ])
+    })
+
+    test('should handle the key option', async () => {
+      await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'checker' },
+        { _id: 'c', test: 'x-value', type: 'tester' },
+      ])
+
+      const view = {
+        map: (
+          doc: PouchDB.Core.Document<any>,
+          emit: (key: any, value?: any) => void
+        ) => {
+          if (doc.type === 'tester') {
+            emit(doc.test, 42)
+          }
+        },
+      }
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (key: any) => useQuery(view, { key }),
+        {
+          initialProps: 'value',
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: 'value', value: 42 },
+      ])
+
+      rerender('x-value')
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'c', key: 'x-value', value: 42 },
+      ])
+    })
+
+    test('should handle the keys option', async () => {
+      await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'tester' },
+        { _id: 'c', test: 'x-value', type: 'tester' },
+      ])
+
+      const view = {
+        map: (
+          doc: PouchDB.Core.Document<any>,
+          emit: (key: any, value?: any) => void
+        ) => {
+          if (doc.type === 'tester') {
+            emit(doc.test, 42)
+          }
+        },
+      }
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (keys: any[]) => useQuery(view, { keys }),
+        {
+          initialProps: ['value'],
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: 'value', value: 42 },
+      ])
+
+      rerender(['x-value', 'value'])
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'c', key: 'x-value', value: 42 },
+        { id: 'a', key: 'value', value: 42 },
+      ])
+    })
+
+    test('should handle the group option', async () => {
+      await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'value', type: 'tester' },
+        { _id: 'c', test: 'x-value', type: 'tester' },
+      ])
+
+      const view = {
+        map: (
+          doc: PouchDB.Core.Document<any>,
+          emit: (key: any, value?: any) => void
+        ) => {
+          if (doc.type === 'tester') {
+            emit(doc.test, 42)
+          }
+        },
+        reduce: '_count',
+      }
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (group: boolean) => useQuery(view, { group }),
+        {
+          initialProps: false,
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([{ key: null, value: 3 }])
+
+      rerender(true)
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { key: 'value', value: 2 },
+        { key: 'x-value', value: 1 },
+      ])
+    })
+
+    test('should handle the group option', async () => {
+      await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'value', type: 'tester' },
+        { _id: 'c', test: 'x-value', type: 'tester' },
+      ])
+
+      const view = {
+        map: (
+          doc: PouchDB.Core.Document<any>,
+          emit: (key: any, value?: any) => void
+        ) => {
+          if (doc.type === 'tester') {
+            emit([13, doc.test], 42)
+          }
+        },
+        reduce: '_count',
+      }
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (group_level: number) => useQuery(view, { group_level }),
+        {
+          initialProps: 1,
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([{ key: [13], value: 3 }])
+
+      rerender(2)
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { key: [13, 'value'], value: 2 },
+        { key: [13, 'x-value'], value: 1 },
+      ])
+    })
+
+    test("should not query if key or keys are objects or arrays and their content didn't change", async () => {
+      await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'tester' },
+        { _id: 'c', test: 'x-value', type: 'tester' },
+      ])
+
+      const view = {
+        map: (
+          doc: PouchDB.Core.Document<any>,
+          emit: (key: any, value?: any) => void
+        ) => {
+          if (doc.type === 'tester') {
+            emit([doc._id, doc.test], 42)
+          }
+        },
+      }
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (option: { key?: any; keys?: any[] }) => useQuery(view, option),
+        {
+          initialProps: {
+            key: ['b', 'other'],
+          },
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'b', key: ['b', 'other'], value: 42 },
+      ])
+
+      rerender({
+        key: ['b', 'other'],
+      })
+
+      expect(result.current.loading).toBe(false)
+
+      rerender({
+        key: ['a', 'value'],
+      })
+
+      expect(result.current.loading).toBe(true)
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: ['a', 'value'], value: 42 },
+      ])
+
+      rerender({
+        keys: [
+          ['a', 'value'],
+          ['c', 'x-value'],
+        ],
+      })
+
+      expect(result.current.loading).toBe(true)
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: ['a', 'value'], value: 42 },
+        { id: 'c', key: ['c', 'x-value'], value: 42 },
+      ])
+
+      rerender({
+        keys: [
+          ['a', 'value'],
+          ['c', 'x-value'],
+        ],
+      })
+
+      expect(result.current.loading).toBe(false)
+
+      rerender({
+        keys: [
+          ['a', 'value'],
+          ['b', 'other'],
+        ],
+      })
+
+      expect(result.current.loading).toBe(true)
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: ['a', 'value'], value: 42 },
+        { id: 'b', key: ['b', 'other'], value: 42 },
+      ])
+    })
   })
 })
 
@@ -429,6 +2028,955 @@ describe('design documents', () => {
       offset: 0,
       rows: [{ id: 'a', key: 'value', value: 42 }],
       total_rows: 1,
+    })
+  })
+
+  describe('options', () => {
+    test('should handle the reduce option', async () => {
+      await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'checker' },
+      ])
+
+      const ddoc = {
+        _id: '_design/ddoc',
+        views: {
+          test: {
+            map: function (doc: PouchDB.Core.Document<any>) {
+              if (doc.type === 'tester') {
+                emit(doc.test, 42)
+              }
+            }.toString(),
+            reduce: '_count',
+          },
+        },
+      }
+
+      await myPouch.put(ddoc)
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (reduce: boolean) => useQuery('ddoc/test', { reduce }),
+        {
+          initialProps: true,
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([{ key: null, value: 1 }])
+
+      rerender(false)
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: 'value', value: 42 },
+      ])
+    })
+
+    test('should handle the include_docs option', async () => {
+      const putResults = await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'checker' },
+      ])
+
+      const ddoc = {
+        _id: '_design/ddoc',
+        views: {
+          test: {
+            map: function (doc: PouchDB.Core.Document<any>) {
+              if (doc.type === 'tester') {
+                emit(doc.test, 42)
+              }
+            }.toString(),
+          },
+        },
+      }
+
+      await myPouch.put(ddoc)
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (include_docs: boolean) => useQuery('ddoc/test', { include_docs }),
+        {
+          initialProps: false,
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: 'value', value: 42 },
+      ])
+
+      rerender(true)
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        {
+          doc: {
+            _id: 'a',
+            _rev: putResults[0].rev,
+            test: 'value',
+            type: 'tester',
+          },
+          id: 'a',
+          key: 'value',
+          value: 42,
+        },
+      ])
+    })
+
+    test('should handle the conflicts option', async () => {
+      const putResults = await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'checker' },
+      ])
+
+      const updateResult = await myPouch.put({
+        _id: 'a',
+        _rev: putResults[0].rev,
+        test: 'update',
+        type: 'tester',
+      })
+
+      const conflictResult = await myPouch.put(
+        {
+          _id: 'a',
+          _rev: putResults[0].rev,
+          test: 'conflict',
+          type: 'tester',
+        },
+        { force: true }
+      )
+
+      const ddoc = {
+        _id: '_design/ddoc',
+        views: {
+          test: {
+            map: function (doc: PouchDB.Core.Document<any>) {
+              if (doc.type === 'tester') {
+                emit(doc.test, 42)
+              }
+            }.toString(),
+          },
+        },
+      }
+
+      await myPouch.put(ddoc)
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (conflicts: boolean) =>
+          useQuery('ddoc/test', { include_docs: true, conflicts }),
+        {
+          initialProps: false,
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows[0].doc._conflicts).toBeUndefined()
+
+      rerender(true)
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows[0].doc._conflicts).toEqual(
+        result.current.rows[0].doc._rev === updateResult.rev
+          ? [conflictResult.rev]
+          : [updateResult.rev]
+      )
+    })
+
+    test('should handle the attachments option', async () => {
+      await myPouch.bulkDocs([
+        {
+          _attachments: {
+            'info.txt': {
+              content_type: 'text/plain',
+              data: Buffer.from('Is there life on Mars?\n'),
+            },
+          },
+          _id: 'a',
+          test: 'value',
+          type: 'tester',
+        },
+        { _id: 'b', test: 'other', type: 'checker' },
+      ])
+
+      const ddoc = {
+        _id: '_design/ddoc',
+        views: {
+          test: {
+            map: function (doc: PouchDB.Core.Document<any>) {
+              if (doc.type === 'tester') {
+                emit(doc.test, 42)
+              }
+            }.toString(),
+          },
+        },
+      }
+
+      await myPouch.put(ddoc)
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (attachments: boolean) =>
+          useQuery('ddoc/test', { include_docs: true, attachments }),
+        {
+          initialProps: false,
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows[0].doc._attachments['info.txt']).toEqual({
+        content_type: 'text/plain',
+        digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
+        length: 23,
+        revpos: 1,
+        stub: true,
+      })
+
+      rerender(true)
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows[0].doc._attachments['info.txt']).toEqual({
+        content_type: 'text/plain',
+        data: 'SXMgdGhlcmUgbGlmZSBvbiBNYXJzPwo=',
+        digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
+        revpos: 1,
+      })
+    })
+
+    test('should handle the binary option', async () => {
+      await myPouch.bulkDocs([
+        {
+          _attachments: {
+            'info.txt': {
+              content_type: 'text/plain',
+              data: Buffer.from('Is there life on Mars?\n'),
+            },
+          },
+          _id: 'a',
+          test: 'value',
+          type: 'tester',
+        },
+        { _id: 'b', test: 'other', type: 'checker' },
+      ])
+
+      const ddoc = {
+        _id: '_design/ddoc',
+        views: {
+          test: {
+            map: function (doc: PouchDB.Core.Document<any>) {
+              if (doc.type === 'tester') {
+                emit(doc.test, 42)
+              }
+            }.toString(),
+          },
+        },
+      }
+
+      await myPouch.put(ddoc)
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (binary: boolean) =>
+          useQuery('ddoc/test', {
+            include_docs: true,
+            attachments: true,
+            binary,
+          }),
+        {
+          initialProps: false,
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows[0].doc._attachments['info.txt']).toEqual({
+        content_type: 'text/plain',
+        data: 'SXMgdGhlcmUgbGlmZSBvbiBNYXJzPwo=',
+        digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
+        revpos: 1,
+      })
+
+      rerender(true)
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows[0].doc._attachments['info.txt']).toEqual({
+        content_type: 'text/plain',
+        data: Buffer.from('Is there life on Mars?\n'),
+        digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
+        revpos: 1,
+      })
+    })
+
+    test('should handle the startkey option', async () => {
+      await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'checker' },
+        { _id: 'c', test: 'x-value', type: 'tester' },
+      ])
+
+      const ddoc = {
+        _id: '_design/ddoc',
+        views: {
+          test: {
+            map: function (doc: PouchDB.Core.Document<any>) {
+              if (doc.type === 'tester') {
+                emit(doc.test, 42)
+              }
+            }.toString(),
+          },
+        },
+      }
+
+      await myPouch.put(ddoc)
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (startkey: any) => useQuery('ddoc/test', { startkey }),
+        {
+          initialProps: 'x',
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'c', key: 'x-value', value: 42 },
+      ])
+
+      rerender('a')
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: 'value', value: 42 },
+        { id: 'c', key: 'x-value', value: 42 },
+      ])
+    })
+
+    test('should handle the endkey option', async () => {
+      await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'checker' },
+        { _id: 'c', test: 'x-value', type: 'tester' },
+      ])
+
+      const ddoc = {
+        _id: '_design/ddoc',
+        views: {
+          test: {
+            map: function (doc: PouchDB.Core.Document<any>) {
+              if (doc.type === 'tester') {
+                emit(doc.test, 42)
+              }
+            }.toString(),
+          },
+        },
+      }
+
+      await myPouch.put(ddoc)
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (endkey: any) => useQuery('ddoc/test', { endkey }),
+        {
+          initialProps: 'value\uffff',
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: 'value', value: 42 },
+      ])
+
+      rerender('a')
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([])
+    })
+
+    test("should not query if startkey or endkey are objects or arrays and their content didn't change", async () => {
+      await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'tester' },
+        { _id: 'c', test: 'x-value', type: 'tester' },
+      ])
+
+      const ddoc = {
+        _id: '_design/ddoc',
+        views: {
+          test: {
+            map: function (doc: PouchDB.Core.Document<any>) {
+              if (doc.type === 'tester') {
+                emit([doc._id, doc.test], 42)
+              }
+            }.toString(),
+          },
+        },
+      }
+
+      await myPouch.put(ddoc)
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        ({ startkey, endkey }: { startkey: any; endkey: any }) =>
+          useQuery('ddoc/test', { startkey, endkey }),
+        {
+          initialProps: {
+            startkey: ['b'],
+            endkey: ['c'],
+          },
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'b', key: ['b', 'other'], value: 42 },
+      ])
+
+      rerender({
+        startkey: ['b'],
+        endkey: ['c'],
+      })
+
+      expect(result.current.loading).toBe(false)
+
+      rerender({
+        startkey: ['b'],
+        endkey: [{}],
+      })
+
+      expect(result.current.loading).toBe(true)
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'b', key: ['b', 'other'], value: 42 },
+        { id: 'c', key: ['c', 'x-value'], value: 42 },
+      ])
+
+      rerender({
+        startkey: [''],
+        endkey: [{}],
+      })
+
+      expect(result.current.loading).toBe(true)
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: ['a', 'value'], value: 42 },
+        { id: 'b', key: ['b', 'other'], value: 42 },
+        { id: 'c', key: ['c', 'x-value'], value: 42 },
+      ])
+    })
+
+    test('should handle the inclusive_end option', async () => {
+      await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'checker' },
+        { _id: 'c', test: 'x-value', type: 'tester' },
+      ])
+
+      const ddoc = {
+        _id: '_design/ddoc',
+        views: {
+          test: {
+            map: function (doc: PouchDB.Core.Document<any>) {
+              if (doc.type === 'tester') {
+                emit(doc.test, 42)
+              }
+            }.toString(),
+          },
+        },
+      }
+
+      await myPouch.put(ddoc)
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (inclusive_end: boolean) =>
+          useQuery('ddoc/test', { endkey: 'x-value', inclusive_end }),
+        {
+          initialProps: true,
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: 'value', value: 42 },
+        { id: 'c', key: 'x-value', value: 42 },
+      ])
+
+      rerender(false)
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: 'value', value: 42 },
+      ])
+    })
+
+    test('should handle the limit option', async () => {
+      await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'checker' },
+        { _id: 'c', test: 'x-value', type: 'tester' },
+      ])
+
+      const ddoc = {
+        _id: '_design/ddoc',
+        views: {
+          test: {
+            map: function (doc: PouchDB.Core.Document<any>) {
+              if (doc.type === 'tester') {
+                emit(doc.test, 42)
+              }
+            }.toString(),
+          },
+        },
+      }
+
+      await myPouch.put(ddoc)
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (limit?: number) => useQuery('ddoc/test', { limit }),
+        {
+          initialProps: 1,
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: 'value', value: 42 },
+      ])
+
+      rerender(5)
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: 'value', value: 42 },
+        { id: 'c', key: 'x-value', value: 42 },
+      ])
+    })
+
+    test('should handle the skip option', async () => {
+      await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'checker' },
+        { _id: 'c', test: 'x-value', type: 'tester' },
+      ])
+
+      const ddoc = {
+        _id: '_design/ddoc',
+        views: {
+          test: {
+            map: function (doc: PouchDB.Core.Document<any>) {
+              if (doc.type === 'tester') {
+                emit(doc.test, 42)
+              }
+            }.toString(),
+          },
+        },
+      }
+
+      await myPouch.put(ddoc)
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (skip?: number) => useQuery('ddoc/test', { skip }),
+        {
+          initialProps: 1,
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'c', key: 'x-value', value: 42 },
+      ])
+
+      rerender(5)
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([])
+    })
+
+    test('should handle the descending option', async () => {
+      await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'checker' },
+        { _id: 'c', test: 'x-value', type: 'tester' },
+      ])
+
+      const ddoc = {
+        _id: '_design/ddoc',
+        views: {
+          test: {
+            map: function (doc: PouchDB.Core.Document<any>) {
+              if (doc.type === 'tester') {
+                emit(doc.test, 42)
+              }
+            }.toString(),
+          },
+        },
+      }
+
+      await myPouch.put(ddoc)
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (descending: boolean) => useQuery('ddoc/test', { descending }),
+        {
+          initialProps: false,
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: 'value', value: 42 },
+        { id: 'c', key: 'x-value', value: 42 },
+      ])
+
+      rerender(true)
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'c', key: 'x-value', value: 42 },
+        { id: 'a', key: 'value', value: 42 },
+      ])
+    })
+
+    test('should handle the key option', async () => {
+      await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'checker' },
+        { _id: 'c', test: 'x-value', type: 'tester' },
+      ])
+
+      const ddoc = {
+        _id: '_design/ddoc',
+        views: {
+          test: {
+            map: function (doc: PouchDB.Core.Document<any>) {
+              if (doc.type === 'tester') {
+                emit(doc.test, 42)
+              }
+            }.toString(),
+          },
+        },
+      }
+
+      await myPouch.put(ddoc)
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (key: any) => useQuery('ddoc/test', { key }),
+        {
+          initialProps: 'value',
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: 'value', value: 42 },
+      ])
+
+      rerender('x-value')
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'c', key: 'x-value', value: 42 },
+      ])
+    })
+
+    test('should handle the keys option', async () => {
+      await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'tester' },
+        { _id: 'c', test: 'x-value', type: 'tester' },
+      ])
+
+      const ddoc = {
+        _id: '_design/ddoc',
+        views: {
+          test: {
+            map: function (doc: PouchDB.Core.Document<any>) {
+              if (doc.type === 'tester') {
+                emit(doc.test, 42)
+              }
+            }.toString(),
+          },
+        },
+      }
+
+      await myPouch.put(ddoc)
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (keys: any[]) => useQuery('ddoc/test', { keys }),
+        {
+          initialProps: ['value'],
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: 'value', value: 42 },
+      ])
+
+      rerender(['x-value', 'value'])
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'c', key: 'x-value', value: 42 },
+        { id: 'a', key: 'value', value: 42 },
+      ])
+    })
+
+    test('should handle the group option', async () => {
+      await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'value', type: 'tester' },
+        { _id: 'c', test: 'x-value', type: 'tester' },
+      ])
+
+      const ddoc = {
+        _id: '_design/ddoc',
+        views: {
+          test: {
+            map: function (doc: PouchDB.Core.Document<any>) {
+              if (doc.type === 'tester') {
+                emit(doc.test, 42)
+              }
+            }.toString(),
+            reduce: '_count',
+          },
+        },
+      }
+
+      await myPouch.put(ddoc)
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (group: boolean) => useQuery('ddoc/test', { group }),
+        {
+          initialProps: false,
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([{ key: null, value: 3 }])
+
+      rerender(true)
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { key: 'value', value: 2 },
+        { key: 'x-value', value: 1 },
+      ])
+    })
+
+    test('should handle the group option', async () => {
+      await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'value', type: 'tester' },
+        { _id: 'c', test: 'x-value', type: 'tester' },
+      ])
+
+      const ddoc = {
+        _id: '_design/ddoc',
+        views: {
+          test: {
+            map: function (doc: PouchDB.Core.Document<any>) {
+              if (doc.type === 'tester') {
+                emit([13, doc.test], 42)
+              }
+            }.toString(),
+            reduce: '_count',
+          },
+        },
+      }
+
+      await myPouch.put(ddoc)
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (group_level: number) => useQuery('ddoc/test', { group_level }),
+        {
+          initialProps: 1,
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([{ key: [13], value: 3 }])
+
+      rerender(2)
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { key: [13, 'value'], value: 2 },
+        { key: [13, 'x-value'], value: 1 },
+      ])
+    })
+
+    test("should not query if key or keys are objects or arrays and their content didn't change", async () => {
+      await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'tester' },
+        { _id: 'c', test: 'x-value', type: 'tester' },
+      ])
+
+      const ddoc = {
+        _id: '_design/ddoc',
+        views: {
+          test: {
+            map: function (doc: PouchDB.Core.Document<any>) {
+              if (doc.type === 'tester') {
+                emit([doc._id, doc.test], 42)
+              }
+            }.toString(),
+          },
+        },
+      }
+
+      await myPouch.put(ddoc)
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (option: { key?: any; keys?: any[] }) => useQuery('ddoc/test', option),
+        {
+          initialProps: {
+            key: ['b', 'other'],
+          },
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'b', key: ['b', 'other'], value: 42 },
+      ])
+
+      rerender({
+        key: ['b', 'other'],
+      })
+
+      expect(result.current.loading).toBe(false)
+
+      rerender({
+        key: ['a', 'value'],
+      })
+
+      expect(result.current.loading).toBe(true)
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: ['a', 'value'], value: 42 },
+      ])
+
+      rerender({
+        keys: [
+          ['a', 'value'],
+          ['c', 'x-value'],
+        ],
+      })
+
+      expect(result.current.loading).toBe(true)
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: ['a', 'value'], value: 42 },
+        { id: 'c', key: ['c', 'x-value'], value: 42 },
+      ])
+
+      rerender({
+        keys: [
+          ['a', 'value'],
+          ['c', 'x-value'],
+        ],
+      })
+
+      expect(result.current.loading).toBe(false)
+
+      rerender({
+        keys: [
+          ['a', 'value'],
+          ['b', 'other'],
+        ],
+      })
+
+      expect(result.current.loading).toBe(true)
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.rows).toEqual([
+        { id: 'a', key: ['a', 'value'], value: 42 },
+        { id: 'b', key: ['b', 'other'], value: 42 },
+      ])
     })
   })
 })

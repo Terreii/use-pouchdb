@@ -52,8 +52,16 @@ export default function useQuery<Content extends {}, Result, Model = Content>(
 
   useEffect(() => {
     let isMounted = true
+    let isFetching = false
+    let shouldUpdateAfter = false
 
     const query = async () => {
+      if (isFetching) {
+        shouldUpdateAfter = true
+        return
+      }
+      isFetching = true
+      shouldUpdateAfter = false
       setState(EQueryState.loading)
 
       try {
@@ -67,6 +75,12 @@ export default function useQuery<Content extends {}, Result, Model = Content>(
         if (isMounted) {
           setState(EQueryState.error)
           setError(error)
+        }
+      } finally {
+        // refresh if change did happen while querying
+        isFetching = false
+        if (shouldUpdateAfter && isMounted) {
+          query()
         }
       }
     }

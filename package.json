@@ -34,7 +34,7 @@
     "husky": "^4.2.5",
     "jest": "^25.4.0",
     "pouchdb-adapter-memory": "^7.2.1",
-    "prettier": "2.0.4",
+    "prettier": "2.0.5",
     "pretty-quick": "^2.0.1",
     "react-test-renderer": "^16.13.1",
     "typescript": "^3.8.3"

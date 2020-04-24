@@ -129,6 +129,65 @@ describe('temporary function only views', () => {
     ])
   })
 
+  test('should reload if a change did happen while a query did run', async () => {
+    await myPouch.bulkDocs([
+      { _id: 'a', test: 'value', type: 'tester' },
+      { _id: 'b', test: 'other', type: 'checker' },
+    ])
+
+    const view = (
+      doc: PouchDB.Core.Document<any>,
+      emit: (key: any, value?: any) => void
+    ) => {
+      if (doc.type === 'tester') {
+        emit(doc.test, 42)
+      }
+    }
+
+    const { result, waitForNextUpdate } = renderHook(() => useQuery(view), {
+      pouchdb: myPouch,
+    })
+
+    await waitForNextUpdate()
+
+    expect(result.current.state).toBe('done')
+    expect(result.current.rows).toEqual([{ id: 'a', key: 'value', value: 42 }])
+
+    act(() => {
+      myPouch.bulkDocs([
+        { _id: 'c', test: 'Hallo!', type: 'tester' },
+        { _id: 'd', test: 'world!', type: 'checker' },
+      ])
+    })
+
+    await waitForNextUpdate()
+
+    expect(result.current.state).toBe('loading')
+    expect(result.current.rows).toEqual([{ id: 'a', key: 'value', value: 42 }])
+
+    act(() => {
+      myPouch.bulkDocs([{ _id: 'e', test: 'Hallo!', type: 'tester' }])
+    })
+
+    await waitForNextUpdate()
+
+    expect(result.current.state).toBe('loading')
+    expect(result.current.rows).toEqual([
+      { id: 'c', key: 'Hallo!', value: 42 },
+      { id: 'e', key: 'Hallo!', value: 42 },
+      { id: 'a', key: 'value', value: 42 },
+    ])
+
+    await waitForNextUpdate()
+
+    expect(result.current.state).toBe('done')
+    expect(result.current.rows).toEqual([
+      { id: 'c', key: 'Hallo!', value: 42 },
+      { id: 'e', key: 'Hallo!', value: 42 },
+      { id: 'a', key: 'value', value: 42 },
+    ])
+  })
+
   describe('options', () => {
     test('should handle the include_docs option', async () => {
       const putResults = await myPouch.bulkDocs([
@@ -938,6 +997,67 @@ describe('temporary views objects', () => {
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([
       { id: 'c', key: 'Hallo!', value: 42 },
+      { id: 'a', key: 'value', value: 42 },
+    ])
+  })
+
+  test('should reload if a change did happen while a query did run', async () => {
+    await myPouch.bulkDocs([
+      { _id: 'a', test: 'value', type: 'tester' },
+      { _id: 'b', test: 'other', type: 'checker' },
+    ])
+
+    const view = {
+      map: (
+        doc: PouchDB.Core.Document<any>,
+        emit: (key: any, value?: any) => void
+      ) => {
+        if (doc.type === 'tester') {
+          emit(doc.test, 42)
+        }
+      },
+    }
+
+    const { result, waitForNextUpdate } = renderHook(() => useQuery(view), {
+      pouchdb: myPouch,
+    })
+
+    await waitForNextUpdate()
+
+    expect(result.current.state).toBe('done')
+    expect(result.current.rows).toEqual([{ id: 'a', key: 'value', value: 42 }])
+
+    act(() => {
+      myPouch.bulkDocs([
+        { _id: 'c', test: 'Hallo!', type: 'tester' },
+        { _id: 'd', test: 'world!', type: 'checker' },
+      ])
+    })
+
+    await waitForNextUpdate()
+
+    expect(result.current.state).toBe('loading')
+    expect(result.current.rows).toEqual([{ id: 'a', key: 'value', value: 42 }])
+
+    act(() => {
+      myPouch.bulkDocs([{ _id: 'e', test: 'Hallo!', type: 'tester' }])
+    })
+
+    await waitForNextUpdate()
+
+    expect(result.current.state).toBe('loading')
+    expect(result.current.rows).toEqual([
+      { id: 'c', key: 'Hallo!', value: 42 },
+      { id: 'e', key: 'Hallo!', value: 42 },
+      { id: 'a', key: 'value', value: 42 },
+    ])
+
+    await waitForNextUpdate()
+
+    expect(result.current.state).toBe('done')
+    expect(result.current.rows).toEqual([
+      { id: 'c', key: 'Hallo!', value: 42 },
+      { id: 'e', key: 'Hallo!', value: 42 },
       { id: 'a', key: 'value', value: 42 },
     ])
   })
@@ -2029,6 +2149,73 @@ describe('design documents', () => {
       rows: [{ id: 'a', key: 'value', value: 42 }],
       total_rows: 1,
     })
+  })
+
+  test('should reload if a change did happen while a query did run', async () => {
+    await myPouch.bulkDocs([
+      { _id: 'a', test: 'value', type: 'tester' },
+      { _id: 'b', test: 'other', type: 'checker' },
+    ])
+
+    const ddoc = {
+      _id: '_design/ddoc',
+      views: {
+        test: {
+          map: function (doc: PouchDB.Core.Document<any>) {
+            if (doc.type === 'tester') {
+              emit(doc.test, 42)
+            }
+          }.toString(),
+        },
+      },
+    }
+
+    await myPouch.put(ddoc)
+
+    const { result, waitForNextUpdate } = renderHook(
+      () => useQuery('ddoc/test'),
+      {
+        pouchdb: myPouch,
+      }
+    )
+
+    await waitForNextUpdate()
+
+    expect(result.current.state).toBe('done')
+    expect(result.current.rows).toEqual([{ id: 'a', key: 'value', value: 42 }])
+
+    act(() => {
+      myPouch.bulkDocs([
+        { _id: 'c', test: 'Hallo!', type: 'tester' },
+        { _id: 'd', test: 'world!', type: 'checker' },
+      ])
+    })
+
+    await waitForNextUpdate()
+
+    expect(result.current.state).toBe('loading')
+    expect(result.current.rows).toEqual([{ id: 'a', key: 'value', value: 42 }])
+
+    act(() => {
+      myPouch.bulkDocs([{ _id: 'e', test: 'Hallo!', type: 'tester' }])
+    })
+
+    await waitForNextUpdate()
+
+    expect(result.current.state).toBe('loading')
+    expect(result.current.rows).toEqual([
+      { id: 'c', key: 'Hallo!', value: 42 },
+      { id: 'a', key: 'value', value: 42 },
+    ])
+
+    await waitForNextUpdate()
+
+    expect(result.current.state).toBe('done')
+    expect(result.current.rows).toEqual([
+      { id: 'c', key: 'Hallo!', value: 42 },
+      { id: 'e', key: 'Hallo!', value: 42 },
+      { id: 'a', key: 'value', value: 42 },
+    ])
   })
 
   describe('options', () => {

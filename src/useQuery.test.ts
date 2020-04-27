@@ -188,6 +188,46 @@ describe('temporary function only views', () => {
     ])
   })
 
+  test('should handle the deletion of docs in the result', async () => {
+    const putResults = await myPouch.bulkDocs([
+      { _id: 'a', test: 'value', type: 'tester' },
+      { _id: 'b', test: 'other', type: 'tester' },
+    ])
+
+    const view = (
+      doc: PouchDB.Core.Document<any>,
+      emit: (key: any, value?: any) => void
+    ) => {
+      if (doc.type === 'tester') {
+        emit(doc.test, 42)
+      }
+    }
+
+    const { result, waitForNextUpdate } = renderHook(() => useQuery(view), {
+      initialProps: false,
+      pouchdb: myPouch,
+    })
+
+    await waitForNextUpdate()
+
+    expect(result.current.state).toBe('done')
+    expect(result.current.rows).toEqual([
+      { id: 'b', key: 'other', value: 42 },
+      { id: 'a', key: 'value', value: 42 },
+    ])
+
+    act(() => {
+      myPouch.remove(putResults[0].id, putResults[0].rev)
+    })
+
+    expect(result.current.state).toBe('loading')
+
+    await waitForNextUpdate()
+
+    expect(result.current.state).toBe('done')
+    expect(result.current.rows).toEqual([{ id: 'b', key: 'other', value: 42 }])
+  })
+
   describe('options', () => {
     test('should handle the include_docs option', async () => {
       const putResults = await myPouch.bulkDocs([
@@ -1060,6 +1100,48 @@ describe('temporary views objects', () => {
       { id: 'e', key: 'Hallo!', value: 42 },
       { id: 'a', key: 'value', value: 42 },
     ])
+  })
+
+  test('should handle the deletion of docs in the result', async () => {
+    const putResults = await myPouch.bulkDocs([
+      { _id: 'a', test: 'value', type: 'tester' },
+      { _id: 'b', test: 'other', type: 'tester' },
+    ])
+
+    const view = {
+      map: (
+        doc: PouchDB.Core.Document<any>,
+        emit: (key: any, value?: any) => void
+      ) => {
+        if (doc.type === 'tester') {
+          emit(doc.test, 42)
+        }
+      },
+    }
+
+    const { result, waitForNextUpdate } = renderHook(() => useQuery(view), {
+      initialProps: false,
+      pouchdb: myPouch,
+    })
+
+    await waitForNextUpdate()
+
+    expect(result.current.state).toBe('done')
+    expect(result.current.rows).toEqual([
+      { id: 'b', key: 'other', value: 42 },
+      { id: 'a', key: 'value', value: 42 },
+    ])
+
+    act(() => {
+      myPouch.remove(putResults[0].id, putResults[0].rev)
+    })
+
+    expect(result.current.state).toBe('loading')
+
+    await waitForNextUpdate()
+
+    expect(result.current.state).toBe('done')
+    expect(result.current.rows).toEqual([{ id: 'b', key: 'other', value: 42 }])
   })
 
   describe('options', () => {
@@ -2216,6 +2298,55 @@ describe('design documents', () => {
       { id: 'e', key: 'Hallo!', value: 42 },
       { id: 'a', key: 'value', value: 42 },
     ])
+  })
+
+  test('should handle the deletion of docs in the result', async () => {
+    const putResults = await myPouch.bulkDocs([
+      { _id: 'a', test: 'value', type: 'tester' },
+      { _id: 'b', test: 'other', type: 'tester' },
+    ])
+
+    const ddoc = {
+      _id: '_design/ddoc',
+      views: {
+        test: {
+          map: function (doc: PouchDB.Core.Document<any>) {
+            if (doc.type === 'tester') {
+              emit(doc.test, 42)
+            }
+          }.toString(),
+        },
+      },
+    }
+
+    await myPouch.put(ddoc)
+
+    const { result, waitForNextUpdate } = renderHook(
+      () => useQuery('ddoc/test'),
+      {
+        initialProps: false,
+        pouchdb: myPouch,
+      }
+    )
+
+    await waitForNextUpdate()
+
+    expect(result.current.state).toBe('done')
+    expect(result.current.rows).toEqual([
+      { id: 'b', key: 'other', value: 42 },
+      { id: 'a', key: 'value', value: 42 },
+    ])
+
+    act(() => {
+      myPouch.remove(putResults[0].id, putResults[0].rev)
+    })
+
+    expect(result.current.state).toBe('loading')
+
+    await waitForNextUpdate()
+
+    expect(result.current.state).toBe('done')
+    expect(result.current.rows).toEqual([{ id: 'b', key: 'other', value: 42 }])
   })
 
   describe('options', () => {

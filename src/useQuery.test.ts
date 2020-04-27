@@ -220,6 +220,8 @@ describe('temporary function only views', () => {
       myPouch.remove(putResults[0].id, putResults[0].rev)
     })
 
+    await waitForNextUpdate()
+
     expect(result.current.state).toBe('loading')
 
     await waitForNextUpdate()
@@ -1135,6 +1137,8 @@ describe('temporary views objects', () => {
     act(() => {
       myPouch.remove(putResults[0].id, putResults[0].rev)
     })
+
+    await waitForNextUpdate()
 
     expect(result.current.state).toBe('loading')
 
@@ -2340,6 +2344,8 @@ describe('design documents', () => {
     act(() => {
       myPouch.remove(putResults[0].id, putResults[0].rev)
     })
+
+    await waitForNextUpdate()
 
     expect(result.current.state).toBe('loading')
 

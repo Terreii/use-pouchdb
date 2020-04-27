@@ -54,6 +54,7 @@ export default function useQuery<Content extends {}, Result, Model = Content>(
     let isMounted = true
     let isFetching = false
     let shouldUpdateAfter = false
+    let resultIds: Set<PouchDB.Core.DocumentId | null> | null = null
 
     const query = async () => {
       if (isFetching) {
@@ -66,10 +67,22 @@ export default function useQuery<Content extends {}, Result, Model = Content>(
 
       try {
         const result = await pouch.query(fun, opts)
-        if (isMounted) {
-          setState(EQueryState.done)
-          setError(null)
-          setResult(result)
+        if (!isMounted) return
+
+        setState(EQueryState.done)
+        setError(null)
+        setResult(result)
+
+        const ids = new Set<PouchDB.Core.DocumentId | null>()
+        for (const row of result.rows) {
+          if (row.id != null) {
+            ids.add(row.id)
+          }
+        }
+        if (ids.size === 0) {
+          resultIds = null
+        } else {
+          resultIds = ids
         }
       } catch (error) {
         if (isMounted) {
@@ -105,10 +118,15 @@ export default function useQuery<Content extends {}, Result, Model = Content>(
         .changes({
           live: true,
           since: 'now',
-          doc_ids: [id],
         })
         .on('change', change => {
           if (!isMounted) return
+
+          if (change.deleted && resultIds?.has(change.id)) {
+            query()
+            return
+          }
+          if (change.id !== id) return
 
           if (change.deleted) {
             setState(EQueryState.error)
@@ -139,6 +157,10 @@ export default function useQuery<Content extends {}, Result, Model = Content>(
           live: true,
           since: 'now',
           filter: doc => {
+            if (doc._deleted && resultIds) {
+              return resultIds.has(doc._id)
+            }
+
             let isDocInView: boolean = false
 
             viewFunction(doc, (_key: any, _value?: any) => {

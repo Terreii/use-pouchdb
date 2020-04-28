@@ -3,12 +3,6 @@ import { MISSING_DOC } from 'pouchdb-errors'
 
 import usePouch from './usePouch'
 
-enum EQueryState {
-  loading,
-  done,
-  error,
-}
-
 export type QueryState = 'loading' | 'done' | 'error'
 
 export interface QueryResponse<Result> extends PouchDB.Query.Response<Result> {
@@ -47,139 +41,14 @@ export default function useQuery<Content extends {}, Result, Model = Content>(
     total_rows: 0,
     offset: 0,
   }))
-  const [state, setState] = useState<EQueryState>(EQueryState.loading)
+  const [state, setState] = useState<QueryState>('loading')
   const [error, setError] = useState<PouchDB.Core.Error | null>(null)
 
   useEffect(() => {
-    let isMounted = true
-    let isFetching = false
-    let shouldUpdateAfter = false
-    let resultIds: Set<PouchDB.Core.DocumentId | null> | null = null
-
-    const query = async () => {
-      if (isFetching) {
-        shouldUpdateAfter = true
-        return
-      }
-      isFetching = true
-      shouldUpdateAfter = false
-      setState(EQueryState.loading)
-
-      try {
-        const result = await pouch.query(fun, opts)
-        if (!isMounted) return
-
-        setState(EQueryState.done)
-        setError(null)
-        setResult(result)
-
-        const ids = new Set<PouchDB.Core.DocumentId | null>()
-        for (const row of result.rows) {
-          if (row.id != null) {
-            ids.add(row.id)
-          }
-        }
-        if (ids.size === 0) {
-          resultIds = null
-        } else {
-          resultIds = ids
-        }
-      } catch (error) {
-        if (isMounted) {
-          setState(EQueryState.error)
-          setError(error)
-        }
-      } finally {
-        // refresh if change did happen while querying
-        isFetching = false
-        if (shouldUpdateAfter && isMounted) {
-          query()
-        }
-      }
-    }
-
-    query()
-
-    let subscription: PouchDB.Core.Changes<any>
-    let ddocSubscription: PouchDB.Core.Changes<any> | null = null
-
     if (typeof fun === 'string') {
-      subscription = pouch
-        .changes({
-          live: true,
-          since: 'now',
-          filter: '_view',
-          view: fun,
-        })
-        .on('change', query)
-
-      const id = '_design/' + fun.split('/')[0]
-      ddocSubscription = pouch
-        .changes({
-          live: true,
-          since: 'now',
-        })
-        .on('change', change => {
-          if (!isMounted) return
-
-          if (change.deleted && resultIds?.has(change.id)) {
-            query()
-            return
-          }
-          if (change.id !== id) return
-
-          if (change.deleted) {
-            setState(EQueryState.error)
-            setError(MISSING_DOC)
-            setResult({
-              rows: [],
-              total_rows: 0,
-              offset: 0,
-            })
-          } else {
-            query()
-          }
-        })
+      return doDDocQuery(setResult, setState, setError, pouch, fun, opts)
     } else {
-      let viewFunction: (
-        doc: any,
-        emit: (key: any, value?: any) => void
-      ) => void
-
-      if (typeof fun === 'function') {
-        viewFunction = fun
-      } else if (typeof fun === 'object' && typeof fun.map === 'function') {
-        viewFunction = fun.map
-      }
-
-      subscription = pouch
-        .changes({
-          live: true,
-          since: 'now',
-          filter: doc => {
-            if (doc._deleted && resultIds) {
-              return resultIds.has(doc._id)
-            }
-
-            let isDocInView: boolean = false
-
-            viewFunction(doc, (_key: any, _value?: any) => {
-              isDocInView = true
-            })
-
-            return isDocInView
-          },
-        })
-        .on('change', query)
-    }
-
-    return () => {
-      isMounted = false
-      subscription.cancel()
-
-      if (ddocSubscription) {
-        ddocSubscription.cancel()
-      }
+      return doTemporaryQuery(setResult, setState, setError, pouch, fun, opts)
     }
   }, [
     fun,
@@ -203,9 +72,9 @@ export default function useQuery<Content extends {}, Result, Model = Content>(
   const returnObject = useMemo(
     () => ({
       ...result,
-      state: EQueryState[state] as QueryState,
+      state,
       error,
-      loading: state === EQueryState.loading,
+      loading: state === 'loading',
     }),
     [result, state, error]
   )
@@ -217,6 +86,215 @@ export default function useQuery<Content extends {}, Result, Model = Content>(
   }
 
   return returnObject
+}
+
+function doDDocQuery<Model, Result>(
+  setResult: (r: PouchDB.Query.Response<Result>) => void,
+  setState: (state: QueryState) => void,
+  setError: (error: PouchDB.Core.Error | null) => void,
+  pouch: PouchDB.Database<{}>,
+  fn: string,
+  option?: PouchDB.Query.Options<Model, Result>
+): () => void {
+  let isMounted = true
+  let isFetching = false
+  let shouldUpdateAfter = false
+
+  let lastUpdateSeq: string | number = 'now'
+  let subscription: PouchDB.Core.Changes<any>
+  let ddocSubscription: PouchDB.Core.Changes<any> | null = null
+
+  let lastResultIds = new Set<PouchDB.Core.DocumentId>()
+  const id = '_design/' + fn.split('/')[0]
+
+  const createDocSubscription = (ids: string[]) => {
+    if (ddocSubscription != null) {
+      ddocSubscription.cancel()
+    }
+
+    ddocSubscription = pouch
+      .changes({
+        live: true,
+        since: lastUpdateSeq,
+        doc_ids: ids,
+      })
+      .on('change', change => {
+        if (!isMounted) return
+
+        lastUpdateSeq = change.seq
+
+        if (change.id === id && change.deleted) {
+          setState('error')
+          setError(MISSING_DOC)
+          setResult({
+            rows: [],
+            total_rows: 0,
+            offset: 0,
+          })
+        } else {
+          query()
+        }
+      })
+  }
+
+  const query = async () => {
+    if (isFetching) {
+      shouldUpdateAfter = true
+      return
+    }
+    isFetching = true
+    shouldUpdateAfter = false
+    setState('loading')
+
+    try {
+      const result = await pouch.query(fn, option)
+      if (!isMounted) return
+
+      setState('done')
+      setError(null)
+      setResult(result)
+
+      const ids = new Set<PouchDB.Core.DocumentId>()
+      for (const row of result.rows) {
+        if (row.id != null) {
+          ids.add(row.id)
+        }
+      }
+      lastResultIds = ids
+
+      if (ids.size === 0) {
+        createDocSubscription([id])
+      } else {
+        ids.add(id)
+        createDocSubscription(Array.from(ids))
+      }
+    } catch (error) {
+      if (isMounted) {
+        setState('error')
+        setError(error)
+      }
+    } finally {
+      // refresh if change did happen while querying
+      isFetching = false
+      if (shouldUpdateAfter && isMounted) {
+        query()
+      }
+    }
+  }
+
+  query()
+  createDocSubscription([id])
+
+  subscription = pouch
+    .changes({
+      live: true,
+      since: 'now',
+      filter: '_view',
+      view: fn,
+    })
+    .on('change', change => {
+      if (!lastResultIds.has(change.id)) {
+        query()
+      }
+    })
+
+  return () => {
+    isMounted = false
+    subscription.cancel()
+
+    if (ddocSubscription) {
+      ddocSubscription.cancel()
+    }
+  }
+}
+
+function doTemporaryQuery<Model, Result>(
+  setResult: (r: PouchDB.Query.Response<Result>) => void,
+  setState: (state: QueryState) => void,
+  setError: (error: PouchDB.Core.Error | null) => void,
+  pouch: PouchDB.Database<{}>,
+  fn: PouchDB.Map<Model, Result> | PouchDB.Filter<Model, Result>,
+  option?: PouchDB.Query.Options<Model, Result>
+): () => void {
+  let isMounted = true
+  let isFetching = false
+  let shouldUpdateAfter = false
+  let resultIds: Set<PouchDB.Core.DocumentId | null> | null = null
+
+  const query = async () => {
+    if (isFetching) {
+      shouldUpdateAfter = true
+      return
+    }
+    isFetching = true
+    shouldUpdateAfter = false
+    setState('loading')
+
+    try {
+      const result = await pouch.query(fn, option)
+      if (!isMounted) return
+
+      setState('done')
+      setError(null)
+      setResult(result)
+
+      const ids = new Set<PouchDB.Core.DocumentId | null>()
+      for (const row of result.rows) {
+        if (row.id != null) {
+          ids.add(row.id)
+        }
+      }
+      if (ids.size === 0) {
+        resultIds = null
+      } else {
+        resultIds = ids
+      }
+    } catch (error) {
+      if (isMounted) {
+        setState('error')
+        setError(error)
+      }
+    } finally {
+      // refresh if change did happen while querying
+      isFetching = false
+      if (shouldUpdateAfter && isMounted) {
+        query()
+      }
+    }
+  }
+
+  query()
+
+  let subscription: PouchDB.Core.Changes<any>
+
+  let viewFunction: (doc: any, emit: (key: any, value?: any) => void) => void
+
+  if (typeof fn === 'function') {
+    viewFunction = fn
+  } else if (typeof fn === 'object' && typeof fn.map === 'function') {
+    viewFunction = fn.map
+  }
+
+  subscription = pouch
+    .changes({
+      live: true,
+      since: 'now',
+      filter: doc => {
+        let isDocInView: boolean = false
+
+        viewFunction(doc, (_key: any, _value?: any) => {
+          isDocInView = true
+        })
+
+        return isDocInView || resultIds?.has(doc._id)
+      },
+    })
+    .on('change', query)
+
+  return () => {
+    isMounted = false
+    subscription.cancel()
+  }
 }
 
 function optionToString(

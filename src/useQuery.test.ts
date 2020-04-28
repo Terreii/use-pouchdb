@@ -85,7 +85,7 @@ describe('temporary function only views', () => {
   })
 
   test('should subscribe to changes to the view', async () => {
-    await myPouch.bulkDocs([
+    const putResults = await myPouch.bulkDocs([
       { _id: 'a', test: 'value', type: 'tester' },
       { _id: 'b', test: 'other', type: 'checker' },
     ])
@@ -127,6 +127,50 @@ describe('temporary function only views', () => {
       { id: 'c', key: 'Hallo!', value: 42 },
       { id: 'a', key: 'value', value: 42 },
     ])
+
+    let secondUpdateRev = ''
+    act(() => {
+      myPouch
+        .put({
+          _id: 'a',
+          _rev: putResults[0].rev,
+          test: 'newValue',
+          type: 'tester',
+        })
+        .then(result => {
+          secondUpdateRev = result.rev
+        })
+    })
+
+    await waitForNextUpdate()
+
+    expect(result.current.loading).toBeTruthy()
+
+    await waitForNextUpdate()
+
+    expect(result.current.state).toBe('done')
+    expect(result.current.rows).toEqual([
+      { id: 'c', key: 'Hallo!', value: 42 },
+      { id: 'a', key: 'newValue', value: 42 },
+    ])
+
+    act(() => {
+      myPouch.put({
+        _id: 'a',
+        _rev: secondUpdateRev,
+        test: 'newValue',
+        type: 'otherType',
+      })
+    })
+
+    await waitForNextUpdate()
+
+    expect(result.current.loading).toBeTruthy()
+
+    await waitForNextUpdate()
+
+    expect(result.current.state).toBe('done')
+    expect(result.current.rows).toEqual([{ id: 'c', key: 'Hallo!', value: 42 }])
   })
 
   test('should reload if a change did happen while a query did run', async () => {
@@ -997,7 +1041,7 @@ describe('temporary views objects', () => {
   })
 
   test('should subscribe to changes to the view', async () => {
-    await myPouch.bulkDocs([
+    const putResults = await myPouch.bulkDocs([
       { _id: 'a', test: 'value', type: 'tester' },
       { _id: 'b', test: 'other', type: 'checker' },
     ])
@@ -1041,6 +1085,50 @@ describe('temporary views objects', () => {
       { id: 'c', key: 'Hallo!', value: 42 },
       { id: 'a', key: 'value', value: 42 },
     ])
+
+    let secondUpdateRev = ''
+    act(() => {
+      myPouch
+        .put({
+          _id: 'a',
+          _rev: putResults[0].rev,
+          test: 'newValue',
+          type: 'tester',
+        })
+        .then(result => {
+          secondUpdateRev = result.rev
+        })
+    })
+
+    await waitForNextUpdate()
+
+    expect(result.current.loading).toBeTruthy()
+
+    await waitForNextUpdate()
+
+    expect(result.current.state).toBe('done')
+    expect(result.current.rows).toEqual([
+      { id: 'c', key: 'Hallo!', value: 42 },
+      { id: 'a', key: 'newValue', value: 42 },
+    ])
+
+    act(() => {
+      myPouch.put({
+        _id: 'a',
+        _rev: secondUpdateRev,
+        test: 'newValue',
+        type: 'otherType',
+      })
+    })
+
+    await waitForNextUpdate()
+
+    expect(result.current.loading).toBeTruthy()
+
+    await waitForNextUpdate()
+
+    expect(result.current.state).toBe('done')
+    expect(result.current.rows).toEqual([{ id: 'c', key: 'Hallo!', value: 42 }])
   })
 
   test('should reload if a change did happen while a query did run', async () => {
@@ -2096,7 +2184,7 @@ describe('design documents', () => {
   })
 
   test('should subscribe to changes to the view', async () => {
-    await myPouch.bulkDocs([
+    const putResults = await myPouch.bulkDocs([
       { _id: 'a', test: 'value', type: 'tester' },
       { _id: 'b', test: 'other', type: 'checker' },
     ])
@@ -2146,6 +2234,50 @@ describe('design documents', () => {
       { id: 'c', key: 'Hallo!', value: 42 },
       { id: 'a', key: 'value', value: 42 },
     ])
+
+    let secondUpdateRev = ''
+    act(() => {
+      myPouch
+        .put({
+          _id: 'a',
+          _rev: putResults[0].rev,
+          test: 'newValue',
+          type: 'tester',
+        })
+        .then(result => {
+          secondUpdateRev = result.rev
+        })
+    })
+
+    await waitForNextUpdate()
+
+    expect(result.current.loading).toBeTruthy()
+
+    await waitForNextUpdate()
+
+    expect(result.current.state).toBe('done')
+    expect(result.current.rows).toEqual([
+      { id: 'c', key: 'Hallo!', value: 42 },
+      { id: 'a', key: 'newValue', value: 42 },
+    ])
+
+    act(() => {
+      myPouch.put({
+        _id: 'a',
+        _rev: secondUpdateRev,
+        test: 'newValue',
+        type: 'otherType',
+      })
+    })
+
+    await waitForNextUpdate()
+
+    expect(result.current.loading).toBeTruthy()
+
+    await waitForNextUpdate()
+
+    expect(result.current.state).toBe('done')
+    expect(result.current.rows).toEqual([{ id: 'c', key: 'Hallo!', value: 42 }])
   })
 
   test('should result in an error if the ddoc gets deleted', async () => {

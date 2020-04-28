@@ -994,6 +994,42 @@ describe('temporary function only views', () => {
         { id: 'b', key: ['b', 'other'], value: 42 },
       ])
     })
+
+    test('should handle the update_seq option', async () => {
+      await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'tester' },
+      ])
+
+      const view = (
+        doc: PouchDB.Core.Document<any>,
+        emit: (key: any, value?: any) => void
+      ) => {
+        if (doc.type === 'tester') {
+          emit(doc.test, 42)
+        }
+      }
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (update_seq: boolean) => useQuery(view, { update_seq }),
+        {
+          initialProps: false,
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.update_seq).toBeUndefined()
+
+      rerender(true)
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.update_seq).not.toBeUndefined()
+    })
   })
 })
 
@@ -2110,6 +2146,44 @@ describe('temporary views objects', () => {
         { id: 'a', key: ['a', 'value'], value: 42 },
         { id: 'b', key: ['b', 'other'], value: 42 },
       ])
+    })
+
+    test('should handle the update_seq option', async () => {
+      await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'tester' },
+      ])
+
+      const view = {
+        map: (
+          doc: PouchDB.Core.Document<any>,
+          emit: (key: any, value?: any) => void
+        ) => {
+          if (doc.type === 'tester') {
+            emit([doc._id, doc.test], 42)
+          }
+        },
+      }
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (update_seq: boolean) => useQuery(view, { update_seq }),
+        {
+          initialProps: false,
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.update_seq).toBeUndefined()
+
+      rerender(true)
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.update_seq).not.toBeUndefined()
     })
   })
 })
@@ -3433,6 +3507,48 @@ describe('design documents', () => {
         { id: 'a', key: ['a', 'value'], value: 42 },
         { id: 'b', key: ['b', 'other'], value: 42 },
       ])
+    })
+
+    test('should handle the update_seq option', async () => {
+      await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'tester' },
+      ])
+
+      const ddoc = {
+        _id: '_design/ddoc',
+        views: {
+          test: {
+            map: function (doc: PouchDB.Core.Document<any>) {
+              if (doc.type === 'tester') {
+                emit([doc._id, doc.test], 42)
+              }
+            }.toString(),
+          },
+        },
+      }
+
+      await myPouch.put(ddoc)
+
+      const { result, waitForNextUpdate, rerender } = renderHook(
+        (update_seq: boolean) => useQuery('ddoc/test', { update_seq }),
+        {
+          initialProps: false,
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.update_seq).toBeUndefined()
+
+      rerender(true)
+
+      await waitForNextUpdate()
+
+      expect(result.current.state).toBe('done')
+      expect(result.current.update_seq).not.toBeUndefined()
     })
   })
 })

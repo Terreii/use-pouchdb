@@ -6,6 +6,7 @@ import usePouch from './usePouch'
 export type QueryState = 'loading' | 'done' | 'error'
 
 export interface QueryResponse<Result> extends PouchDB.Query.Response<Result> {
+  update_seq?: number | string
   state: QueryState
   error: PouchDB.Core.Error | null
   loading: boolean
@@ -13,7 +14,7 @@ export interface QueryResponse<Result> extends PouchDB.Query.Response<Result> {
 
 export default function useQuery<Content extends {}, Result, Model = Content>(
   fun: string | PouchDB.Map<Model, Result> | PouchDB.Filter<Model, Result>,
-  opts?: PouchDB.Query.Options<Model, Result>
+  opts?: PouchDB.Query.Options<Model, Result> & { update_seq?: boolean }
 ): QueryResponse<Result> {
   const pouch = usePouch()
 
@@ -29,6 +30,7 @@ export default function useQuery<Content extends {}, Result, Model = Content>(
     descending,
     group,
     group_level,
+    update_seq,
   } = opts || {}
 
   const startkey = optionToString(opts?.startkey)
@@ -45,10 +47,38 @@ export default function useQuery<Content extends {}, Result, Model = Content>(
   const [error, setError] = useState<PouchDB.Core.Error | null>(null)
 
   useEffect(() => {
+    const options = {
+      reduce,
+      include_docs,
+      conflicts,
+      attachments,
+      binary,
+      inclusive_end,
+      limit,
+      skip,
+      descending,
+      group,
+      group_level,
+      update_seq,
+      startkey: opts?.startkey,
+      endkey: opts?.endkey,
+      key: opts?.key,
+      keys: opts?.keys,
+      // stale is not yet supported
+      // stale: stale,
+    }
+
     if (typeof fun === 'string') {
-      return doDDocQuery(setResult, setState, setError, pouch, fun, opts)
+      return doDDocQuery(setResult, setState, setError, pouch, fun, options)
     } else {
-      return doTemporaryQuery(setResult, setState, setError, pouch, fun, opts)
+      return doTemporaryQuery(
+        setResult,
+        setState,
+        setError,
+        pouch,
+        fun,
+        options
+      )
     }
   }, [
     fun,
@@ -67,6 +97,7 @@ export default function useQuery<Content extends {}, Result, Model = Content>(
     keys,
     group,
     group_level,
+    update_seq,
   ])
 
   const returnObject = useMemo(

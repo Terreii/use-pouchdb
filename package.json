@@ -8,7 +8,9 @@
   "scripts": {
     "build": "tsc",
     "format": "prettier --write .",
-    "test": "jest --watch"
+    "test": "jest --watch",
+    "update-coc": "weallbehave -o . && git add CODE_OF_CONDUCT.md && git commit -m 'docs(coc): updated CODE_OF_CONDUCT.md'",
+    "update-contrib": "weallcontribute -o . && git add CONTRIBUTING.md && git commit -m 'docs(contributing): updated CONTRIBUTING.md'"
   },
   "keywords": [
     "react",
@@ -41,7 +43,9 @@
     "prettier": "2.0.4",
     "pretty-quick": "^2.0.1",
     "react-test-renderer": "^16.13.1",
-    "typescript": "^3.8.3"
+    "typescript": "^3.8.3",
+    "weallbehave": "^1.2.0",
+    "weallcontribute": "^1.0.9"
   },
   "dependencies": {
     "@types/pouchdb-core": "^7.0.5",

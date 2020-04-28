@@ -8,7 +8,10 @@
   "scripts": {
     "build": "tsc",
     "format": "prettier --write .",
-    "test": "jest --watch"
+    "test": "jest --watch",
+    "textlint": "textlint README.md docs/*",
+    "update-coc": "weallbehave -o . && git add CODE_OF_CONDUCT.md && git commit -m 'docs(coc): updated CODE_OF_CONDUCT.md'",
+    "update-contrib": "weallcontribute -o . && git add CONTRIBUTING.md && git commit -m 'docs(contributing): updated CONTRIBUTING.md'"
   },
   "keywords": [
     "react",
@@ -22,6 +25,10 @@
     "url": "http://christopher-astfalk.de/"
   },
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Terreii/use-pouchdb.git"
+  },
   "devDependencies": {
     "@babel/core": "^7.9.0",
     "@babel/preset-env": "^7.9.5",
@@ -37,7 +44,12 @@
     "prettier": "2.0.4",
     "pretty-quick": "^2.0.1",
     "react-test-renderer": "^16.13.1",
-    "typescript": "^3.8.3"
+    "textlint": "^11.6.3",
+    "textlint-rule-alex": "^1.3.1",
+    "textlint-rule-common-misspellings": "^1.0.1",
+    "typescript": "^3.8.3",
+    "weallbehave": "^1.2.0",
+    "weallcontribute": "^1.0.9"
   },
   "dependencies": {
     "@types/pouchdb-core": "^7.0.5",

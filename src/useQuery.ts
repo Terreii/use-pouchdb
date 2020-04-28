@@ -6,12 +6,30 @@ import usePouch from './usePouch'
 export type QueryState = 'loading' | 'done' | 'error'
 
 export interface QueryResponse<Result> extends PouchDB.Query.Response<Result> {
+  /**
+   * Include an update_seq value indicating which sequence id of the underlying database the view
+   * reflects.
+   */
   update_seq?: number | string
+  /**
+   * Query state. Can be 'loading', 'done' or 'error'.
+   */
   state: QueryState
+  /**
+   * If the query did error it is returned in this field.
+   */
   error: PouchDB.Core.Error | null
+  /**
+   * Is this hook currently loading/updating the query.
+   */
   loading: boolean
 }
 
+/**
+ * Query a view and subscribe to its updates.
+ * @param {string | function | object} fun The name of the view or a temporary view.
+ * @param {object} [opts] PouchDB's query-options
+ */
 export default function useQuery<Content extends {}, Result, Model = Content>(
   fun: string | PouchDB.Map<Model, Result> | PouchDB.Filter<Model, Result>,
   opts?: PouchDB.Query.Options<Model, Result> & { update_seq?: boolean }
@@ -119,6 +137,15 @@ export default function useQuery<Content extends {}, Result, Model = Content>(
   return returnObject
 }
 
+/**
+ * Query and subscribe to updates of a view in a ddoc.
+ * @param setResult setState for the result.
+ * @param setState setState for state.
+ * @param setError setState to set the error.
+ * @param pouch The pouch db.
+ * @param fn Name of the view.
+ * @param option PouchDB's query options.
+ */
 function doDDocQuery<Model, Result>(
   setResult: (r: PouchDB.Query.Response<Result>) => void,
   setState: (state: QueryState) => void,
@@ -138,6 +165,10 @@ function doDDocQuery<Model, Result>(
   let lastResultIds = new Set<PouchDB.Core.DocumentId>()
   const id = '_design/' + fn.split('/')[0]
 
+  // Subscribe to updates of documents that where returned in the last query,
+  // and the design doc.
+  // It subscribes to the result docs, to be notified of deletions and other updates of docs
+  // which removes them from the view.
   const createDocSubscription = (ids: string[]) => {
     if (ddocSubscription != null) {
       ddocSubscription.cancel()
@@ -168,6 +199,8 @@ function doDDocQuery<Model, Result>(
       })
   }
 
+  // Does the query.
+  // It updates the state only if this function is still active.
   const query = async () => {
     if (isFetching) {
       shouldUpdateAfter = true
@@ -216,6 +249,7 @@ function doDDocQuery<Model, Result>(
   query()
   createDocSubscription([id])
 
+  // Subscribe to new entries in the view.
   subscription = pouch
     .changes({
       live: true,
@@ -239,6 +273,15 @@ function doDDocQuery<Model, Result>(
   }
 }
 
+/**
+ * Query and subscribe to updates of a temporary view (function or object with map function).
+ * @param setResult setState for the result.
+ * @param setState setState for state.
+ * @param setError setState to set the error.
+ * @param pouch The pouch db.
+ * @param fn The temporary view.
+ * @param option PouchDB's query options.
+ */
 function doTemporaryQuery<Model, Result>(
   setResult: (r: PouchDB.Query.Response<Result>) => void,
   setState: (state: QueryState) => void,
@@ -252,6 +295,8 @@ function doTemporaryQuery<Model, Result>(
   let shouldUpdateAfter = false
   let resultIds: Set<PouchDB.Core.DocumentId | null> | null = null
 
+  // Does the query.
+  // It updates the state only if this function is still active.
   const query = async () => {
     if (isFetching) {
       shouldUpdateAfter = true
@@ -306,6 +351,7 @@ function doTemporaryQuery<Model, Result>(
     viewFunction = fn.map
   }
 
+  // Subscribe to updates of the view.
   subscription = pouch
     .changes({
       live: true,
@@ -317,6 +363,8 @@ function doTemporaryQuery<Model, Result>(
           isDocInView = true
         })
 
+        // Also check if one of the result documents did update in a way,
+        // that removes it from the view.
         return isDocInView || resultIds?.has(doc._id)
       },
     })
@@ -328,13 +376,19 @@ function doTemporaryQuery<Model, Result>(
   }
 }
 
+/**
+ * Parses a option that can be a JSON data structure.
+ * It is then transformed into a comparable data type (null, number, or string).
+ * For example key: It can be any valid JSON type.
+ * @param option A option that can be a JSON data structure.
+ */
 function optionToString(
   option: any | null | undefined
 ): string | number | boolean | undefined {
   if (option != null && typeof option === 'object') {
     // also arrays
     return '_usePouchDB_json_encoded:' + JSON.stringify(option)
-  } else if (option) {
+  } else if (option || option === null) {
     return option
   } else {
     return undefined

@@ -1,0 +1,14 @@
+{
+  "filters": {},
+  "rules": {
+    "alex": {
+      "allow": [
+        reject,
+        rejects,
+        hook,
+        hooks
+      ]
+    },
+    "common-misspellings": true
+  }
+}

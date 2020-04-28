@@ -1,4 +1,4 @@
-import { Provider, usePouch, useDoc } from './index'
+import { Provider, usePouch, useDoc, useQuery } from './index'
 
 test('should export the provider', () => {
   expect(Provider).toBeTruthy()
@@ -13,4 +13,9 @@ test('should export usePouchDB', () => {
 test('should export useDoc', () => {
   expect(useDoc).toBeTruthy()
   expect(typeof useDoc).toBe('function')
+})
+
+test('should export useQuery', () => {
+  expect(useQuery).toBeTruthy()
+  expect(typeof useQuery).toBe('function')
 })

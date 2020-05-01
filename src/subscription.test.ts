@@ -156,7 +156,7 @@ test('should subscribe a view updates only once', () => {
     'ddoc/otherView',
     _id => {}
   )
-  expect(changes).toHaveBeenCalledTimes(1)
+  expect(changes).toHaveBeenCalledTimes(2)
   expect(changes).toHaveBeenLastCalledWith({
     since: 'now',
     live: true,
@@ -211,10 +211,10 @@ test('should call the callback to documents with a document and to views with an
 
   expect(docCallback).toHaveBeenCalled()
   expect(typeof docCallback.mock.calls[0]).toBe('object')
-  expect(docCallback.mock.calls[0][0]).toBe('a_document')
+  expect(docCallback.mock.calls[0][1]).toBe('a_document')
   expect(docCallback.mock.calls[0][2]._id).toBe('a_document')
-  expect(typeof docCallback.mock.calls[0]._rev).toBe('string')
-  expect(docCallback.mock.calls[0].value).toBe(42)
+  expect(typeof docCallback.mock.calls[0][2]._rev).toBe('string')
+  expect(docCallback.mock.calls[0][2].value).toBe(42)
 
   expect(viewCallback).toHaveBeenCalledWith('a_document')
 
@@ -228,7 +228,7 @@ test('should call the callback to documents with a document and to views with an
   })
 
   await new Promise(resolve => {
-    setTimeout(resolve, 50)
+    setTimeout(resolve, 10)
   })
 
   expect(docCallback).toHaveBeenCalledTimes(1)
@@ -259,7 +259,7 @@ test('should clone the documents that are passed to document callbacks', async (
   })
 
   await new Promise(resolve => {
-    setTimeout(resolve, 50)
+    setTimeout(resolve, 10)
   })
 
   docs[0].value = 43
@@ -289,7 +289,7 @@ test('should subscribe to all docs if null is passed to doc subscription', async
   await myPouch.bulkDocs(docs)
 
   await new Promise(resolve => {
-    setTimeout(resolve, 100)
+    setTimeout(resolve, 50)
   })
 
   expect(callback).toHaveBeenCalledTimes(15)

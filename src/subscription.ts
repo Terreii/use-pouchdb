@@ -1,6 +1,6 @@
 import { clone } from 'pouchdb-utils'
 
-export type Callback<T extends {}> = (
+export type DocsCallback<T extends {}> = (
   deleted: boolean,
   id: PouchDB.Core.DocumentId,
   doc?: PouchDB.Core.Document<T>
@@ -8,17 +8,25 @@ export type Callback<T extends {}> = (
 
 interface DocsSubscription {
   changesFeed: PouchDB.Core.Changes<{}>
-  all: Set<Callback<{}>>
-  ids: Map<PouchDB.Core.DocumentId, Set<Callback<{}>>>
+  all: Set<DocsCallback<{}>>
+  ids: Map<PouchDB.Core.DocumentId, Set<DocsCallback<{}>>>
+}
+
+export type ViewCallback = (id: PouchDB.Core.DocumentId) => void
+
+interface SubscriptionToAView {
+  feed: PouchDB.Core.Changes<{}>
+  callbacks: Set<ViewCallback>
 }
 
 export default function subscriptionManager(pouch: PouchDB.Database) {
   let docsSubscription: DocsSubscription | null = null
+  const viewsSubscription = new Map<string, SubscriptionToAView>()
 
   return {
     subscribeToDocs: <T extends {}>(
       ids: PouchDB.Core.DocumentId[] | null,
-      callback: Callback<T>
+      callback: DocsCallback<T>
     ): (() => void) => {
       if (docsSubscription == null) {
         docsSubscription = createDocSubscription(pouch)
@@ -29,15 +37,15 @@ export default function subscriptionManager(pouch: PouchDB.Database) {
       if (isIds) {
         for (const id of ids!) {
           if (docsSubscription.ids.has(id)) {
-            docsSubscription.ids.get(id)?.add(callback as Callback<{}>)
+            docsSubscription.ids.get(id)?.add(callback as DocsCallback<{}>)
           } else {
-            const set: Set<Callback<{}>> = new Set()
-            set.add(callback as Callback<{}>)
+            const set: Set<DocsCallback<{}>> = new Set()
+            set.add(callback as DocsCallback<{}>)
             docsSubscription.ids.set(id, set)
           }
         }
       } else {
-        docsSubscription.all.add(callback as Callback<{}>)
+        docsSubscription.all.add(callback as DocsCallback<{}>)
       }
 
       let didUnsubscribe = false
@@ -48,14 +56,14 @@ export default function subscriptionManager(pouch: PouchDB.Database) {
         if (isIds) {
           for (const id of ids!) {
             const set = docsSubscription?.ids.get(id)
-            set?.delete(callback as Callback<{}>)
+            set?.delete(callback as DocsCallback<{}>)
 
             if (set?.size === 0) {
               docsSubscription?.ids.delete(id)
             }
           }
         } else {
-          docsSubscription?.all.delete(callback as Callback<{}>)
+          docsSubscription?.all.delete(callback as DocsCallback<{}>)
         }
 
         if (
@@ -68,11 +76,30 @@ export default function subscriptionManager(pouch: PouchDB.Database) {
       }
     },
 
-    subscribeToView: (
-      _fun: string | PouchDB.Map<{}, {}> | PouchDB.Filter<{}, {}>,
-      _callback: (id: PouchDB.Core.DocumentId) => void
-    ): (() => void) => {
-      return () => {}
+    subscribeToView: (fun: string, callback: ViewCallback): (() => void) => {
+      let subscription: SubscriptionToAView
+
+      if (viewsSubscription.has(fun)) {
+        subscription = viewsSubscription.get(fun)!
+      } else {
+        subscription = subscribeToView(pouch, fun)
+        viewsSubscription.set(fun, subscription)
+      }
+
+      subscription.callbacks.add(callback)
+
+      let didUnsubscribe = false
+      return () => {
+        if (didUnsubscribe) return
+        didUnsubscribe = true
+
+        subscription.callbacks.delete(callback)
+
+        if (subscription.callbacks.size === 0) {
+          subscription.feed.cancel()
+          viewsSubscription.delete(fun)
+        }
+      }
     },
   }
 }
@@ -127,7 +154,7 @@ function createDocSubscription(pouch: PouchDB.Database): DocsSubscription {
 }
 
 function notify(
-  set: Set<Callback<{}>>,
+  set: Set<DocsCallback<{}>>,
   deleted: boolean,
   id: PouchDB.Core.DocumentId,
   doc?: PouchDB.Core.Document<{}>
@@ -140,4 +167,35 @@ function notify(
       console.error(err)
     }
   }
+}
+
+function subscribeToView(
+  pouch: PouchDB.Database,
+  view: string
+): SubscriptionToAView {
+  let viewsSubscription: SubscriptionToAView
+
+  const changesFeed = pouch
+    .changes({
+      since: 'now',
+      live: true,
+      filter: '_view',
+      view,
+    })
+    .on('change', change => {
+      for (const callback of viewsSubscription.callbacks) {
+        try {
+          callback(change.id)
+        } catch (err) {
+          console.error(err)
+        }
+      }
+    })
+
+  viewsSubscription = {
+    feed: changesFeed,
+    callbacks: new Set(),
+  }
+
+  return viewsSubscription
 }

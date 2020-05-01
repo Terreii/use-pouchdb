@@ -39,7 +39,7 @@ test('should subscribe to document updates', () => {
 
   const unsubscribe = subscriptionManager.subscribeToDocs(
     ['test', 'userDoc', 'other'],
-    _doc => {}
+    (_deleted, _id, _doc) => {}
   )
 
   expect(changes).toHaveBeenCalledWith({
@@ -67,11 +67,11 @@ test('should only subscribe once to document updates', () => {
 
   const unsubscribe = subscriptionManager.subscribeToDocs(
     ['test', 'userDoc', 'other'],
-    _doc => {}
+    (_deleted, _id, _doc) => {}
   )
   const unsubscribe2 = subscriptionManager.subscribeToDocs(
     ['moar', 'why_couchdb_is_awesome'],
-    _doc => {}
+    (_deleted, _id, _doc) => {}
   )
 
   expect(changes).toHaveBeenCalledTimes(1)
@@ -82,7 +82,7 @@ test('should only subscribe once to document updates', () => {
 
   const unsubscribe3 = subscriptionManager.subscribeToDocs(
     ['why_pouchdb_is_needed'],
-    _doc => {}
+    (_deleted, _id, _doc) => {}
   )
   expect(changes).toHaveBeenCalledTimes(1)
 
@@ -211,7 +211,8 @@ test('should call the callback to documents with a document and to views with an
 
   expect(docCallback).toHaveBeenCalled()
   expect(typeof docCallback.mock.calls[0]).toBe('object')
-  expect(docCallback.mock.calls[0]._id).toBe('a_document')
+  expect(docCallback.mock.calls[0][0]).toBe('a_document')
+  expect(docCallback.mock.calls[0][2]._id).toBe('a_document')
   expect(typeof docCallback.mock.calls[0]._rev).toBe('string')
   expect(docCallback.mock.calls[0].value).toBe(42)
 
@@ -241,13 +242,13 @@ test('should clone the documents that are passed to document callbacks', async (
 
   const unsubscribe1 = subscriptionManager.subscribeToDocs(
     ['a_document'],
-    doc => {
+    (_deleted, _id, doc) => {
       docs.push(doc)
     }
   )
   const unsubscribe2 = subscriptionManager.subscribeToDocs(
     ['a_document'],
-    doc => {
+    (_deleted, _id, doc) => {
       docs.push(doc)
     }
   )

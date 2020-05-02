@@ -16,7 +16,7 @@ export default function useDoc<Content extends {}>(
 ) {
   type Document = (PouchDB.Core.Document<Content> & PouchDB.Core.GetMeta) | null
 
-  const { pouchdb: pouch } = useContext()
+  const { pouchdb: pouch, subscriptionManager } = useContext()
 
   const { rev, revs, revs_info, conflicts, attachments, binary, latest } =
     options || {}
@@ -80,38 +80,31 @@ export default function useDoc<Content extends {}>(
     fetchDoc()
 
     // Use the changes feed to get updates to the document
-    const subscription = pouch
-      .changes({
-        live: true,
-        since: 'now',
-        doc_ids: [id],
-        include_docs: true,
-        conflicts,
-        attachments,
-        binary,
-      })
-      .on('change', change => {
+    const unsubscribe = subscriptionManager.subscribeToDocs(
+      [id],
+      (deleted, _id, doc) => {
         if (!isMounted) return
 
         // If the document got deleted it should change to an 404 error state
-        if (change.deleted) {
+        if (deleted) {
           setToInitialValue(true)
           setError(MISSING_DOC)
           setState('error')
-        } else {
-          setDoc(
-            change.doc as PouchDB.Core.Document<Content> & PouchDB.Core.GetMeta
-          )
+        } else if (!conflicts && !attachments) {
+          setDoc(doc as PouchDB.Core.Document<Content> & PouchDB.Core.GetMeta)
           setState('done')
           setError(null)
+        } else {
+          fetchDoc()
         }
-      })
+      }
+    )
 
     return () => {
       isMounted = false
-      subscription.cancel()
+      unsubscribe()
     }
-  }, [id, rev, revs, revs_info, conflicts, attachments, binary, latest])
+  }, [pouch, id, rev, revs, revs_info, conflicts, attachments, binary, latest])
 
   return useMemo(() => {
     const resultDoc = doc as Document

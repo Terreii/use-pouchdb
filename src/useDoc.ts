@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { MISSING_DOC } from 'pouchdb-errors'
 
-import usePouchDB from './usePouch'
+import { useContext } from './context'
 
 /**
  * Retrieves a document and subscribes to it's changes.
@@ -16,7 +16,7 @@ export default function useDoc<Content extends {}>(
 ) {
   type Document = (PouchDB.Core.Document<Content> & PouchDB.Core.GetMeta) | null
 
-  const pouch = usePouchDB()
+  const { pouchdb: pouch } = useContext()
 
   const { rev, revs, revs_info, conflicts, attachments, binary, latest } =
     options || {}

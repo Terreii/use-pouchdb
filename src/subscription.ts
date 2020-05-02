@@ -23,11 +23,15 @@ export default function subscriptionManager(pouch: PouchDB.Database) {
   let docsSubscription: DocsSubscription | null = null
   const viewsSubscription = new Map<string, SubscriptionToAView>()
 
+  let didUnsubscribeAll = false
+
   return {
     subscribeToDocs: <T extends {}>(
       ids: PouchDB.Core.DocumentId[] | null,
       callback: DocsCallback<T>
     ): (() => void) => {
+      if (didUnsubscribeAll) return () => {}
+
       if (docsSubscription == null) {
         docsSubscription = createDocSubscription(pouch)
       }
@@ -50,7 +54,7 @@ export default function subscriptionManager(pouch: PouchDB.Database) {
 
       let didUnsubscribe = false
       return () => {
-        if (didUnsubscribe) return
+        if (didUnsubscribe || didUnsubscribeAll) return
         didUnsubscribe = true
 
         if (isIds) {
@@ -77,6 +81,8 @@ export default function subscriptionManager(pouch: PouchDB.Database) {
     },
 
     subscribeToView: (fun: string, callback: ViewCallback): (() => void) => {
+      if (didUnsubscribeAll) return () => {}
+
       let subscription: SubscriptionToAView
 
       if (viewsSubscription.has(fun)) {
@@ -90,7 +96,7 @@ export default function subscriptionManager(pouch: PouchDB.Database) {
 
       let didUnsubscribe = false
       return () => {
-        if (didUnsubscribe) return
+        if (didUnsubscribe || didUnsubscribeAll) return
         didUnsubscribe = true
 
         subscription.callbacks.delete(callback)
@@ -100,6 +106,26 @@ export default function subscriptionManager(pouch: PouchDB.Database) {
           viewsSubscription.delete(fun)
         }
       }
+    },
+
+    unsubscribeAll() {
+      if (didUnsubscribeAll) return
+      didUnsubscribeAll = true
+
+      if (docsSubscription) {
+        docsSubscription.changesFeed.cancel()
+        docsSubscription.all.clear()
+        docsSubscription.ids.forEach(set => {
+          set.clear()
+        })
+        docsSubscription.ids.clear()
+      }
+
+      for (const viewInfo of viewsSubscription.values()) {
+        viewInfo.feed.cancel()
+        viewInfo.callbacks.clear()
+      }
+      viewsSubscription.clear()
     },
   }
 }

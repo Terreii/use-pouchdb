@@ -16,5 +16,12 @@ test('should render a Provider which provide the passed pouchdb database', () =>
     ),
   })
 
-  expect(result.current).toBe(myPouch)
+  expect(result.current.pouchdb).toBe(myPouch)
+  expect(typeof result.current.subscriptionManager).toBe('object')
+  expect(typeof result.current.subscriptionManager.subscribeToDocs).toBe(
+    'function'
+  )
+  expect(typeof result.current.subscriptionManager.subscribeToView).toBe(
+    'function'
+  )
 })

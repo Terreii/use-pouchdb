@@ -2,7 +2,6 @@ import PouchDB from 'pouchdb-core'
 import memory from 'pouchdb-adapter-memory'
 import mapReduce from 'pouchdb-mapreduce'
 
-import { renderHook, act } from './test-utils'
 import subscription from './subscription'
 
 PouchDB.plugin(memory)
@@ -233,6 +232,60 @@ test('should call the callback to documents with a document and to views with an
 
   expect(docCallback).toHaveBeenCalledTimes(1)
   expect(viewCallback).toHaveBeenCalledTimes(1)
+})
+
+test('should have a unsubscribeAll method', async () => {
+  const emit = (_key: any, _value?: any) => {}
+
+  await myPouch.put({
+    _id: '_design/test',
+    views: {
+      test: {
+        map: function (doc: any) {
+          emit(doc.id)
+        }.toString(),
+      },
+    },
+  })
+
+  const docCallback = jest.fn()
+  const allDocCallback = jest.fn()
+  const viewCallback = jest.fn()
+
+  const subscriptionManager = subscription(myPouch)
+
+  const unsubscribeDocs = subscriptionManager.subscribeToDocs(
+    ['a_document'],
+    docCallback
+  )
+  const unsubscribeAllDocs = subscriptionManager.subscribeToDocs(
+    null,
+    allDocCallback
+  )
+  const unsubscribeView = subscriptionManager.subscribeToView(
+    'test',
+    viewCallback
+  )
+
+  subscriptionManager.unsubscribeAll()
+
+  await myPouch.put({
+    _id: 'a_document',
+    value: 42,
+  })
+
+  await new Promise(resolve => {
+    setTimeout(resolve, 50)
+  })
+
+  expect(docCallback).not.toHaveBeenCalled()
+  expect(allDocCallback).not.toHaveBeenCalled()
+  expect(viewCallback).not.toHaveBeenCalled()
+
+  // doesn't throw
+  unsubscribeDocs()
+  unsubscribeAllDocs()
+  unsubscribeView()
 })
 
 test('should clone the documents that are passed to document callbacks', async () => {

@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { MISSING_DOC } from 'pouchdb-errors'
 
-import usePouch from './usePouch'
+import { useContext } from './context'
 
 export type QueryState = 'loading' | 'done' | 'error'
 
@@ -34,7 +34,7 @@ export default function useQuery<Content extends {}, Result, Model = Content>(
   fun: string | PouchDB.Map<Model, Result> | PouchDB.Filter<Model, Result>,
   opts?: PouchDB.Query.Options<Model, Result> & { update_seq?: boolean }
 ): QueryResponse<Result> {
-  const pouch = usePouch()
+  const { pouchdb: pouch } = useContext()
 
   const {
     reduce,

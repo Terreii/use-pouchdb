@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { MISSING_DOC } from 'pouchdb-errors'
 
 import { useContext } from './context'
+import type { SubscriptionManager } from './subscription'
 
 export type QueryState = 'loading' | 'done' | 'error'
 
@@ -34,7 +35,7 @@ export default function useQuery<Content extends {}, Result, Model = Content>(
   fun: string | PouchDB.Map<Model, Result> | PouchDB.Filter<Model, Result>,
   opts?: PouchDB.Query.Options<Model, Result> & { update_seq?: boolean }
 ): QueryResponse<Result> {
-  const { pouchdb: pouch } = useContext()
+  const { pouchdb: pouch, subscriptionManager } = useContext()
 
   const {
     reduce,
@@ -87,18 +88,28 @@ export default function useQuery<Content extends {}, Result, Model = Content>(
     }
 
     if (typeof fun === 'string') {
-      return doDDocQuery(setResult, setState, setError, pouch, fun, options)
+      return doDDocQuery(
+        setResult,
+        setState,
+        setError,
+        pouch,
+        subscriptionManager,
+        fun,
+        options
+      )
     } else {
       return doTemporaryQuery(
         setResult,
         setState,
         setError,
         pouch,
+        subscriptionManager,
         fun,
         options
       )
     }
   }, [
+    pouch,
     fun,
     reduce,
     include_docs,
@@ -151,6 +162,7 @@ function doDDocQuery<Model, Result>(
   setState: (state: QueryState) => void,
   setError: (error: PouchDB.Core.Error | null) => void,
   pouch: PouchDB.Database<{}>,
+  subscriptionManager: SubscriptionManager,
   fn: string,
   option?: PouchDB.Query.Options<Model, Result>
 ): () => void {
@@ -158,9 +170,7 @@ function doDDocQuery<Model, Result>(
   let isFetching = false
   let shouldUpdateAfter = false
 
-  let lastUpdateSeq: string | number = 'now'
-  let subscription: PouchDB.Core.Changes<any>
-  let ddocSubscription: PouchDB.Core.Changes<any> | null = null
+  let unsubscribeFromDocs: (() => void) | null = null
 
   let lastResultIds = new Set<PouchDB.Core.DocumentId>()
   const id = '_design/' + fn.split('/')[0]
@@ -170,22 +180,16 @@ function doDDocQuery<Model, Result>(
   // It subscribes to the result docs, to be notified of deletions and other updates of docs
   // which removes them from the view.
   const createDocSubscription = (ids: string[]) => {
-    if (ddocSubscription != null) {
-      ddocSubscription.cancel()
+    if (unsubscribeFromDocs != null) {
+      unsubscribeFromDocs()
     }
 
-    ddocSubscription = pouch
-      .changes({
-        live: true,
-        since: lastUpdateSeq,
-        doc_ids: ids,
-      })
-      .on('change', change => {
+    unsubscribeFromDocs = subscriptionManager.subscribeToDocs(
+      ids,
+      (deleted, docId) => {
         if (!isMounted) return
 
-        lastUpdateSeq = change.seq
-
-        if (change.id === id && change.deleted) {
+        if (docId === id && deleted) {
           setState('error')
           setError(MISSING_DOC)
           setResult({
@@ -196,7 +200,8 @@ function doDDocQuery<Model, Result>(
         } else {
           query()
         }
-      })
+      }
+    )
   }
 
   // Does the query.
@@ -226,12 +231,8 @@ function doDDocQuery<Model, Result>(
       }
       lastResultIds = ids
 
-      if (ids.size === 0) {
-        createDocSubscription([id])
-      } else {
-        ids.add(id)
-        createDocSubscription(Array.from(ids))
-      }
+      ids.add(id)
+      createDocSubscription(Array.from(ids))
     } catch (error) {
       if (isMounted) {
         setState('error')
@@ -250,25 +251,18 @@ function doDDocQuery<Model, Result>(
   createDocSubscription([id])
 
   // Subscribe to new entries in the view.
-  subscription = pouch
-    .changes({
-      live: true,
-      since: 'now',
-      filter: '_view',
-      view: fn,
-    })
-    .on('change', change => {
-      if (!lastResultIds.has(change.id)) {
-        query()
-      }
-    })
+  const unsubscribe = subscriptionManager.subscribeToView(fn, id => {
+    if (isMounted && !lastResultIds.has(id)) {
+      query()
+    }
+  })
 
   return () => {
     isMounted = false
-    subscription.cancel()
+    unsubscribe()
 
-    if (ddocSubscription) {
-      ddocSubscription.cancel()
+    if (unsubscribeFromDocs) {
+      unsubscribeFromDocs()
     }
   }
 }
@@ -287,6 +281,7 @@ function doTemporaryQuery<Model, Result>(
   setState: (state: QueryState) => void,
   setError: (error: PouchDB.Core.Error | null) => void,
   pouch: PouchDB.Database<{}>,
+  subscriptionManager: SubscriptionManager,
   fn: PouchDB.Map<Model, Result> | PouchDB.Filter<Model, Result>,
   option?: PouchDB.Query.Options<Model, Result>
 ): () => void {
@@ -341,8 +336,6 @@ function doTemporaryQuery<Model, Result>(
 
   query()
 
-  let subscription: PouchDB.Core.Changes<any>
-
   let viewFunction: (doc: any, emit: (key: any, value?: any) => void) => void
 
   if (typeof fn === 'function') {
@@ -352,27 +345,32 @@ function doTemporaryQuery<Model, Result>(
   }
 
   // Subscribe to updates of the view.
-  subscription = pouch
-    .changes({
-      live: true,
-      since: 'now',
-      filter: doc => {
-        let isDocInView: boolean = false
+  const unsubscribe = subscriptionManager.subscribeToDocs(
+    null,
+    (_deleted, id, doc) => {
+      let isDocInView: boolean = false
 
-        viewFunction(doc, (_key: any, _value?: any) => {
-          isDocInView = true
-        })
+      try {
+        if (doc) {
+          viewFunction(doc, (_key: any, _value?: any) => {
+            isDocInView = true
+          })
+        }
 
         // Also check if one of the result documents did update in a way,
         // that removes it from the view.
-        return isDocInView || resultIds?.has(doc._id)
-      },
-    })
-    .on('change', query)
+        if (isDocInView || resultIds?.has(id)) {
+          query()
+        }
+      } catch (err) {
+        console.error(err)
+      }
+    }
+  )
 
   return () => {
     isMounted = false
-    subscription.cancel()
+    unsubscribe()
   }
 }
 

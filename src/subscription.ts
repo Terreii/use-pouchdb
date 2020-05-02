@@ -13,13 +13,30 @@ interface DocsSubscription {
 }
 
 export type ViewCallback = (id: PouchDB.Core.DocumentId) => void
+export type subscribeToView = (
+  fun: string,
+  callback: ViewCallback
+) => () => void
 
 interface SubscriptionToAView {
   feed: PouchDB.Core.Changes<{}>
   callbacks: Set<ViewCallback>
 }
+export type subscribeToDocs = <T extends {}>(
+  ids: PouchDB.Core.DocumentId[] | null,
+  callback: DocsCallback<T>
+) => () => void
 
-export default function subscriptionManager(pouch: PouchDB.Database) {
+export type SubscriptionManager = {
+  subscribeToDocs: <T extends {}>(
+    ids: string[] | null,
+    callback: DocsCallback<T>
+  ) => () => void
+  subscribeToView: (fun: string, callback: ViewCallback) => () => void
+  unsubscribeAll(): void
+}
+
+export default function createSubscriptionManager(pouch: PouchDB.Database) {
   let docsSubscription: DocsSubscription | null = null
   const viewsSubscription = new Map<string, SubscriptionToAView>()
 

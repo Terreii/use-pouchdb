@@ -38,12 +38,16 @@ export function Provider({ children, pouchdb }: ProviderArguments) {
     }
   }, [pouchdb])
 
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    const listener = () => {
       context.subscriptionManager.unsubscribeAll()
-    },
-    [pouchdb]
-  )
+    }
+    pouchdb.once('destroyed', listener)
+    return () => {
+      pouchdb.removeListener('destroyed', listener)
+      context.subscriptionManager.unsubscribeAll()
+    }
+  }, [pouchdb])
 
   return (
     <PouchContext.Provider value={context}>{children}</PouchContext.Provider>

@@ -408,6 +408,40 @@ describe('pouchdb get options', () => {
     })
   })
 
+  test('should not update if a change did happen and rev is set', async () => {
+    const firstPutResult = await myPouch.put({
+      _id: 'test',
+      value: 'first',
+    })
+
+    const { result, waitForNextUpdate } = renderHook(
+      (rev: string) => useDoc<{ _id?: string; value: string }>('test', { rev }),
+      {
+        initialProps: firstPutResult.rev,
+        pouchdb: myPouch,
+      }
+    )
+
+    await waitForNextUpdate()
+
+    await myPouch.put({
+      _id: 'test',
+      _rev: firstPutResult.rev,
+      value: 'update',
+    })
+
+    await new Promise(resolve => {
+      setTimeout(resolve, 10)
+    })
+
+    expect(result.current.state).toBe('done')
+    expect(result.current.doc).toEqual({
+      _id: 'test',
+      _rev: firstPutResult.rev,
+      value: 'first',
+    })
+  })
+
   test('should include revision history if revs is set', async () => {
     const firstPutResult = await myPouch.put({
       _id: 'test',
@@ -432,6 +466,25 @@ describe('pouchdb get options', () => {
     expect(result.current.doc._revisions).toEqual({
       ids: [updateResult.rev, firstPutResult.rev].map(rev => rev.split('-')[1]),
       start: 2,
+    })
+
+    const secondUpdate = await myPouch.put({
+      _id: 'test',
+      _rev: updateResult.rev,
+      value: 'update2',
+    })
+
+    await waitForNextUpdate()
+
+    expect(result.current.state).toBe('loading')
+
+    await waitForNextUpdate()
+
+    expect(result.current.doc._revisions).toEqual({
+      ids: [secondUpdate.rev, updateResult.rev, firstPutResult.rev].map(
+        rev => rev.split('-')[1]
+      ),
+      start: 3,
     })
   })
 
@@ -458,6 +511,24 @@ describe('pouchdb get options', () => {
     await waitForNextUpdate()
 
     expect(result.current.doc._revs_info).toEqual([
+      { rev: updateResult.rev, status: 'available' },
+      { rev: firstPutResult.rev, status: 'available' },
+    ])
+
+    const secondUpdate = await myPouch.put({
+      _id: 'test',
+      _rev: updateResult.rev,
+      value: 'update2',
+    })
+
+    await waitForNextUpdate()
+
+    expect(result.current.state).toBe('loading')
+
+    await waitForNextUpdate()
+
+    expect(result.current.doc._revs_info).toEqual([
+      { rev: secondUpdate.rev, status: 'available' },
       { rev: updateResult.rev, status: 'available' },
       { rev: firstPutResult.rev, status: 'available' },
     ])
@@ -494,11 +565,26 @@ describe('pouchdb get options', () => {
 
     await waitForNextUpdate()
 
-    expect(result.current.doc._conflicts).toEqual(
+    const [loosing, winning] =
       result.current.doc._rev === resultUpdate.rev
-        ? [conflictResult.rev]
-        : [resultUpdate.rev]
-    )
+        ? [conflictResult.rev, resultUpdate.rev]
+        : [resultUpdate.rev, conflictResult.rev]
+
+    expect(result.current.doc._conflicts).toEqual([loosing])
+
+    await myPouch.put({
+      _id: 'test',
+      _rev: winning,
+      value: 'update2',
+    })
+
+    await waitForNextUpdate()
+
+    expect(result.current.state).toBe('loading')
+
+    await waitForNextUpdate()
+
+    expect(result.current.doc._conflicts).toEqual([loosing])
   })
 
   test('should include attachments if attachments is set to true', async () => {
@@ -543,6 +629,57 @@ describe('pouchdb get options', () => {
       digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
       revpos: 1,
     })
+
+    await myPouch.putAttachment(
+      'test',
+      'moar.txt',
+      result.current.doc._rev,
+      'aGVsbG8gd29ybGQ=',
+      'text/plain'
+    )
+
+    await waitForNextUpdate()
+
+    expect(result.current.state).toBe('loading')
+
+    await waitForNextUpdate()
+
+    expect(result.current.doc._attachments['info.txt']).toEqual({
+      content_type: 'text/plain',
+      data: 'SXMgdGhlcmUgbGlmZSBvbiBNYXJzPwo=',
+      digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
+      revpos: 1,
+    })
+    expect(result.current.doc._attachments['moar.txt']).toEqual({
+      content_type: 'text/plain',
+      data: 'aGVsbG8gd29ybGQ=',
+      digest: 'md5-XrY7u+Ae7tCTyyK7j1rNww==',
+      revpos: 2,
+    })
+
+    const doc = await myPouch.get<any>('test')
+    doc.value = 'moreData'
+    await myPouch.put(doc)
+
+    await waitForNextUpdate()
+
+    expect(result.current.state).toBe('loading')
+
+    await waitForNextUpdate()
+
+    expect(result.current.doc.value).toBe('moreData')
+    expect(result.current.doc._attachments['info.txt']).toEqual({
+      content_type: 'text/plain',
+      data: 'SXMgdGhlcmUgbGlmZSBvbiBNYXJzPwo=',
+      digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
+      revpos: 1,
+    })
+    expect(result.current.doc._attachments['moar.txt']).toEqual({
+      content_type: 'text/plain',
+      data: 'aGVsbG8gd29ybGQ=',
+      digest: 'md5-XrY7u+Ae7tCTyyK7j1rNww==',
+      revpos: 2,
+    })
   })
 
   test('should include attachments as buffer/blob if attachments and binary are true', async () => {
@@ -577,6 +714,57 @@ describe('pouchdb get options', () => {
       digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
       revpos: 1,
     })
+
+    await myPouch.putAttachment(
+      'test',
+      'moar.txt',
+      result.current.doc._rev,
+      Buffer.from('hello world'),
+      'text/plain'
+    )
+
+    await waitForNextUpdate()
+
+    expect(result.current.state).toBe('loading')
+
+    await waitForNextUpdate()
+
+    expect(result.current.doc._attachments['info.txt']).toEqual({
+      content_type: 'text/plain',
+      data: Buffer.from('Is there life on Mars?\n'),
+      digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
+      revpos: 1,
+    })
+    expect(result.current.doc._attachments['moar.txt']).toEqual({
+      content_type: 'text/plain',
+      data: Buffer.from('hello world'),
+      digest: 'md5-XrY7u+Ae7tCTyyK7j1rNww==',
+      revpos: 2,
+    })
+
+    const doc = await myPouch.get<any>('test')
+    doc.value = 'moreData'
+    await myPouch.put(doc)
+
+    await waitForNextUpdate()
+
+    expect(result.current.state).toBe('loading')
+
+    await waitForNextUpdate()
+
+    expect(result.current.doc.value).toBe('moreData')
+    expect(result.current.doc._attachments['info.txt']).toEqual({
+      content_type: 'text/plain',
+      data: Buffer.from('Is there life on Mars?\n'),
+      digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
+      revpos: 1,
+    })
+    expect(result.current.doc._attachments['moar.txt']).toEqual({
+      content_type: 'text/plain',
+      data: Buffer.from('hello world'),
+      digest: 'md5-XrY7u+Ae7tCTyyK7j1rNww==',
+      revpos: 2,
+    })
   })
 
   test('should return the latest leaf revision if latest is set to true', async () => {
@@ -605,5 +793,15 @@ describe('pouchdb get options', () => {
     await waitForNextUpdate()
 
     expect(result.current.doc._rev).toBe(updateResult.rev)
+
+    const secondUpdateResult = await myPouch.put({
+      _id: 'test',
+      _rev: updateResult.rev,
+      value: 'update2',
+    })
+
+    await waitForNextUpdate()
+
+    expect(result.current.doc._rev).toBe(secondUpdateResult.rev)
   })
 })

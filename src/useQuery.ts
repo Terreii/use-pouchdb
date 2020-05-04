@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { MISSING_DOC } from 'pouchdb-errors'
 
 import { useContext } from './context'
-import type { SubscriptionManager } from './subscription'
+import type SubscriptionManager from './subscription'
 
 export type QueryState = 'loading' | 'done' | 'error'
 

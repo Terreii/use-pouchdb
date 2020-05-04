@@ -2,7 +2,7 @@ import PouchDB from 'pouchdb-core'
 import memory from 'pouchdb-adapter-memory'
 import mapReduce from 'pouchdb-mapreduce'
 
-import subscription from './subscription'
+import SubscriptionManager from './subscription'
 
 PouchDB.plugin(memory)
 PouchDB.plugin(mapReduce)
@@ -18,7 +18,7 @@ afterEach(async () => {
 })
 
 test('should have subscription methods for docs and views', () => {
-  const subscriptionManager = subscription(myPouch)
+  const subscriptionManager = new SubscriptionManager(myPouch)
 
   expect(typeof subscriptionManager).toBe('object')
   expect(typeof subscriptionManager.subscribeToDocs).toBe('function')
@@ -34,7 +34,7 @@ test('should subscribe to document updates', () => {
 
   myPouch.changes = changes
 
-  const subscriptionManager = subscription(myPouch)
+  const subscriptionManager = new SubscriptionManager(myPouch)
 
   const unsubscribe = subscriptionManager.subscribeToDocs(
     ['test', 'userDoc', 'other'],
@@ -62,7 +62,7 @@ test('should only subscribe once to document updates', () => {
 
   myPouch.changes = changes
 
-  const subscriptionManager = subscription(myPouch)
+  const subscriptionManager = new SubscriptionManager(myPouch)
 
   const unsubscribe = subscriptionManager.subscribeToDocs(
     ['test', 'userDoc', 'other'],
@@ -101,7 +101,7 @@ test('should subscribe to view updates', () => {
 
   myPouch.changes = changes
 
-  const subscriptionManager = subscription(myPouch)
+  const subscriptionManager = new SubscriptionManager(myPouch)
 
   const unsubscribe = subscriptionManager.subscribeToView(
     'ddoc/aView',
@@ -131,7 +131,7 @@ test('should subscribe a view updates only once', () => {
 
   myPouch.changes = changes
 
-  const subscriptionManager = subscription(myPouch)
+  const subscriptionManager = new SubscriptionManager(myPouch)
 
   const unsubscribe = subscriptionManager.subscribeToView(
     'ddoc/aView',
@@ -188,7 +188,7 @@ test('should call the callback to documents with a document and to views with an
   const docCallback = jest.fn()
   const viewCallback = jest.fn()
 
-  const subscriptionManager = subscription(myPouch)
+  const subscriptionManager = new SubscriptionManager(myPouch)
 
   const unsubscribeDocs = subscriptionManager.subscribeToDocs(
     ['a_document'],
@@ -252,7 +252,7 @@ test('should have a unsubscribeAll method', async () => {
   const allDocCallback = jest.fn()
   const viewCallback = jest.fn()
 
-  const subscriptionManager = subscription(myPouch)
+  const subscriptionManager = new SubscriptionManager(myPouch)
 
   const unsubscribeDocs = subscriptionManager.subscribeToDocs(
     ['a_document'],
@@ -291,7 +291,7 @@ test('should have a unsubscribeAll method', async () => {
 test('should clone the documents that are passed to document callbacks', async () => {
   const docs = []
 
-  const subscriptionManager = subscription(myPouch)
+  const subscriptionManager = new SubscriptionManager(myPouch)
 
   const unsubscribe1 = subscriptionManager.subscribeToDocs(
     ['a_document'],
@@ -326,7 +326,7 @@ test('should clone the documents that are passed to document callbacks', async (
 })
 
 test('should subscribe to all docs if null is passed to doc subscription', async () => {
-  const subscriptionManager = subscription(myPouch)
+  const subscriptionManager = new SubscriptionManager(myPouch)
 
   const callback = jest.fn()
 

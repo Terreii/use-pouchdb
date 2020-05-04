@@ -27,123 +27,118 @@ export type subscribeToDocs = <T extends {}>(
   callback: DocsCallback<T>
 ) => () => void
 
-export type SubscriptionManager = {
-  subscribeToDocs: <T extends {}>(
-    ids: string[] | null,
+export default class SubscriptionManager {
+  #pouch: PouchDB.Database
+
+  #docsSubscription: DocsSubscription | null = null
+  #viewsSubscription = new Map<string, SubscriptionToAView>()
+
+  #didUnsubscribeAll = false
+
+  constructor(pouch: PouchDB.Database) {
+    this.#pouch = pouch
+  }
+
+  subscribeToDocs<T extends {}>(
+    ids: PouchDB.Core.DocumentId[] | null,
     callback: DocsCallback<T>
-  ) => () => void
-  subscribeToView: (fun: string, callback: ViewCallback) => () => void
-  unsubscribeAll(): void
-}
+  ): () => void {
+    if (this.#didUnsubscribeAll) return () => {}
 
-export default function createSubscriptionManager(pouch: PouchDB.Database) {
-  let docsSubscription: DocsSubscription | null = null
-  const viewsSubscription = new Map<string, SubscriptionToAView>()
+    if (this.#docsSubscription == null) {
+      this.#docsSubscription = createDocSubscription(this.#pouch)
+    }
 
-  let didUnsubscribeAll = false
+    const isIds = Array.isArray(ids) && ids.length > 0
 
-  return {
-    subscribeToDocs: <T extends {}>(
-      ids: PouchDB.Core.DocumentId[] | null,
-      callback: DocsCallback<T>
-    ): (() => void) => {
-      if (didUnsubscribeAll) return () => {}
-
-      if (docsSubscription == null) {
-        docsSubscription = createDocSubscription(pouch)
+    if (isIds) {
+      for (const id of ids!) {
+        if (this.#docsSubscription.ids.has(id)) {
+          this.#docsSubscription.ids.get(id)?.add(callback as DocsCallback<{}>)
+        } else {
+          const set: Set<DocsCallback<{}>> = new Set()
+          set.add(callback as DocsCallback<{}>)
+          this.#docsSubscription.ids.set(id, set)
+        }
       }
+    } else {
+      this.#docsSubscription.all.add(callback as DocsCallback<{}>)
+    }
 
-      const isIds = Array.isArray(ids) && ids.length > 0
+    let didUnsubscribe = false
+    return () => {
+      if (didUnsubscribe || this.#didUnsubscribeAll) return
+      didUnsubscribe = true
 
       if (isIds) {
         for (const id of ids!) {
-          if (docsSubscription.ids.has(id)) {
-            docsSubscription.ids.get(id)?.add(callback as DocsCallback<{}>)
-          } else {
-            const set: Set<DocsCallback<{}>> = new Set()
-            set.add(callback as DocsCallback<{}>)
-            docsSubscription.ids.set(id, set)
+          const set = this.#docsSubscription?.ids.get(id)
+          set?.delete(callback as DocsCallback<{}>)
+
+          if (set?.size === 0) {
+            this.#docsSubscription?.ids.delete(id)
           }
         }
       } else {
-        docsSubscription.all.add(callback as DocsCallback<{}>)
+        this.#docsSubscription?.all.delete(callback as DocsCallback<{}>)
       }
 
-      let didUnsubscribe = false
-      return () => {
-        if (didUnsubscribe || didUnsubscribeAll) return
-        didUnsubscribe = true
-
-        if (isIds) {
-          for (const id of ids!) {
-            const set = docsSubscription?.ids.get(id)
-            set?.delete(callback as DocsCallback<{}>)
-
-            if (set?.size === 0) {
-              docsSubscription?.ids.delete(id)
-            }
-          }
-        } else {
-          docsSubscription?.all.delete(callback as DocsCallback<{}>)
-        }
-
-        if (
-          docsSubscription?.all.size === 0 &&
-          docsSubscription.ids.size === 0
-        ) {
-          docsSubscription.changesFeed.cancel()
-          docsSubscription = null
-        }
+      if (
+        this.#docsSubscription?.all.size === 0 &&
+        this.#docsSubscription.ids.size === 0
+      ) {
+        this.#docsSubscription.changesFeed.cancel()
+        this.#docsSubscription = null
       }
-    },
+    }
+  }
 
-    subscribeToView: (fun: string, callback: ViewCallback): (() => void) => {
-      if (didUnsubscribeAll) return () => {}
+  subscribeToView(fun: string, callback: ViewCallback): () => void {
+    if (this.#didUnsubscribeAll) return () => {}
 
-      let subscription: SubscriptionToAView
+    let subscription: SubscriptionToAView
 
-      if (viewsSubscription.has(fun)) {
-        subscription = viewsSubscription.get(fun)!
-      } else {
-        subscription = subscribeToView(pouch, fun)
-        viewsSubscription.set(fun, subscription)
+    if (this.#viewsSubscription.has(fun)) {
+      subscription = this.#viewsSubscription.get(fun)!
+    } else {
+      subscription = subscribeToView(this.#pouch, fun)
+      this.#viewsSubscription.set(fun, subscription)
+    }
+
+    subscription.callbacks.add(callback)
+
+    let didUnsubscribe = false
+    return () => {
+      if (didUnsubscribe || this.#didUnsubscribeAll) return
+      didUnsubscribe = true
+
+      subscription.callbacks.delete(callback)
+
+      if (subscription.callbacks.size === 0) {
+        subscription.feed.cancel()
+        this.#viewsSubscription.delete(fun)
       }
+    }
+  }
 
-      subscription.callbacks.add(callback)
+  unsubscribeAll() {
+    if (this.#didUnsubscribeAll) return
+    this.#didUnsubscribeAll = true
 
-      let didUnsubscribe = false
-      return () => {
-        if (didUnsubscribe || didUnsubscribeAll) return
-        didUnsubscribe = true
+    if (this.#docsSubscription) {
+      this.#docsSubscription.changesFeed.cancel()
+      this.#docsSubscription.all.clear()
+      this.#docsSubscription.ids.forEach(set => {
+        set.clear()
+      })
+      this.#docsSubscription.ids.clear()
+    }
 
-        subscription.callbacks.delete(callback)
-
-        if (subscription.callbacks.size === 0) {
-          subscription.feed.cancel()
-          viewsSubscription.delete(fun)
-        }
-      }
-    },
-
-    unsubscribeAll() {
-      if (didUnsubscribeAll) return
-      didUnsubscribeAll = true
-
-      if (docsSubscription) {
-        docsSubscription.changesFeed.cancel()
-        docsSubscription.all.clear()
-        docsSubscription.ids.forEach(set => {
-          set.clear()
-        })
-        docsSubscription.ids.clear()
-      }
-
-      for (const viewInfo of viewsSubscription.values()) {
-        viewInfo.feed.cancel()
-        viewInfo.callbacks.clear()
-      }
-      viewsSubscription.clear()
-    },
+    for (const viewInfo of this.#viewsSubscription.values()) {
+      viewInfo.feed.cancel()
+      viewInfo.callbacks.clear()
+    }
+    this.#viewsSubscription.clear()
   }
 }
 

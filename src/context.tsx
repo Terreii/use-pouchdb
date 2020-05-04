@@ -6,21 +6,11 @@ import React, {
   ReactNode,
 } from 'react'
 
-import createSubscriptionManager, {
-  DocsCallback,
-  ViewCallback,
-} from './subscription'
+import SubscriptionManager from './subscription'
 
 export const PouchContext = createContext<{
   pouchdb: PouchDB.Database
-  subscriptionManager: {
-    subscribeToDocs: <T extends {}>(
-      ids: string[] | null,
-      callback: DocsCallback<T>
-    ) => () => void
-    subscribeToView: (fun: string, callback: ViewCallback) => () => void
-    unsubscribeAll(): void
-  }
+  subscriptionManager: SubscriptionManager
 } | null>(null)
 
 export interface ProviderArguments {
@@ -30,7 +20,7 @@ export interface ProviderArguments {
 
 export function Provider({ children, pouchdb }: ProviderArguments) {
   const context = useMemo(() => {
-    const subscriptionManager = createSubscriptionManager(pouchdb)
+    const subscriptionManager = new SubscriptionManager(pouchdb)
 
     return {
       pouchdb,

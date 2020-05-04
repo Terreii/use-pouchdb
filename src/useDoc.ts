@@ -80,25 +80,27 @@ export default function useDoc<Content extends {}>(
     fetchDoc()
 
     // Use the changes feed to get updates to the document
-    const unsubscribe = subscriptionManager.subscribeToDocs(
-      [id],
-      (deleted, _id, doc) => {
-        if (!isMounted) return
+    const unsubscribe =
+      rev && !latest // but don't subscribe if a specific rev is requested.
+        ? () => {}
+        : subscriptionManager.subscribeToDocs([id], (deleted, _id, doc) => {
+            if (!isMounted) return
 
-        // If the document got deleted it should change to an 404 error state
-        if (deleted) {
-          setToInitialValue(true)
-          setError(MISSING_DOC)
-          setState('error')
-        } else if (!conflicts && !attachments) {
-          setDoc(doc as PouchDB.Core.Document<Content> & PouchDB.Core.GetMeta)
-          setState('done')
-          setError(null)
-        } else {
-          fetchDoc()
-        }
-      }
-    )
+            // If the document got deleted it should change to an 404 error state
+            if (deleted) {
+              setToInitialValue(true)
+              setError(MISSING_DOC)
+              setState('error')
+            } else if (revs || revs_info || conflicts || attachments) {
+              fetchDoc()
+            } else {
+              setDoc(
+                doc as PouchDB.Core.Document<Content> & PouchDB.Core.GetMeta
+              )
+              setState('done')
+              setError(null)
+            }
+          })
 
     return () => {
       isMounted = false

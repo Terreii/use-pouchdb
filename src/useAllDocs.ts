@@ -80,8 +80,64 @@ export default function useAllDocs<Content extends {}, Model = Content>(
 
     fetch()
 
+    let keysToSubscribe: null | string[] = null
+
+    if (key != null) {
+      keysToSubscribe = [key]
+    } else if (keys != null) {
+      keysToSubscribe = keys
+    }
+
+    const unsubscribe = subscriptionManager.subscribeToDocs(
+      keysToSubscribe,
+      (deleted, id) => {
+        if (!isMounted) return
+
+        let isInRange = true
+        const rangeOptions = options as
+          | PouchDB.Core.AllDocsWithinRangeOptions
+          | undefined
+
+        if (rangeOptions?.startkey) {
+          isInRange = options?.descending
+            ? id < rangeOptions.startkey
+            : id > rangeOptions.startkey
+        }
+        if (isInRange && !rangeOptions?.inclusive_end && rangeOptions?.endkey) {
+          isInRange = options?.descending
+            ? id > rangeOptions.endkey
+            : id < rangeOptions.endkey
+        } else if (
+          isInRange &&
+          rangeOptions?.inclusive_end &&
+          rangeOptions?.endkey
+        ) {
+          isInRange = options?.descending
+            ? id >= rangeOptions.endkey
+            : id <= rangeOptions.endkey
+        }
+
+        if (!isInRange) return
+
+        if (deleted) {
+          setResult(result => {
+            const rows = result.rows.filter(row => row.id !== id)
+            return {
+              ...result,
+              rows,
+              total_rows:
+                result.total_rows - (result.rows.length - rows.length),
+            }
+          })
+        } else {
+          fetch()
+        }
+      }
+    )
+
     return () => {
       isMounted = false
+      unsubscribe()
     }
   }, [
     pouch,

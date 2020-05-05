@@ -78,6 +78,7 @@ test('should subscribe to changes', async () => {
     { id: 'a', key: 'a', value: { rev: revA } },
     { id: 'b', key: 'b', value: { rev: revB } },
   ])
+  expect(result.current.total_rows).toBe(2)
 
   let revC: string
   let revD: string
@@ -99,13 +100,15 @@ test('should subscribe to changes', async () => {
 
   await waitForNextUpdate()
 
-  expect(result.current.state).toBe('done')
   expect(result.current.rows).toEqual([
     { id: 'a', key: 'a', value: { rev: revA } },
     { id: 'b', key: 'b', value: { rev: revB } },
     { id: 'c', key: 'c', value: { rev: revC } },
     { id: 'd', key: 'd', value: { rev: revD } },
   ])
+  expect(result.current.total_rows).toBe(4)
+
+  await waitForNextUpdate()
 
   let secondUpdateRev = ''
   act(() => {
@@ -133,14 +136,11 @@ test('should subscribe to changes', async () => {
     { id: 'c', key: 'c', value: { rev: revC } },
     { id: 'd', key: 'd', value: { rev: revD } },
   ])
+  expect(result.current.total_rows).toBe(4)
 
   act(() => {
     myPouch.remove('b', revB)
   })
-
-  await waitForNextUpdate()
-
-  expect(result.current.loading).toBeTruthy()
 
   await waitForNextUpdate()
 
@@ -150,6 +150,7 @@ test('should subscribe to changes', async () => {
     { id: 'c', key: 'c', value: { rev: revC } },
     { id: 'd', key: 'd', value: { rev: revD } },
   ])
+  expect(result.current.total_rows).toBe(3)
 })
 
 test('should reload if a change did happen while a query is running', async () => {
@@ -220,6 +221,8 @@ test('should reload if a change did happen while a query is running', async () =
     { id: 'd', key: 'd', value: { rev: revD } },
     { id: 'e', key: 'e', value: { rev: revE } },
   ])
+
+  await waitForNextUpdate()
 })
 
 describe('options', () => {
@@ -435,6 +438,21 @@ describe('options', () => {
       { id: 'b', key: 'b', value: { rev: revB } },
     ])
 
+    let revAA: string
+    act(() => {
+      myPouch.put({ _id: 'aa' }).then(result => {
+        revAA = result.rev
+      })
+    })
+
+    await new Promise(resolve => {
+      setTimeout(resolve, 10)
+    })
+
+    expect(result.current.rows).toEqual([
+      { id: 'b', key: 'b', value: { rev: revB } },
+    ])
+
     rerender('a')
 
     await waitForNextUpdate()
@@ -442,6 +460,7 @@ describe('options', () => {
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([
       { id: 'a', key: 'a', value: { rev: revA } },
+      { id: 'aa', key: 'aa', value: { rev: revAA } },
       { id: 'b', key: 'b', value: { rev: revB } },
     ])
   })
@@ -476,6 +495,21 @@ describe('options', () => {
     expect(result.current.rows).toEqual([
       { id: 'a', key: 'a', value: { rev: revA } },
     ])
+
+    let revC: string
+    act(() => {
+      myPouch.put({ _id: 'c', test: 'moar' }).then(result => {
+        revC = result.rev
+      })
+    })
+
+    await new Promise(resolve => {
+      setTimeout(resolve, 10)
+    })
+
+    expect(result.current.rows).toEqual([
+      { id: 'a', key: 'a', value: { rev: revA } },
+    ])
   })
 
   test('should handle the inclusive_end option', async () => {
@@ -496,6 +530,22 @@ describe('options', () => {
     await waitForNextUpdate()
 
     expect(result.current.state).toBe('done')
+    expect(result.current.rows).toEqual([
+      { id: 'a', key: 'a', value: { rev: revA } },
+      { id: 'b', key: 'b', value: { rev: revB } },
+    ])
+
+    let revC: string
+    act(() => {
+      myPouch.put({ _id: 'c', test: 'moar' }).then(result => {
+        revC = result.rev
+      })
+    })
+
+    await new Promise(resolve => {
+      setTimeout(resolve, 10)
+    })
+
     expect(result.current.rows).toEqual([
       { id: 'a', key: 'a', value: { rev: revA } },
       { id: 'b', key: 'b', value: { rev: revB } },
@@ -563,6 +613,7 @@ describe('options', () => {
     expect(result.current.rows).toEqual([
       { id: 'b', key: 'b', value: { rev: revB } },
     ])
+    expect(result.current.offset).toBe(1)
 
     rerender(5)
 
@@ -570,6 +621,7 @@ describe('options', () => {
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([])
+    expect(result.current.offset).toBe(5)
 
     rerender(0)
 
@@ -580,6 +632,7 @@ describe('options', () => {
       { id: 'a', key: 'a', value: { rev: revA } },
       { id: 'b', key: 'b', value: { rev: revB } },
     ])
+    expect(result.current.offset).toBe(0)
   })
 
   test('should handle the descending option', async () => {
@@ -615,6 +668,48 @@ describe('options', () => {
     ])
   })
 
+  test('should handle updates with the descending option', async () => {
+    const [{ rev: revA }, { rev: revB }] = await myPouch.bulkDocs([
+      { _id: 'a', test: 'value' },
+      { _id: 'b', test: 'other' },
+    ])
+
+    const { result, waitForNextUpdate } = renderHook(
+      () => useAllDocs({ descending: true }),
+      {
+        pouchdb: myPouch,
+      }
+    )
+
+    await waitForNextUpdate()
+
+    expect(result.current.state).toBe('done')
+    expect(result.current.rows).toEqual([
+      { id: 'b', key: 'b', value: { rev: revB } },
+      { id: 'a', key: 'a', value: { rev: revA } },
+    ])
+
+    let revC: string
+    act(() => {
+      myPouch.put({ _id: 'c', test: 'moar' }).then(result => {
+        revC = result.rev
+      })
+    })
+
+    await waitForNextUpdate()
+
+    expect(result.current.state).toBe('loading')
+
+    await waitForNextUpdate()
+
+    expect(result.current.state).toBe('done')
+    expect(result.current.rows).toEqual([
+      { id: 'c', key: 'c', value: { rev: revC } },
+      { id: 'b', key: 'b', value: { rev: revB } },
+      { id: 'a', key: 'a', value: { rev: revA } },
+    ])
+  })
+
   test('should handle the key option', async () => {
     const [{ rev: revA }, { rev: revB }] = await myPouch.bulkDocs([
       { _id: 'a', test: 'value' },
@@ -639,6 +734,19 @@ describe('options', () => {
     rerender('b')
 
     await waitForNextUpdate()
+
+    expect(result.current.state).toBe('done')
+    expect(result.current.rows).toEqual([
+      { id: 'b', key: 'b', value: { rev: revB } },
+    ])
+
+    act(() => {
+      myPouch.put({ _id: 'c', test: 'moar' })
+    })
+
+    await new Promise(resolve => {
+      setTimeout(resolve, 10)
+    })
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([
@@ -675,6 +783,20 @@ describe('options', () => {
     rerender(['c', 'b'])
 
     await waitForNextUpdate()
+
+    expect(result.current.state).toBe('done')
+    expect(result.current.rows).toEqual([
+      { id: 'c', key: 'c', value: { rev: revC } },
+      { id: 'b', key: 'b', value: { rev: revB } },
+    ])
+
+    act(() => {
+      myPouch.put({ _id: 'd', test: 'moar' })
+    })
+
+    await new Promise(resolve => {
+      setTimeout(resolve, 10)
+    })
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([

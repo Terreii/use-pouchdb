@@ -544,7 +544,7 @@ describe('options', () => {
   })
 
   test('should handle the skip option', async () => {
-    const [{ rev: revA }] = await myPouch.bulkDocs([
+    const [{ rev: revA }, { rev: revB }] = await myPouch.bulkDocs([
       { _id: 'a', test: 'value' },
       { _id: 'b', test: 'other' },
     ])
@@ -561,7 +561,7 @@ describe('options', () => {
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([
-      { id: 'a', key: 'a', value: { rev: revA } },
+      { id: 'b', key: 'b', value: { rev: revB } },
     ])
 
     rerender(5)
@@ -570,6 +570,16 @@ describe('options', () => {
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([])
+
+    rerender(0)
+
+    await waitForNextUpdate()
+
+    expect(result.current.state).toBe('done')
+    expect(result.current.rows).toEqual([
+      { id: 'a', key: 'a', value: { rev: revA } },
+      { id: 'b', key: 'b', value: { rev: revB } },
+    ])
   })
 
   test('should handle the descending option', async () => {

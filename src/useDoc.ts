@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
-import { MISSING_DOC } from 'pouchdb-errors'
 
-import usePouchDB from './usePouch'
+import { useContext } from './context'
 
 /**
  * Retrieves a document and subscribes to it's changes.
@@ -16,7 +15,7 @@ export default function useDoc<Content extends {}>(
 ) {
   type Document = (PouchDB.Core.Document<Content> & PouchDB.Core.GetMeta) | null
 
-  const pouch = usePouchDB()
+  const { pouchdb: pouch, subscriptionManager } = useContext()
 
   const { rev, revs, revs_info, conflicts, attachments, binary, latest } =
     options || {}
@@ -80,38 +79,30 @@ export default function useDoc<Content extends {}>(
     fetchDoc()
 
     // Use the changes feed to get updates to the document
-    const subscription = pouch
-      .changes({
-        live: true,
-        since: 'now',
-        doc_ids: [id],
-        include_docs: true,
-        conflicts,
-        attachments,
-        binary,
-      })
-      .on('change', change => {
-        if (!isMounted) return
+    const unsubscribe =
+      rev && !latest // but don't subscribe if a specific rev is requested.
+        ? () => {}
+        : subscriptionManager.subscribeToDocs([id], (deleted, _id, doc) => {
+            if (!isMounted) return
 
-        // If the document got deleted it should change to an 404 error state
-        if (change.deleted) {
-          setToInitialValue(true)
-          setError(MISSING_DOC)
-          setState('error')
-        } else {
-          setDoc(
-            change.doc as PouchDB.Core.Document<Content> & PouchDB.Core.GetMeta
-          )
-          setState('done')
-          setError(null)
-        }
-      })
+            // If the document got deleted it should change to an 404 error state
+            // or if there is a conflicting version, then it should show the new winning one.
+            if (deleted || revs || revs_info || conflicts || attachments) {
+              fetchDoc()
+            } else {
+              setDoc(
+                doc as PouchDB.Core.Document<Content> & PouchDB.Core.GetMeta
+              )
+              setState('done')
+              setError(null)
+            }
+          })
 
     return () => {
       isMounted = false
-      subscription.cancel()
+      unsubscribe()
     }
-  }, [id, rev, revs, revs_info, conflicts, attachments, binary, latest])
+  }, [pouch, id, rev, revs, revs_info, conflicts, attachments, binary, latest])
 
   return useMemo(() => {
     const resultDoc = doc as Document

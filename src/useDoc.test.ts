@@ -359,6 +359,56 @@ test('should return a 404 error if the doc was deleted while it is shown', async
   expect(result.current.error.status).toBe(404)
 })
 
+test('should return the new winning rev doc was deleted while it is shown and has a conflicting version', async () => {
+  const putResult = await myPouch.put({
+    _id: 'test',
+    value: 42,
+  })
+
+  const resultUpdate = await myPouch.put({
+    _id: 'test',
+    _rev: putResult.rev,
+    value: 'update',
+  })
+
+  const conflictResult = await myPouch.put(
+    {
+      _id: 'test',
+      _rev: putResult.rev,
+      value: 'conflict',
+    },
+    { force: true }
+  )
+
+  const { result, waitForNextUpdate } = renderHook(
+    () => useDoc<{ _id?: string; value: number | string }>('test'),
+    {
+      pouchdb: myPouch,
+    }
+  )
+
+  await waitForNextUpdate()
+
+  const [winningRev, conflictRev, winningValue, conflictValue] =
+    result.current.doc._rev === resultUpdate.rev
+      ? [resultUpdate.rev, conflictResult.rev, 'update', 'conflict']
+      : [conflictResult.rev, resultUpdate.rev, 'conflict', 'update']
+
+  expect(result.current.state).toBe('done')
+  expect(result.current.doc._id).toBe('test')
+  expect(result.current.doc.value).toBe(winningValue)
+
+  act(() => {
+    myPouch.remove(putResult.id, winningRev)
+  })
+
+  await waitForNextUpdate()
+
+  expect(result.current.state).toBe('done')
+  expect(result.current.doc._rev).toBe(conflictRev)
+  expect(result.current.doc.value).toBe(conflictValue)
+})
+
 describe('pouchdb get options', () => {
   test('should returns a specific rev if rev is set', async () => {
     const firstPutResult = await myPouch.put({

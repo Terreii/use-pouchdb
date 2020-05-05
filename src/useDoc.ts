@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
-import { MISSING_DOC } from 'pouchdb-errors'
 
 import { useContext } from './context'
 
@@ -87,11 +86,8 @@ export default function useDoc<Content extends {}>(
             if (!isMounted) return
 
             // If the document got deleted it should change to an 404 error state
-            if (deleted) {
-              setToInitialValue(true)
-              setError(MISSING_DOC)
-              setState('error')
-            } else if (revs || revs_info || conflicts || attachments) {
+            // or if there is a conflicting version, then it should show the new winning one.
+            if (deleted || revs || revs_info || conflicts || attachments) {
               fetchDoc()
             } else {
               setDoc(

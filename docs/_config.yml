@@ -39,6 +39,9 @@ theme: minima
 plugins:
   - jekyll-feed
 
+feed:
+  path: https://christopher-astfalk.de/feed.xml
+
 minima:
   date_format: '%Y-%m-%d'
 # Exclude from processing.

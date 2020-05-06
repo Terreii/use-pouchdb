@@ -4,6 +4,10 @@ import { useContext } from './context'
 
 type QueryState = 'loading' | 'done' | 'error'
 
+/**
+ * Get all docs or a slice of all docs and subscribe to their updates.
+ * @param options PouchDB's allDocs options.
+ */
 export default function useAllDocs<Content extends {}, Model = Content>(
   options?:
     | PouchDB.Core.AllDocsWithKeyOptions
@@ -91,33 +95,12 @@ export default function useAllDocs<Content extends {}, Model = Content>(
     const unsubscribe = subscriptionManager.subscribeToDocs(
       keysToSubscribe,
       (deleted, id) => {
-        if (!isMounted) return
-
-        let isInRange = true
-        const rangeOptions = options as
-          | PouchDB.Core.AllDocsWithinRangeOptions
-          | undefined
-
-        if (rangeOptions?.startkey) {
-          isInRange = options?.descending
-            ? id < rangeOptions.startkey
-            : id > rangeOptions.startkey
-        }
-        if (isInRange && !rangeOptions?.inclusive_end && rangeOptions?.endkey) {
-          isInRange = options?.descending
-            ? id > rangeOptions.endkey
-            : id < rangeOptions.endkey
-        } else if (
-          isInRange &&
-          rangeOptions?.inclusive_end &&
-          rangeOptions?.endkey
+        if (
+          !isMounted ||
+          !isInRange(id, startkey, endkey, inclusive_end, descending)
         ) {
-          isInRange = options?.descending
-            ? id >= rangeOptions.endkey
-            : id <= rangeOptions.endkey
+          return
         }
-
-        if (!isInRange) return
 
         if (deleted) {
           setResult(result => {
@@ -165,4 +148,35 @@ export default function useAllDocs<Content extends {}, Model = Content>(
     }),
     [result, state, error]
   )
+}
+
+/**
+ * Check if the updated document is inside of the range.
+ * @param id Id of the updated document
+ * @param startkey Startkey option.
+ * @param endkey Endkey option.
+ * @param inclusive_end Is the endkey inclusive?
+ * @param descending Which direction should the slice go?
+ */
+function isInRange(
+  id: PouchDB.Core.DocumentId,
+  startkey: string | undefined,
+  endkey: string | undefined,
+  inclusive_end: boolean | undefined,
+  descending: boolean | undefined
+): boolean {
+  if (
+    startkey &&
+    ((descending && id > startkey) || (!descending && id < startkey))
+  ) {
+    return false
+  }
+  if (endkey == null) {
+    return true
+  }
+  if (inclusive_end) {
+    return descending ? id >= endkey : id <= endkey
+  } else {
+    return descending ? id > endkey : id < endkey
+  }
 }

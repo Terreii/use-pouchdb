@@ -1,0 +1,20 @@
+.ribbon {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  height: 6rem;
+  width: 6rem;
+}
+
+.ribbon-img {
+  width: auto;
+  height: auto;
+  object-fit: fill;
+  object-position: center;
+}
+
+@include media-query($on-iphone-se) {
+  .ribbon {
+    display: none;
+  }
+}

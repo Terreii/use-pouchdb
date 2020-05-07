@@ -1,0 +1,19 @@
+.logo {
+  font-size: xx-large;
+  font-weight: 700;
+  color: $brand-color;
+}
+.logo:visited {
+  color: $brand-color;
+}
+.logo:hover {
+  color: $brand-color;
+  text-decoration: underline;
+}
+
+@include media-query($on-palm) {
+  .logo {
+    font-size: x-large;
+    margin-right: 1rem;
+  }
+}

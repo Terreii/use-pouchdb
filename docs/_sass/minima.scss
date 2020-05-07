@@ -14,6 +14,7 @@ $spacing-unit: 30px !default;
 
 $text-color: #111 !default;
 $background-color: #fdfdfd !default;
+$header-background-color: #F7FAFC !default;
 $brand-color: #2a7ae2 !default;
 
 $grey-color: #828282 !default;
@@ -26,6 +27,7 @@ $table-text-align: left !default;
 $content-width: 800px !default;
 
 $on-palm: 600px !default;
+$on-iphone-se: 360px !default;
 $on-laptop: 800px !default;
 
 // Use media queries like this:
@@ -47,3 +49,5 @@ $on-laptop: 800px !default;
 
 // Import partials.
 @import 'minima/base', 'minima/layout', 'minima/syntax-highlighting';
+
+@import 'header', 'ribbon', 'logo';

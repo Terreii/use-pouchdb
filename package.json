@@ -63,7 +63,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "pretty-quick --staged"
+      "pre-commit": "pretty-quick --staged --pattern \"**/*.*(ts|tsx)\" --pattern \"package.json\""
     }
   },
   "prettier": {

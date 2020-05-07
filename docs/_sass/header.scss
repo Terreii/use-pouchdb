@@ -1,0 +1,48 @@
+header {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0px;
+  max-width: 100vw;
+}
+
+header > .container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  background-color: $header-background-color;
+  padding: 1rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.main-links-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  margin-right: 3cm;
+}
+
+.main-links-container > a.section {
+  display: inline-block;
+  font-size: large;
+  margin-right: 1cm;
+  margin-top: auto;
+  margin-bottom: auto;
+  color: $brand-color;
+}
+.main-links-container > a.section:visited {
+  color: $brand-color;
+}
+.main-links-container > a.section:hover {
+  color: $brand-color;
+  text-decoration: underline;
+}
+
+@include media-query($on-palm) {
+  .main-links-container {
+    margin-right: 2cm;
+  }
+
+  .main-links-container > a.section {
+    margin-right: 1rem;
+  }
+}

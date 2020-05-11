@@ -1,4 +1,4 @@
-import { useReducer, useMemo } from 'react'
+import { useReducer, useMemo, useCallback, useRef } from 'react'
 
 /**
  * Core state reducer for most hooks.
@@ -37,7 +37,24 @@ export default function useStateMachine<Result>(
     [currentState]
   )
 
-  return [state, dispatch]
+  const stateRef = useRef(currentState)
+  stateRef.current = currentState
+
+  const changeState = useCallback((fn: (state: Result) => Result) => {
+    const oldState = {
+      ...stateRef.current,
+    }
+    delete oldState.state
+    delete oldState.error
+
+    const next = fn(stateRef.current as Result)
+    dispatch({
+      type: 'loading_finished',
+      payload: next,
+    })
+  }, [])
+
+  return [state, dispatch, changeState]
 }
 
 export type QueryState = 'loading' | 'done' | 'error'
@@ -70,7 +87,11 @@ export type ResultType<T> = T &
     loading: boolean
   }
 
-type StateMachineResultType<T> = [ResultType<T>, Dispatch<T>]
+type StateMachineResultType<T> = [
+  ResultType<T>,
+  Dispatch<T>,
+  (fn: (state: T) => T) => void
+]
 
 export interface StartLoading {
   type: 'loading_started'

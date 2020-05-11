@@ -34,6 +34,7 @@ test('should return a doc', async () => {
 
   expect(result.current.doc).toBeFalsy()
   expect(result.current.error).toBeNull()
+  expect(result.current.loading).toBeTruthy()
   expect(result.current.state).toBe('loading')
 
   await waitForNextUpdate()
@@ -41,6 +42,7 @@ test('should return a doc', async () => {
   expect(result.current.doc).toBeTruthy()
   expect(result.current.error).toBeNull()
   expect(result.current.doc._id).toBe('test')
+  expect(result.current.loading).toBeFalsy()
   expect(result.current.state).toBe('done')
 })
 

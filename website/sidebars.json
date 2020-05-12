@@ -1,0 +1,15 @@
+{
+  "docs": {
+    "Introduction": [
+      "introduction/quick_start",
+      "introduction/pouchdb_couchdb"
+    ],
+    "API": [
+      "api/provider",
+      "api/use-pouch",
+      "api/use-doc",
+      "api/use-all-docs",
+      "api/use-query"
+    ]
+  }
+}

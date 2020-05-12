@@ -1,8 +1,7 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useEffect } from 'react'
 
 import { useContext } from './context'
-
-type QueryState = 'loading' | 'done' | 'error'
+import useStateMachine, { ResultType } from './state-machine'
 
 /**
  * Get all docs or a slice of all docs and subscribe to their updates.
@@ -14,11 +13,7 @@ export default function useAllDocs<Content extends {}, Model = Content>(
     | PouchDB.Core.AllDocsWithKeysOptions
     | PouchDB.Core.AllDocsWithinRangeOptions
     | PouchDB.Core.AllDocsOptions
-): PouchDB.Core.AllDocsResponse<Content & Model> & {
-  loading: boolean
-  state: 'loading' | 'done' | 'error'
-  error: PouchDB.Core.Error | null
-} {
+): ResultType<PouchDB.Core.AllDocsResponse<Content & Model>> {
   const { pouchdb: pouch, subscriptionManager } = useContext()
 
   const {
@@ -36,15 +31,13 @@ export default function useAllDocs<Content extends {}, Model = Content>(
   const { key } = (options as PouchDB.Core.AllDocsWithKeyOptions) || {}
   const { keys } = (options as PouchDB.Core.AllDocsWithKeysOptions) || {}
 
-  const [result, setResult] = useState<
+  const [state, dispatch, replace] = useStateMachine<
     PouchDB.Core.AllDocsResponse<Content & Model>
   >(() => ({
     rows: [],
     total_rows: 0,
     offset: 0,
   }))
-  const [state, setState] = useState<QueryState>('loading')
-  const [error, setError] = useState<PouchDB.Core.Error | null>(null)
 
   useEffect(() => {
     let isMounted = true
@@ -58,20 +51,26 @@ export default function useAllDocs<Content extends {}, Model = Content>(
       }
       isFetching = true
       shouldUpdateAfter = false
-      setState('loading')
+      dispatch({ type: 'loading_started' })
 
       try {
         const result = await pouch.allDocs<Content & Model>(options || {})
 
         if (isMounted) {
-          setState('done')
-          setError(null)
-          setResult(result)
+          dispatch({
+            type: 'loading_finished',
+            payload: result,
+          })
         }
       } catch (err) {
         if (isMounted) {
-          setState('error')
-          setError(err)
+          dispatch({
+            type: 'loading_error',
+            payload: {
+              error: err,
+              setResult: false,
+            },
+          })
         }
       } finally {
         // refresh if change did happen while querying
@@ -103,7 +102,7 @@ export default function useAllDocs<Content extends {}, Model = Content>(
         }
 
         if (deleted) {
-          setResult(result => {
+          replace(result => {
             const rows = result.rows.filter(row => row.id !== id)
             return {
               ...result,
@@ -139,15 +138,7 @@ export default function useAllDocs<Content extends {}, Model = Content>(
     update_seq,
   ])
 
-  return useMemo(
-    () => ({
-      ...result,
-      state,
-      error,
-      loading: state === 'loading',
-    }),
-    [result, state, error]
-  )
+  return state
 }
 
 /**

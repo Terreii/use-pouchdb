@@ -1,30 +1,19 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useEffect } from 'react'
 import { MISSING_DOC } from 'pouchdb-errors'
 
 import { useContext } from './context'
 import type SubscriptionManager from './subscription'
+import useStateMachine, { ResultType, Dispatch } from './state-machine'
 
-export type QueryState = 'loading' | 'done' | 'error'
-
-export interface QueryResponse<Result> extends PouchDB.Query.Response<Result> {
+type QueryResponseBase<Result> = PouchDB.Query.Response<Result> & {
   /**
    * Include an update_seq value indicating which sequence id of the underlying database the view
    * reflects.
    */
   update_seq?: number | string
-  /**
-   * Query state. Can be 'loading', 'done' or 'error'.
-   */
-  state: QueryState
-  /**
-   * If the query did error it is returned in this field.
-   */
-  error: PouchDB.Core.Error | null
-  /**
-   * Is this hook currently loading/updating the query.
-   */
-  loading: boolean
 }
+
+export type QueryResponse<T> = ResultType<QueryResponseBase<T>>
 
 /**
  * Query a view and subscribe to its updates.
@@ -36,6 +25,12 @@ export default function useQuery<Content extends {}, Result, Model = Content>(
   opts?: PouchDB.Query.Options<Model, Result> & { update_seq?: boolean }
 ): QueryResponse<Result> {
   const { pouchdb: pouch, subscriptionManager } = useContext()
+
+  if (typeof pouch?.query !== 'function') {
+    throw new TypeError(
+      'db.query() is not defined. Please install "pouchdb-mapreduce"'
+    )
+  }
 
   const {
     reduce,
@@ -57,13 +52,11 @@ export default function useQuery<Content extends {}, Result, Model = Content>(
   const key = optionToString(opts?.key)
   const keys = optionToString(opts?.keys)
 
-  const [result, setResult] = useState<PouchDB.Query.Response<Result>>(() => ({
+  const [state, dispatch] = useStateMachine<QueryResponseBase<Result>>(() => ({
     rows: [],
     total_rows: 0,
     offset: 0,
   }))
-  const [state, setState] = useState<QueryState>('loading')
-  const [error, setError] = useState<PouchDB.Core.Error | null>(null)
 
   useEffect(() => {
     const options = {
@@ -88,20 +81,10 @@ export default function useQuery<Content extends {}, Result, Model = Content>(
     }
 
     if (typeof fun === 'string') {
-      return doDDocQuery(
-        setResult,
-        setState,
-        setError,
-        pouch,
-        subscriptionManager,
-        fun,
-        options
-      )
+      return doDDocQuery(dispatch, pouch, subscriptionManager, fun, options)
     } else {
       return doTemporaryQuery(
-        setResult,
-        setState,
-        setError,
+        dispatch,
         pouch,
         subscriptionManager,
         fun,
@@ -129,23 +112,7 @@ export default function useQuery<Content extends {}, Result, Model = Content>(
     update_seq,
   ])
 
-  const returnObject = useMemo(
-    () => ({
-      ...result,
-      state,
-      error,
-      loading: state === 'loading',
-    }),
-    [result, state, error]
-  )
-
-  if (typeof pouch?.query !== 'function') {
-    throw new TypeError(
-      'db.query() is not defined. Please install "pouchdb-mapreduce"'
-    )
-  }
-
-  return returnObject
+  return state
 }
 
 /**
@@ -158,9 +125,7 @@ export default function useQuery<Content extends {}, Result, Model = Content>(
  * @param option PouchDB's query options.
  */
 function doDDocQuery<Model, Result>(
-  setResult: (r: PouchDB.Query.Response<Result>) => void,
-  setState: (state: QueryState) => void,
-  setError: (error: PouchDB.Core.Error | null) => void,
+  dispatch: Dispatch<PouchDB.Query.Response<Result>>,
   pouch: PouchDB.Database<{}>,
   subscriptionManager: SubscriptionManager,
   fn: string,
@@ -190,12 +155,17 @@ function doDDocQuery<Model, Result>(
         if (!isMounted) return
 
         if (docId === id && deleted) {
-          setState('error')
-          setError(MISSING_DOC)
-          setResult({
-            rows: [],
-            total_rows: 0,
-            offset: 0,
+          dispatch({
+            type: 'loading_error',
+            payload: {
+              error: MISSING_DOC,
+              setResult: true,
+              result: {
+                rows: [],
+                total_rows: 0,
+                offset: 0,
+              },
+            },
           })
         } else {
           query()
@@ -213,15 +183,16 @@ function doDDocQuery<Model, Result>(
     }
     isFetching = true
     shouldUpdateAfter = false
-    setState('loading')
+    dispatch({ type: 'loading_started' })
 
     try {
       const result = await pouch.query(fn, option)
       if (!isMounted) return
 
-      setState('done')
-      setError(null)
-      setResult(result)
+      dispatch({
+        type: 'loading_finished',
+        payload: result,
+      })
 
       const ids = new Set<PouchDB.Core.DocumentId>()
       for (const row of result.rows) {
@@ -235,8 +206,13 @@ function doDDocQuery<Model, Result>(
       createDocSubscription(Array.from(ids))
     } catch (error) {
       if (isMounted) {
-        setState('error')
-        setError(error)
+        dispatch({
+          type: 'loading_error',
+          payload: {
+            error: error,
+            setResult: false,
+          },
+        })
       }
     } finally {
       // refresh if change did happen while querying
@@ -277,9 +253,7 @@ function doDDocQuery<Model, Result>(
  * @param option PouchDB's query options.
  */
 function doTemporaryQuery<Model, Result>(
-  setResult: (r: PouchDB.Query.Response<Result>) => void,
-  setState: (state: QueryState) => void,
-  setError: (error: PouchDB.Core.Error | null) => void,
+  dispatch: Dispatch<PouchDB.Query.Response<Result>>,
   pouch: PouchDB.Database<{}>,
   subscriptionManager: SubscriptionManager,
   fn: PouchDB.Map<Model, Result> | PouchDB.Filter<Model, Result>,
@@ -299,15 +273,16 @@ function doTemporaryQuery<Model, Result>(
     }
     isFetching = true
     shouldUpdateAfter = false
-    setState('loading')
+    dispatch({ type: 'loading_started' })
 
     try {
       const result = await pouch.query(fn, option)
       if (!isMounted) return
 
-      setState('done')
-      setError(null)
-      setResult(result)
+      dispatch({
+        type: 'loading_finished',
+        payload: result,
+      })
 
       const ids = new Set<PouchDB.Core.DocumentId | null>()
       for (const row of result.rows) {
@@ -322,8 +297,13 @@ function doTemporaryQuery<Model, Result>(
       }
     } catch (error) {
       if (isMounted) {
-        setState('error')
-        setError(error)
+        dispatch({
+          type: 'loading_error',
+          payload: {
+            error,
+            setResult: false,
+          },
+        })
       }
     } finally {
       // refresh if change did happen while querying

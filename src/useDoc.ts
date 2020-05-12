@@ -1,6 +1,11 @@
-import { useState, useEffect, useRef, useMemo } from 'react'
+import { useEffect, useRef } from 'react'
 
 import { useContext } from './context'
+import useStateMachine, { ResultType } from './state-machine'
+
+type DocResultType<T> = ResultType<{
+  doc: (PouchDB.Core.Document<T> & PouchDB.Core.GetMeta) | null
+}>
 
 /**
  * Retrieves a document and subscribes to it's changes.
@@ -12,7 +17,7 @@ export default function useDoc<Content extends {}>(
   id: PouchDB.Core.DocumentId,
   options?: PouchDB.Core.GetOptions,
   initialValue?: (() => Content) | Content
-) {
+): DocResultType<Content> {
   type Document = (PouchDB.Core.Document<Content> & PouchDB.Core.GetMeta) | null
 
   const { pouchdb: pouch, subscriptionManager } = useContext()
@@ -20,20 +25,29 @@ export default function useDoc<Content extends {}>(
   const { rev, revs, revs_info, conflicts, attachments, binary, latest } =
     options || {}
 
-  const [doc, setDoc] = useState<Content | Document | null>(initialValue!)
-  const [state, setState] = useState<'loading' | 'done' | 'error'>('loading')
-  const [error, setError] = useState<PouchDB.Core.Error | null>(null)
+  const getInitialValue = (): { doc: Document } => {
+    let doc: Content | null = null
 
-  // Reset the document to initialValue (or null)
-  const setToInitialValue = (fallBackToNull: boolean) => {
-    if (initialValue && typeof initialValue === 'object') {
-      setDoc(initialValue)
-    } else if (typeof initialValue === 'function') {
-      setDoc((initialValue as Function)())
-    } else if (fallBackToNull) {
-      setDoc(null)
+    if (typeof initialValue === 'function') {
+      doc = (initialValue as Function)()
+    } else if (initialValue && typeof initialValue === 'object') {
+      doc = initialValue
     }
+
+    const resultDoc = doc as Document
+
+    // Add _id and _rev to the initial value (if they aren't set)
+    if (resultDoc && resultDoc._id == null) {
+      resultDoc._id = id
+    }
+    if (resultDoc && resultDoc._rev == null) {
+      resultDoc._rev = ''
+    }
+
+    return { doc: resultDoc }
   }
+
+  const [state, dispatch] = useStateMachine(getInitialValue)
 
   // Reset the document if the id did change and a initial value is set.
   const lastId = useRef(id)
@@ -41,7 +55,12 @@ export default function useDoc<Content extends {}>(
     if (id === lastId.current) return
     lastId.current = id
 
-    setToInitialValue(false)
+    if (initialValue != null) {
+      dispatch({
+        type: 'loading_finished',
+        payload: getInitialValue(),
+      })
+    }
   }, [id, initialValue])
 
   useEffect(() => {
@@ -49,10 +68,10 @@ export default function useDoc<Content extends {}>(
     let isMounted = true
 
     const fetchDoc = async () => {
-      setState('loading')
+      dispatch({ type: 'loading_started' })
 
       try {
-        const doc = await pouch.get<Content>(id, {
+        const doc = await pouch.get<Document>(id, {
           rev,
           revs,
           revs_info,
@@ -63,15 +82,21 @@ export default function useDoc<Content extends {}>(
         })!
 
         if (isMounted) {
-          setState('done')
-          setDoc(doc)
-          setError(null)
+          dispatch({
+            type: 'loading_finished',
+            payload: { doc },
+          })
         }
       } catch (err) {
         if (isMounted) {
-          setState('error')
-          setError(err)
-          setToInitialValue(true)
+          dispatch({
+            type: 'loading_error',
+            payload: {
+              error: err,
+              setResult: true,
+              result: getInitialValue(),
+            },
+          })
         }
       }
     }
@@ -90,11 +115,13 @@ export default function useDoc<Content extends {}>(
             if (deleted || revs || revs_info || conflicts || attachments) {
               fetchDoc()
             } else {
-              setDoc(
-                doc as PouchDB.Core.Document<Content> & PouchDB.Core.GetMeta
-              )
-              setState('done')
-              setError(null)
+              dispatch({
+                type: 'loading_finished',
+                payload: {
+                  doc: doc as PouchDB.Core.Document<Content> &
+                    PouchDB.Core.GetMeta,
+                },
+              })
             }
           })
 
@@ -104,21 +131,5 @@ export default function useDoc<Content extends {}>(
     }
   }, [pouch, id, rev, revs, revs_info, conflicts, attachments, binary, latest])
 
-  return useMemo(() => {
-    const resultDoc = doc as Document
-
-    // Add _id and _rev to the initial value (if they aren't set)
-    if (resultDoc && resultDoc._id == null) {
-      resultDoc._id = id
-    }
-    if (resultDoc && resultDoc._rev == null) {
-      resultDoc._rev = ''
-    }
-
-    return {
-      doc: resultDoc,
-      state,
-      error,
-    }
-  }, [id, doc, state, error])
+  return state
 }

@@ -7,7 +7,7 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "format": "prettier --write package.json ./*.js ./src/**/*.{ts,tsx}",
+    "format": "prettier --write .",
     "test": "jest --watch",
     "textlint": "textlint README.md docs/*",
     "update-coc": "weallbehave -o . && git add CODE_OF_CONDUCT.md && git commit -m 'docs(coc): updated CODE_OF_CONDUCT.md'",
@@ -63,7 +63,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "pretty-quick --staged --pattern \"**/*.*(ts|tsx)\" --pattern \"package.json\""
+      "pre-commit": "pretty-quick --staged"
     }
   },
   "prettier": {

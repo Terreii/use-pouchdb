@@ -26,6 +26,9 @@
       },
       "introduction/quick_start": {
         "title": "Quick Start"
+      },
+      "README": {
+        "title": "README"
       }
     },
     "links": {

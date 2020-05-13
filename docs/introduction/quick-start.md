@@ -3,11 +3,11 @@ id: quick_start
 title: Quick Start
 ---
 
-[usePouchDB](https://github.com/Terreii/use-pouchdb) is a collection of *React Hooks* to access data in an PouchDB database.
+[usePouchDB](https://github.com/Terreii/use-pouchdb) is a collection of _React Hooks_ to access data in an PouchDB database.
 
 ## Installation
 
-usePouchDB requires __React 16.8.3 or later__.
+usePouchDB requires **React 16.8.3 or later**.
 
 To use usePouchDB with your React app:
 
@@ -21,11 +21,11 @@ or
 yarn add use-pouchdb
 ```
 
-You'll also need to [install PouchDB](https://pouchdb.com/guides/setup-pouchdb.html "PouchDBs installation guide"). There is also a special [browser version](https://www.npmjs.com/package/pouchdb-browser).
+You'll also need to [install PouchDB](https://pouchdb.com/guides/setup-pouchdb.html 'PouchDBs installation guide'). There is also a special [browser version](https://www.npmjs.com/package/pouchdb-browser).
 
 ## Provider
 
-usePouchDB provides a ```<Provider />```, to make a PouchDB database available to it's child components.
+usePouchDB provides a `<Provider />`, to make a PouchDB database available to it's child components.
 
 ```jsx
 import React from 'react'
@@ -55,7 +55,7 @@ import React from 'react'
 
 import { useDoc } from 'use-pouchdb'
 
-export default function BlogPost ({ id }) {
+export default function BlogPost({ id }) {
   const { doc, state, isLoading, error } = useDoc(id)
 
   if (isLoading && doc == null) {
@@ -68,7 +68,7 @@ export default function BlogPost ({ id }) {
 
   return (
     <article>
-      <DocDisplay doc={doc}>
+      <DocDisplay doc={doc} />
     </article>
   )
 }
@@ -83,7 +83,7 @@ import React from 'react'
 
 import { useAllDocs } from 'use-pouchdb'
 
-export default function AllPosts () {
+export default function AllPosts() {
   const { rows, offset, total_rows, state, isLoading, error } = useAllDocs({
     startkey: 'posts:',
     endkey: 'posts:\uffff',
@@ -101,10 +101,7 @@ export default function AllPosts () {
   return (
     <div>
       {rows.map(row => (
-        <PostPreview
-          key={row.id}
-          post={row.doc}
-        />
+        <PostPreview key={row.id} post={row.doc} />
       ))}
     </div>
   )
@@ -113,14 +110,14 @@ export default function AllPosts () {
 
 ## useQuery
 
-Accessing a [view](https://docs.couchdb.org/en/stable/ddocs/views/index.html "CouchDBs Guide to Views") accomplished using the hook `useQuery`. It also automatically subscribes to updates of that view.
+Accessing a [view](https://docs.couchdb.org/en/stable/ddocs/views/index.html 'CouchDBs Guide to Views') accomplished using the hook `useQuery`. It also automatically subscribes to updates of that view.
 
 ```jsx
 import React from 'react'
 
 import { useQuery } from 'use-pouchdb'
 
-export default function Comments ({ id }) {
+export default function Comments({ id }) {
   const { rows, offset, total_rows, state, isLoading, error } = useQuery(
     'blog/comments',
     {
@@ -141,10 +138,7 @@ export default function Comments ({ id }) {
   return (
     <div>
       {rows.map(row => (
-        <Comment
-          key={row.key.join('_')}
-          comment={row.doc}
-        />
+        <Comment key={row.key.join('_')} comment={row.doc} />
       ))}
     </div>
   )
@@ -160,17 +154,20 @@ import { useCallback } from 'react'
 
 import { usePouch } from 'use-pouchdb'
 
-export function useDelete (errorCallback) {
+export function useDelete(errorCallback) {
   const db = usePouch()
 
-  return useCallback(async id => {
-    try {
-      const doc = await db.get(id)
-  
-      await db.remove(doc)
-    } catch (error) {
-      errorCallback(error)
-    }
-  }, [db, errorCallback])
+  return useCallback(
+    async id => {
+      try {
+        const doc = await db.get(id)
+
+        await db.remove(doc)
+      } catch (error) {
+        errorCallback(error)
+      }
+    },
+    [db, errorCallback]
+  )
 }
 ```

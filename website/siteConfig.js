@@ -42,6 +42,10 @@ const siteConfig = {
     { doc: 'api/provider', label: 'API' },
     { page: 'help', label: 'Help' },
     // {blog: true, label: 'Blog'},
+    {
+      href: 'https://github.com/Terreii/use-pouchdb',
+      label: 'GitHub',
+    },
   ],
 
   // If you have users set above, you add it here:

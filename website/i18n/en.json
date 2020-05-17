@@ -6,7 +6,8 @@
     "tagline": "Access PouchDB in React Components",
     "docs": {
       "api/provider": {
-        "title": "Provider"
+        "title": "<Provider />",
+        "sidebar_label": "Provider"
       },
       "api/use-all-docs": {
         "title": "useAllDocs"

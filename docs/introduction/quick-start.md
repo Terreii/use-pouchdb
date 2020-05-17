@@ -7,7 +7,7 @@ title: Quick Start
 
 ## Purpose
 
-usePouchDB is intended to be used by small [CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete 'CRUD on Wikipedia') apps and bigger Web-Apps alike. It was originally created by me, after I realized that with [PouchDB](https://pouchdb.com/) (and its [vast plugin ecosystem](https://pouchdb.com/external.html 'List of plugins for PouchDB')), [CouchDB](https://couchdb.apache.org/) as the data backend and [React](https://reactjs.org/) with [Hooks](https://reactjs.org/docs/hooks-intro.html), you have everything you need to build a CRUD Web-App.
+usePouchDB is intended to be used by small [CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete 'CRUD on Wikipedia') apps and more complicated Web-Apps alike. It was originally created by me, after I realized that with [PouchDB](https://pouchdb.com/) (and its [vast plugin ecosystem](https://pouchdb.com/external.html 'List of plugins for PouchDB')), [CouchDB](https://couchdb.apache.org/) as the data backend and [React](https://reactjs.org/) with [Hooks](https://reactjs.org/docs/hooks-intro.html), you have everything you need to build a CRUD Web-App.
 
 It is now intended to be a puzzle piece in the replacement of CouchApps (the ones that use the deprecated [show](https://docs.couchdb.org/en/3.1.0/ddocs/ddocs.html#show-functions) and [list](https://docs.couchdb.org/en/3.1.0/ddocs/ddocs.html#list-functions) functions). If CouchApp doesn't says you anything, don't worry for now, I will clear things up later.
 

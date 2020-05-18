@@ -9,9 +9,13 @@ Sometimes you need more than the provided hooks alow, the `usePouch` is for thos
 
 It can only be invoked from a component nested inside of a `<Provider />`.
 
-## Props
+## Parameters
 
-`usePouch` doesn't have any props, yet.
+`usePouch` doesn't have any parameters, yet.
+
+## Result
+
+`usePouch` returns a reference to the [PouchDB database](https://pouchdb.com/api.html#create_database) past into `<Provider />`.
 
 ## Example Usage
 

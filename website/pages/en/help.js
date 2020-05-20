@@ -14,7 +14,7 @@ const GridBlock = CompLibrary.GridBlock
 
 function Help(props) {
   const { config: siteConfig, language = '' } = props
-  const { baseUrl, docsUrl } = siteConfig
+  const { baseUrl, docsUrl, repoUrl } = siteConfig
   const docsPart = `${docsUrl ? `${docsUrl}/` : ''}`
   const langPart = `${language ? `${language}/` : ''}`
   const docUrl = doc => `${baseUrl}${docsPart}${langPart}${doc}`
@@ -22,17 +22,17 @@ function Help(props) {
   const supportLinks = [
     {
       content: `Learn more using the [documentation on this site.](${docUrl(
-        'doc1.html'
+        'introduction/quick_start'
       )})`,
       title: 'Browse Docs',
     },
     {
-      content: 'Ask questions about the documentation and project',
-      title: 'Join the community',
+      content: `If your are stuck or have questions, ask them [on twitter](https://twitter.com/terreii) on on [GitHub](${repoUrl}).`,
+      title: 'Ask questions',
     },
     {
-      content: "Find out what's new with this project",
-      title: 'Stay up to date',
+      content: 'Images are provided by [undraw.co](https://undraw.co/).',
+      title: 'Image Source',
     },
   ]
 
@@ -43,7 +43,10 @@ function Help(props) {
           <header className="postHeader">
             <h1>Need help?</h1>
           </header>
-          <p>This project is maintained by a dedicated group of people.</p>
+          <p>
+            This project is maintained by me,
+            <a href="https://christopher-astfalk.de/"> Christopher Astfalk</a>.
+          </p>
           <GridBlock contents={supportLinks} layout="threeColumn" />
         </div>
       </Container>

@@ -83,6 +83,9 @@ class Footer extends React.Component {
                 />
               </div>
             )}
+            <div className="social">
+              <a href="../impressum.html">Impressum</a>
+            </div>
           </div>
         </section>
 

@@ -52,7 +52,12 @@ class HomeSplash extends React.Component {
 
     const Button = props => (
       <div className="pluginWrapper buttonWrapper">
-        <a className="button" href={props.href} target={props.target}>
+        <a
+          className="button"
+          href={props.href}
+          target={props.target}
+          rel={props.rel}
+        >
           {props.children}
         </a>
       </div>
@@ -60,13 +65,20 @@ class HomeSplash extends React.Component {
 
     return (
       <SplashContainer>
-        <Logo img_src={`${baseUrl}img/undraw_monitor.svg`} />
+        <Logo img_src={`${baseUrl}img/undraw_relaxing_at_home.svg`} />
         <div className="inner">
           <ProjectTitle tagline={siteConfig.tagline} title={siteConfig.title} />
           <PromoSection>
-            <Button href="#try">Try It Out</Button>
-            <Button href={docUrl('doc1.html')}>Example Link</Button>
-            <Button href={docUrl('doc2.html')}>Example Link 2</Button>
+            <Button href={docUrl('introduction/quick_start')}>
+              Get Started
+            </Button>
+            <Button
+              href="https://pouchdb.com/"
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              Get PouchDB
+            </Button>
           </PromoSection>
         </div>
       </SplashContainer>
@@ -93,55 +105,17 @@ class Index extends React.Component {
       </Container>
     )
 
-    const FeatureCallout = () => (
-      <div
-        className="productShowcaseSection paddingBottom"
-        style={{ textAlign: 'center' }}
-      >
-        <h2>Feature Callout</h2>
-        <MarkdownBlock>These are features of this project</MarkdownBlock>
-      </div>
-    )
-
-    const TryOut = () => (
-      <Block id="try">
-        {[
-          {
-            content:
-              'To make your landing page more attractive, use illustrations! Check out ' +
-              '[**unDraw**](https://undraw.co/) which provides you with customizable illustrations which are free to use. ' +
-              'The illustrations you see on this page are from unDraw.',
-            image: `${baseUrl}img/undraw_code_review.svg`,
-            imageAlign: 'left',
-            title: 'Wonderful SVG Illustrations',
-          },
-        ]}
-      </Block>
-    )
-
-    const Description = () => (
-      <Block background="dark">
-        {[
-          {
-            content:
-              'This is another description of how this project is useful',
-            image: `${baseUrl}img/undraw_note_list.svg`,
-            imageAlign: 'right',
-            title: 'Description',
-          },
-        ]}
-      </Block>
-    )
-
-    const LearnHow = () => (
+    const OfflineFirst = () => (
       <Block background="light">
         {[
           {
             content:
-              'Each new Docusaurus project has **randomly-generated** theme colors.',
-            image: `${baseUrl}img/undraw_youtube_tutorial.svg`,
+              'By using PouchDB your app can become [offline first](http://offlinefirst.org/).' +
+              '<br />PouchDB can store data on your users browser. ' +
+              'And sync it once they come back online.',
+            image: `${baseUrl}img/undraw_going_offline.svg`,
             imageAlign: 'right',
-            title: 'Randomly Generated Theme Colors',
+            title: 'Offline first',
           },
         ]}
       </Block>
@@ -151,16 +125,29 @@ class Index extends React.Component {
       <Block layout="fourColumn">
         {[
           {
-            content: 'This is the content of my feature',
+            content:
+              'usePouchDB is a collection of hooks, which allow you to access [PouchDB]() ' +
+              'directly from your components. All the extendability of hooks comes along with it.',
             image: `${baseUrl}img/undraw_react.svg`,
             imageAlign: 'top',
-            title: 'Feature One',
+            title: 'React Hooks',
           },
           {
-            content: 'The content of my second feature',
-            image: `${baseUrl}img/undraw_operating_system.svg`,
+            content:
+              'usePouchDBs hooks are inspired by PouchDB methods, ' +
+              'and use similar options and return their results. ' +
+              'Allowing you to bring all your knowledge along.',
+            image: `${baseUrl}img/undraw_certification.svg`,
             imageAlign: 'top',
-            title: 'Feature Two',
+            title: 'Familiar',
+          },
+          {
+            content:
+              'Your components become a function of your database. ' +
+              'All hooks subscribe to changes in your database and update when they happen.',
+            image: `${baseUrl}img/undraw_file_analysis.svg`,
+            imageAlign: 'top',
+            title: 'Predictable',
           },
         ]}
       </Block>
@@ -200,10 +187,7 @@ class Index extends React.Component {
         <HomeSplash siteConfig={siteConfig} language={language} />
         <div className="mainContainer">
           <Features />
-          <FeatureCallout />
-          <LearnHow />
-          <TryOut />
-          <Description />
+          <OfflineFirst />
           <Showcase />
         </div>
       </div>

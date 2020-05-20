@@ -22,7 +22,7 @@
         "title": "useQuery"
       },
       "introduction/pouchdb_couchdb": {
-        "title": "Basic Tutorial to PouchDB and CouchDB",
+        "title": "Basic Tutorial for PouchDB and CouchDB",
         "sidebar_label": "PouchDB and CouchDB"
       },
       "introduction/quick_start": {

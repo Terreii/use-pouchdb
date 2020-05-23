@@ -21,6 +21,14 @@
       "api/use-query": {
         "title": "useQuery"
       },
+      "basics/intro": {
+        "title": "Basics",
+        "sidebar_label": "Basic Tutorial: Intro"
+      },
+      "basics/setup": {
+        "title": "Basic Setup",
+        "sidebar_label": "Setup"
+      },
       "introduction/pouchdb_couchdb": {
         "title": "Basic Tutorial for PouchDB and CouchDB",
         "sidebar_label": "PouchDB and CouchDB"
@@ -40,6 +48,7 @@
     },
     "categories": {
       "Introduction": "Introduction",
+      "Basic Tutorial": "Basic Tutorial",
       "API": "API"
     }
   },

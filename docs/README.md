@@ -3,6 +3,9 @@
 - Introduction
   - [Quick Start](./introduction/quick-start.md)
   - [Learn PouchDB and CouchDB](./introduction/pouchdb_couchdb.md)
+- Basic Tutorial
+  - [Intro](./basics/intro.md)
+  - [Basic setup](./basics/setup.md)
 - API
   - [Provider](./api/provider.md)
   - [usePouch](./api/use-pouch.md)

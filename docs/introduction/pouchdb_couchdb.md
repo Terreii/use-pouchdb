@@ -28,7 +28,7 @@ Then there is also the **changes feed**, which lists what did change in the orde
 
 If CouchDB is the big sibling, than **PouchDB** is its little sibling. PouchDB is a clone of CouchDB in JavaScript. It syncs with CouchDB. And you can use it in the browser, or your node app. It also has an [extensive plugin ecosystem](https://pouchdb.com/external.html).
 
-Because PouchDB and CouchDB are so alike, and this package uses PouchDB, I will use PouchDB synonymously for PouchDB and CouchDB. If I explicitly mean CouchDB, then I will write CouchDB. If PouchDB is explicitly meant, then I will note it so, or if I write about a PouchDB plugin, it will always be PouchDB (the JS package).
+Because PouchDB and CouchDB are so alike, and this package uses PouchDB, I will use PouchDB synonymously for PouchDB and CouchDB. If I explicitly mean CouchDB, then I will write CouchDB. If PouchDB is explicitly meant, then I will note it so, or if I write about a PouchDB plugin, it will always be PouchDB (the JS package). The biggest difference is that CouchDB's API are URLs while PouchDB's is on JavaScript Objects.
 
 > There is a [PouchDB Server](https://github.com/pouchdb/pouchdb-server). It implements more/most of CouchDBs API (like user management). And most of what will be marked as CouchDB also works with PouchDB Server. Which makes PouchDB Server an ideal candidate for development. But use CouchDB in production!
 
@@ -68,4 +68,258 @@ In HospitalRun they store patient data in 2 different documents types. In one th
 
 ## Show me some code!
 
-Wow! That escalated.
+Wow! That escalated quickly. So much for a quick introduction…
+
+### Setup PouchDB
+
+With how PouchDB works out of the way, let's begin with using it! You can experiment with PouchDB in 3 different ways:
+
+- Run on pouchdb.com
+- Get from a CDN
+- install by npm
+
+[There are more options](https://pouchdb.com/guides/setup-pouchdb.html). But this is a quick start.
+
+#### Run on pouchdb.com
+
+For quickly trying out PouchDB, [pouchdb.com](https://pouchdb.com/) has an instance of PouchDB running on their site.
+
+When you are there enter in your browsers console:
+
+```javascript
+PouchDB.version
+```
+
+And you should get something like `"6.2.0"`.
+
+#### CDN
+
+Add this to your `index.html`:
+
+```html
+<script src="//cdn.jsdelivr.net/npm/pouchdb@7.1.1/dist/pouchdb.min.js"></script>
+```
+
+#### npm
+
+In stall it with:
+
+```sh
+$ npm install pouchdb
+```
+
+or
+
+```sh
+$ yarn add pouchdb
+```
+
+You can now use it on `node`.
+
+To use it in your browser you have to bundle it. If you use [create-react-app](https://create-react-app.dev/) all you have to to is import `pouchdb`.
+
+```javascript
+const PouchDB = require('pouchdb')
+```
+
+For the browser there is a special [`pouchdb-browser`](https://www.npmjs.com/package/pouchdb-browser) package. It only ships with stuff for the browser.
+
+```javascript
+import PouchDB from 'pouchdb-browser'
+```
+
+### Create a database
+
+The PouchDB export is a constructor/class. To create a local database instantiate it with a none URL like string:
+
+```javascript
+const db = new PouchDB('myDB')
+```
+
+`db` is the database instance.
+
+If you want to access a remote database, then change the name to the url of the remote database. But not the URL object.
+
+```javascript
+const remote = new PouchDB('https://example.com/myDB/')
+
+// or with username and password:
+
+const remote2 = new PouchDB('https://example.com/myDB/', {
+  auth: {
+    username: 'tester',
+    password: 'geheim',
+  },
+})
+```
+
+More on the [PouchDB guide](https://pouchdb.com/guides/databases.html) or [API documentation](https://pouchdb.com/api.html#create_database).
+
+### Setup Sync
+
+You don't have to do much to setup syncing. If you don't have a CouchDB instance running, you probably won't be able to test this section. But later in the tutorials we will setup CouchDB instance.
+
+```javascript
+// this syncs in both directions: from remote and to remote
+const syncHandler = localDB
+  .sync(remoteDB, {
+    live: true, // continuously sync between local and remote.
+    retry: true, // Retry on connection lost.
+  })
+  .on('paused', info => {
+    // replication was paused, usually because of a lost connection.
+  })
+  .on('active', info => {
+    // replication was resumed.
+  })
+  .on('change', change => {
+    // something did change.
+  })
+
+// cancel replication/sync
+syncHandler.cancel()
+```
+
+If you only what to sync in one direction there is also:
+
+```javascript
+localDB.replicate.to(remoteDB)
+localDB.replicate.from(remoteDB)
+```
+
+They have the same options as sync.
+
+To read more, visit [PouchDBs replication guide](https://pouchdb.com/guides/replication.html).
+
+### Write a document
+
+PouchDB has two methods to write/update a document: [`db.put(doc)` and `db.post(doc)`](https://pouchdb.com/api.html#create_document).
+
+What's the difference? `put` requires that the document has an `_id`, while `post` will auto generate (using UUID) an `_id` for you, if the document doesn't have one. And yes, they are named after HTTP methods, because that's what CouchDB uses.
+
+<!--DOCUSAURUS_CODE_TABS-->
+<!--Async functions-->
+
+```javascript
+try {
+  const response = await db.put({
+    _id: 'myDoc',
+    title: 'Welcome, to PouchDB!',
+  })
+} catch (err) {
+  console.error(err)
+}
+```
+
+<!--Promises-->
+
+```javascript
+db.put({
+  _id: 'myDoc',
+  title: 'Welcome, to PouchDB!',
+})
+  .then(response => {
+    // handle response
+  })
+  .catch(err => {
+    console.error(err)
+  })
+```
+
+<!--Callbacks-->
+
+```javascript
+db.put(
+  {
+    _id: 'myDoc',
+    title: 'Welcome, to PouchDB!',
+  },
+  (err, response) => {
+    if (err) {
+      console.error(err)
+    } else {
+      // handle response
+    }
+  }
+)
+```
+
+<!--END_DOCUSAURUS_CODE_TABS-->
+
+The response will be an object:
+
+```json
+{
+  "ok": true,
+  "id": "myDoc",
+  "rev": "1-e78451c157971875ec76860d33e7da93"
+}
+```
+
+`"ok": true` indicates that it did succeed. `"id": "myDoc"` is the documents `_id` (useful for `post`). And what is `rev`?
+
+> If you **update** a document you must supply the _complete_ document! _Not_ a diff. That version you supply will replace the old document.
+
+### Revision (rev) and updating documents
+
+There are two fields that every document in PouchDB has.
+
+- `_id` (string) is a for the database unique identifier.
+- `_rev` (string) is a version "number".
+
+The rev consists out of two parts: a **number** and a **hash**. On every update the **number** will be increased by 1. And a new **hash** calculated. If you update a document you must include the `_rev` from the last version.
+
+But why do we need `rev` in the first place?
+
+It is all about **sync**. Or: PouchDB is a _distributed_ system. While you where updating a document, someone else could have changed the doc, too!
+
+Internal PouchDB keeps a rev-history of every document. If you sync, then PouchDB uses the rev-history of a document to know if there is a conflict. Think like **Git** with _fast-forward-merging_.
+
+Read more about it in the PouchDB guides about [working with documents](https://pouchdb.com/guides/documents.html) and [updating and deleting documents](https://pouchdb.com/guides/updating-deleting.html) and [conflicts](https://pouchdb.com/guides/conflicts.html).
+
+### Reading a document
+
+Now lets read a doc:
+
+<!--DOCUSAURUS_CODE_TABS-->
+<!--Async functions-->
+
+```javascript
+try {
+  const doc = await db.get('myDoc')
+} catch (err) {
+  console.error(err)
+}
+```
+
+<!--Promises-->
+
+```javascript
+db.get('myDoc')
+  .then(doc => {
+    // handle doc
+  })
+  .catch(err => {
+    console.error(err)
+  })
+```
+
+<!--Callbacks-->
+
+```javascript
+db.get('myDoc', (err, doc) => {
+  if (err) {
+    console.error(err)
+  } else {
+    // handle doc
+  }
+})
+```
+
+<!--END_DOCUSAURUS_CODE_TABS-->
+
+Thats it!
+
+If you didn't yet, you could read the [PouchDB's guide](https://pouchdb.com/guides/), or their [Getting Started Guide](https://pouchdb.com/getting-started.html).
+
+I think we are now ready for the first tutorial for `usePouchDB`!

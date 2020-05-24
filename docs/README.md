@@ -6,6 +6,7 @@
 - Basic Tutorial
   - [Intro](./basics/intro.md)
   - [Basic setup](./basics/setup.md)
+  - [Add the Provider](./basics/provider.md)
 - API
   - [Provider](./api/provider.md)
   - [usePouch](./api/use-pouch.md)

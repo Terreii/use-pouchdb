@@ -23,7 +23,10 @@
       },
       "basics/intro": {
         "title": "Basics",
-        "sidebar_label": "Basic Tutorial: Intro"
+        "sidebar_label": "'Basic Tutorial: Intro'"
+      },
+      "basics/provider": {
+        "title": "Add the Provider"
       },
       "basics/setup": {
         "title": "Basic Setup",

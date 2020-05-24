@@ -60,7 +60,7 @@ yarn add -D pouchdb-authentication
 
 ## CouchDB backend
 
-Now which to use? **CouchDB** or **PouchDB-Server**? Well, normally both. PouchDB-Server is local to the project. You can install it with **npm**, you can define where it should store its data. While CouchDB will be the one you will be using in production. It is more powerful. So I normally recommend that you install both. PouchDB-Server for your development. And CouchDB to verify and test if everything works. But to only get started, PouchDB-Server is enough.
+Now which to use? **CouchDB** or **PouchDB-Server**? Well, normally both. PouchDB-Server is local to the project. It is installable with **npm**, you can define where it should store its data. While CouchDB is the one you will be using in production. It is more powerful. So I normally recommend that you install both. PouchDB-Server for your development. And CouchDB to verify and test if everything works. But to only get started, PouchDB-Server is enough.
 
 There are some incompatibilities through.
 
@@ -68,7 +68,7 @@ While PouchDB-Server is intended as a drop-in replacement of CouchDB, the later 
 
 Regarding compatibility the biggest change was, that the default setup of CouchDB _is more secure_. In previous versions in the standard setup, everyone could create an user. Now you must be an admin or change some settings.
 
-Now, CouchDB lacks some user management features; for example sending Mails to the user, or resetting a password. You need to implement them yourself. With [serverless functions (function as a service)](https://en.wikipedia.org/wiki/Function_as_a_service) it became more strate forward. But you won't be able to use every method of **PouchDB Authentication**. Log in/out still works through.
+Now, CouchDB lacks some user management features; for example sending Mails to the user, or resetting a password. You need to implement them yourself. With [serverless functions (function as a service)](https://en.wikipedia.org/wiki/Function_as_a_service) it became more strate forward. But you won't be able to use every method of [**PouchDB Authentication**](https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/api.md#dbsignupusername-password--options--callback). Log in/out still works through.
 
 In this tutorial we will be using the old sign up method, where everyone can create an account and no verification mail is send. If in your app you need more, please visit [CouchDBs Security section](https://docs.couchdb.org/en/stable/intro/security.html).
 
@@ -76,7 +76,7 @@ In this tutorial we will be using the old sign up method, where everyone can cre
 >
 > Because you have to change some security settings, it might be better to _only_ use PouchDB-Server for the beginning.
 
-### Installing PouchDB
+### Installing PouchDB Server
 
 [PouchDB-Server](https://www.npmjs.com/package/pouchdb-server) can be found on `npm`.
 
@@ -136,26 +136,63 @@ Now open `package.json` and change your scripts:
 }
 ```
 
+The `pouchdb-server --dir db` command configures pouchdb-server to store all databases in the `./db/` directory ([more here](https://github.com/pouchdb/pouchdb-server#full-options)).
+
 Now with `npm start` or `yarn start` both you dev-server and pouchdb-server will start! To start just one enter:
 
 <!--DOCUSAURUS_CODE_TABS-->
 <!--npm-->
 
 ```sh
+# to only start pouchdb-server
 npm run start:pouch
-# or
+# or to only start react-scripts
 npm run start:cra
 ```
 
 <!--yarn-->
 
 ```sh
+# to only start pouchdb-server
 yarn run start:pouch
-# or
+# or to only start react-scripts
 yarn run start:cra
 ```
 
 <!--END_DOCUSAURUS_CODE_TABS-->
+
+#### CORS
+
+Next up [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)! We will create an app that is going to be served from one server, while connecting to PouchDB-Server/CouchDB on another domain. That's why CORS must be enabled.
+
+First open Fauxton on http://127.0.0.1:5984/_utils/. Fauxton is the web-interface of both PouchDB-Server and CouchDB.
+
+![Fauxton PouchDB Server](../../img/fauxton_pouchdb_cors.png)
+
+You can expend the sidebar with the hamburger menu at the top.
+
+Then open **Configuration**. In it select **CORS**. And enable CORS. You can allow _All domains_ or restrict it to http://localhost:3000/ (standard create-react-app port).
+
+In your project directory should now be a `config.json`, with a content similar to this (but a different uuid):
+
+```json
+{
+  "couchdb": {
+    "uuid": "28a7ec02-b524-4716-950d-4549c4adedc1"
+  },
+  "httpd": {
+    "enable_cors": true
+  },
+  "cors": {
+    "origins": "*",
+    "credentials": true,
+    "headers": "accept, authorization, content-type, origin, referer",
+    "methods": "GET, PUT, POST, HEAD, DELETE"
+  }
+}
+```
+
+You can also configure PouchDB-Server using `config.json`. `couchdb.uuid` will be different. `httpd.enable_cors` and `cors` might be missing, but if in Fauxton there was `Cors is currently enabled.`, then everything is setup correctly.
 
 We are now all set!
 
@@ -167,7 +204,7 @@ We are now all set!
 
 You can download CouchDB on it's [webpage](https://couchdb.apache.org/).
 
-When you run CouchDB the first time, it will terminate with an error message, that you need to setup an admin. You can setup an admin [using the this config instructions](https://docs.couchdb.org/en/stable/config/auth.html#config-admins). Where you can find the config files [is documented in the _Introduction To Configuring_](https://docs.couchdb.org/en/stable/config/intro.html).
+When you run CouchDB the first time, it will terminate with an error message, that you need to setup an admin. You can setup an admin [using this config instructions](https://docs.couchdb.org/en/stable/config/auth.html#config-admins). Where you can find the config files [is documented in the _Introduction To Configuring_](https://docs.couchdb.org/en/stable/config/intro.html).
 
 Once CouchDB starts you can Relax™. From now on you can configure everything over HTTP or CouchDBs web-interface, **Fauxton**.
 
@@ -178,13 +215,21 @@ We are now going to restore the < v3 user behavior. Future tutorials will expect
 - First login to Fauxton with your admin account.
 - Go to **Configuration**.
 - Set in **Main config** the setting `users_db_security_editable` to `true`. This will allow you to change the security settings of the `_users` db.
+- Also set in [`couch_peruser`](https://docs.couchdb.org/en/stable/config/couch-peruser.html) `enable` to `true`. With this setting every user will have their own database.
+- Next go to the **CORS** configs. And click `Enable CORS`. You can restrict access to http://localhost:3000/ or allow _All domains_.
 - Go to setup.
 - Follow the `Configure a Single Note` setup.
 - Now go to **Databases**.
 - Navigate to `_users`.
 - Click on the lock icon on `_users`.
-- Now remote the `_admin` in **Roles** under **Members**. This will reset access to `_users` to pre v3: Everyone can sign up, but only access their own user-document.
+- Now remote the `_admin` in **Roles** under **Members**. This will reset access to `_users` to pre v3 behavior:
+  - Only administrators may browse list of all documents (`GET /_users/_all_docs`)
+  - Only administrators may listen to changes feed (`GET /_users/_changes`)
+  - Only administrators may run design functions like views.
+  - There is a special design document `_auth` that cannot be modified
+  - Every document except the design documents represent registered CouchDB users and belong to them
+  - Users may only access (`GET /_users/org.couchdb.user:Jan`) or modify (`PUT /_users/org.couchdb.user:Jan`) documents that they own (their own user document)
 
-> Before you release something: Read the documentations! Specially about [Security](https://docs.couchdb.org/en/stable/intro/security.html)! It is the **_Users_** database after all!
+> Before you release something: Read the documentations! Specially about [Security](https://docs.couchdb.org/en/stable/intro/security.html)! It is the **_Users_ database** after all!
 >
 > What we did change here is only for development!

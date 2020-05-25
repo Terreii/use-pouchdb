@@ -21,6 +21,9 @@
       "api/use-query": {
         "title": "useQuery"
       },
+      "basics/add-todo": {
+        "title": "Add Todos"
+      },
       "basics/intro": {
         "title": "Basics",
         "sidebar_label": "'Basic Tutorial: Intro'"

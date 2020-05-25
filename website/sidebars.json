@@ -4,7 +4,12 @@
       "introduction/quick_start",
       "introduction/pouchdb_couchdb"
     ],
-    "Basic Tutorial": ["basics/intro", "basics/setup", "basics/provider"],
+    "Basic Tutorial": [
+      "basics/intro",
+      "basics/setup",
+      "basics/provider",
+      "basics/add-todo"
+    ],
     "API": [
       "api/provider",
       "api/use-pouch",

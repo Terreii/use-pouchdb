@@ -10,3 +10,4 @@ In this guide, we'll be creative, and walk through the process of creating a Tod
 
 - [Basic setup](./setup)
 - [Add the Provider](./provider)
+- [Add Todos](./add-todo)

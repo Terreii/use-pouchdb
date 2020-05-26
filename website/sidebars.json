@@ -8,7 +8,8 @@
       "basics/intro",
       "basics/setup",
       "basics/provider",
-      "basics/add-todo"
+      "basics/add-todo",
+      "basics/list-all"
     ],
     "API": [
       "api/provider",

@@ -8,6 +8,7 @@
   - [Basic setup](./basics/setup.md)
   - [Add the Provider](./basics/provider.md)
   - [Add Todos](./basics/add-todo.md)
+  - [List all Todos](./list-all.md)
 - API
   - [Provider](./api/provider.md)
   - [usePouch](./api/use-pouch.md)

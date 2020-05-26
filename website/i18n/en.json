@@ -28,6 +28,9 @@
         "title": "Basics",
         "sidebar_label": "'Basic Tutorial: Intro'"
       },
+      "basics/list-all": {
+        "title": "List all Todos"
+      },
       "basics/provider": {
         "title": "Add the Provider"
       },

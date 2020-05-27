@@ -70,4 +70,6 @@ export default function Todo({ todo }) {
 }
 ```
 
-And with that we have a Todo List! Next we will learn how to update a document!
+And with that we have a Todo List! And, whenever you add a new Todo the list will update!
+
+Next we will learn how to update a document!

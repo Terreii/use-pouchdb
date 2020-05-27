@@ -38,6 +38,9 @@
         "title": "Basic Setup",
         "sidebar_label": "Setup"
       },
+      "basics/update": {
+        "title": "Update docs"
+      },
       "introduction/pouchdb_couchdb": {
         "title": "Basic Tutorial for PouchDB and CouchDB",
         "sidebar_label": "PouchDB and CouchDB"

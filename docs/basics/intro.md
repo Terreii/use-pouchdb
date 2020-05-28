@@ -13,3 +13,4 @@ In this guide, we'll be creative, and walk through the process of creating a Tod
 - [Add Todos](./add-todo)
 - [List all Todos](./list-all)
 - [Update docs](./update)
+- [Sync account](./sync)

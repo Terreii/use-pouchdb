@@ -10,7 +10,8 @@
       "basics/provider",
       "basics/add-todo",
       "basics/list-all",
-      "basics/update"
+      "basics/update",
+      "basics/sync"
     ],
     "API": [
       "api/provider",

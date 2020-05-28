@@ -162,4 +162,4 @@ If you are not in private browsing all your todos should already be there! Now u
 
 Your todos sync between your tabs, while the filter state is local!
 
-Next: we going to extent syncing between browsers/machines.
+Next: we going to implement syncing between different browsers/devices.

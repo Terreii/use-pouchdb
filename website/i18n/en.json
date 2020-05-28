@@ -38,6 +38,9 @@
         "title": "Basic Setup",
         "sidebar_label": "Setup"
       },
+      "basics/sync": {
+        "title": "Sync account"
+      },
       "basics/update": {
         "title": "Update docs"
       },

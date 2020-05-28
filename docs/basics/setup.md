@@ -60,7 +60,7 @@ yarn add -D pouchdb-authentication
 
 ## CouchDB backend
 
-Now which to use? **CouchDB** or **PouchDB-Server**? Well, normally both. PouchDB-Server is local to the project. It is installable with **npm**, you can define where it should store its data. While CouchDB is the one you will be using in production. It is more powerful. So I normally recommend that you install both. PouchDB-Server for your development. And CouchDB to verify and test if everything works. But to only get started, PouchDB-Server is enough.
+Now which to use? **CouchDB** or **PouchDB-Server**? Well, normally both. PouchDB-Server is local to the project. It is installable with **npm**, you can define where it should store its data. While CouchDB is the one you will be using in production. It is more powerful. So I normally recommend that you install both. PouchDB-Server for your development. And CouchDB to verify and test if everything works. But to only get started, PouchDB-Server is enough. And that is why we are going to be using PouchDB-Server for this guide.
 
 There are some incompatibilities through.
 
@@ -74,7 +74,7 @@ In this tutorial we will be using the old sign up method, where everyone can cre
 
 > You don't need CouchDB installed for this tutorial!
 >
-> Because you have to change some security settings, it might be better to _only_ use PouchDB-Server for the beginning.
+> Because you have to change some security settings, it might be better to _only_ use PouchDB-Server for the beginning. And when you are more comfortable with PouchDB and its distributed nature, learn more about Apache CouchDB.
 
 ### Installing PouchDB Server
 
@@ -195,41 +195,3 @@ In your project directory should now be a `config.json`, with a content similar 
 You can also configure PouchDB-Server using `config.json`. `couchdb.uuid` will be different. `httpd.enable_cors` and `cors` might be missing, but if in Fauxton there was `Cors is currently enabled.`, then everything is setup correctly.
 
 We are now all set!
-
-### Installing CouchDB
-
-> You don't need CouchDB installed for this tutorial! PouchDB-Server is more than enough.
->
-> This is only for completion sake here!
-
-You can download CouchDB on it's [webpage](https://couchdb.apache.org/).
-
-When you run CouchDB the first time, it will terminate with an error message, that you need to setup an admin. You can setup an admin [using this config instructions](https://docs.couchdb.org/en/stable/config/auth.html#config-admins). Where you can find the config files [is documented in the _Introduction To Configuring_](https://docs.couchdb.org/en/stable/config/intro.html).
-
-Once CouchDB starts you can Relax™. From now on you can configure everything over HTTP or CouchDBs web-interface, **Fauxton**.
-
-To access Fauxton go to http://127.0.0.1:5984/_utils/. If CouchDB runs on an other port, change the port.
-
-We are now going to restore the < v3 user behavior. Future tutorials will expect the new v3+ access control through.
-
-- First login to Fauxton with your admin account.
-- Go to **Configuration**.
-- Set in **Main config** the setting `users_db_security_editable` to `true`. This will allow you to change the security settings of the `_users` db.
-- Also set in [`couch_peruser`](https://docs.couchdb.org/en/stable/config/couch-peruser.html) `enable` to `true`. With this setting every user will have their own database.
-- Next go to the **CORS** configs. And click `Enable CORS`. You can restrict access to http://localhost:3000/ or allow _All domains_.
-- Go to setup.
-- Follow the `Configure a Single Note` setup.
-- Now go to **Databases**.
-- Navigate to `_users`.
-- Click on the lock icon on `_users`.
-- Now remote the `_admin` in **Roles** under **Members**. This will reset access to `_users` to pre v3 behavior:
-  - Only administrators may browse list of all documents (`GET /_users/_all_docs`)
-  - Only administrators may listen to changes feed (`GET /_users/_changes`)
-  - Only administrators may run design functions like views.
-  - There is a special design document `_auth` that cannot be modified
-  - Every document except the design documents represent registered CouchDB users and belong to them
-  - Users may only access (`GET /_users/org.couchdb.user:Jan`) or modify (`PUT /_users/org.couchdb.user:Jan`) documents that they own (their own user document)
-
-> Before you release something: Read the documentations! Specially about [Security](https://docs.couchdb.org/en/stable/intro/security.html)! It is the **_Users_ database** after all!
->
-> What we did change here is only for development!

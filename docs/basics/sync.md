@@ -252,11 +252,106 @@ new PouchDB('http://localhost:5984/db_name')
 
 // into:
 
-new PouchDB('/db/db_name') // it is on the same host after all!
+new PouchDB('http://localhost:3000/db/db_name')
+// or if you want to be domain independent
+new PouchDB(new URL('/db/db_name', window.location.href).href)
+// or
+new PouchDB('/db/db_name', { adapter: 'http' })
 ```
 
-Many static site host provider allow you to setup a similar proxy.
+Many static site hosting provider allow you to setup a similar proxy.
+
+## Session and sync functions
+
+Now let's implement it!
+
+This will be handled by our own global module. We will be using separate functions, because most of the session logic will be handled by components.
+
+```javascript
+// account.js
+import PouchDB from 'pouchdb-browser'
+import auth from 'pouchdb-authentication'
+
+PouchDB.plugin(auth) // register pouchdb-authentication as a plugin
+
+let remote = new PouchDB(
+  'http://localhost:5984/_users', // just a known existing db
+  { skip_setup: true } // Don't check for the existence!
+)
+
+export function signUp(username, password) {
+  return remote.signUp(username, password)
+}
+
+export async function logIn(username, password) {
+  // throws the error of logIn
+  const result = await remote.logIn(username, password)
+
+  if (result.ok && result.name != null && result.name.length > 0) {
+    // connect to the user database
+    await remote.close()
+    remote = new PouchDB(
+      `http://localhost:5984/${getUserDatabaseName(username)}`
+    )
+    return result
+  } else {
+    throw new Error('user not logged in')
+  }
+}
+
+export async function logOut() {
+  await remote.close()
+  return remote.logOut()
+}
+
+export function getSession() {
+  return remote.getSession()
+}
+
+export async function isLoggedIn() {
+  const session = await remote.getSession()
+
+  return session.ok && session.userCtx && session.userCtx.name != null
+}
+
+// A useEffect friendly sync function
+export function startSync(localDB) {
+  let isActive = true
+  let sync = null
+
+  const syncing = async () => {
+    const loggedIn = await isLoggedIn()
+
+    if (loggedIn && isActive) {
+      sync = localDB.sync(remote, {
+        live: true,
+        retry: true,
+      })
+    }
+  }
+  syncing()
+
+  return () => {
+    if (!isActive) {
+      return
+    }
+    isActive = false
+    if (sync) {
+      sync.cancel()
+    }
+  }
+}
+
+function getUserDatabaseName(name, prefix = 'userdb-') {
+  const encoder = new TextEncoder()
+  const buffy = encoder.encode(name)
+  const bytes = Array.from(buffy).map(byte =>
+    byte.toString(16).padStart(2, '0')
+  )
+  return prefix + bytes.join('')
+}
+```
+
+We don't have to handle incoming changes, because changes subscriptions on the local database are emitting events when they are happening.
 
 ## Components
-
-## Sync

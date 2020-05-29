@@ -62,13 +62,13 @@ yarn add -D pouchdb-authentication
 
 Now which to use? **CouchDB** or **PouchDB-Server**? Well, normally both. PouchDB-Server is local to the project. It is installable with **npm**, you can define where it should store its data. While CouchDB is the one you will be using in production. It is more powerful. So I normally recommend that you install both. PouchDB-Server for your development. And CouchDB to verify and test if everything works. But to only get started, PouchDB-Server is enough. And that is why we are going to be using PouchDB-Server for this guide.
 
-There are some incompatibilities through.
+There are some incompatibilities though.
 
 While PouchDB-Server is intended as a drop-in replacement of CouchDB, the later moves faster. At the time of writing, <time datetime="2020-05-23">2020-05-23</time>, CouchDB did release [version 3](https://docs.couchdb.org/en/3.1.0/whatsnew/3.0.html) and PouchDB-Server didn't catchup yet.
 
 Regarding compatibility the biggest change was, that the default setup of CouchDB _is more secure_. In previous versions in the standard setup, everyone could create an user. Now you must be an admin or change some settings.
 
-Now, CouchDB lacks some user management features; for example sending Mails to the user, or resetting a password. You need to implement them yourself. With [serverless functions (function as a service)](https://en.wikipedia.org/wiki/Function_as_a_service) it became more strate forward. But you won't be able to use every method of [**PouchDB Authentication**](https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/api.md#dbsignupusername-password--options--callback). Log in/out still works through.
+Now, CouchDB lacks some user management features; for example sending Mails to the user, or resetting a password. You need to implement them yourself. With [serverless functions (function as a service)](https://en.wikipedia.org/wiki/Function_as_a_service) it became more strate forward. But you won't be able to use every method of [**PouchDB Authentication**](https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/api.md#dbsignupusername-password--options--callback). Log in/out still works though.
 
 In this tutorial we will be using the old sign up method, where everyone can create an account and no verification mail is send. If in your app you need more, please visit [CouchDBs Security section](https://docs.couchdb.org/en/stable/intro/security.html).
 

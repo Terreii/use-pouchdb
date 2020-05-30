@@ -308,7 +308,7 @@ export function getSession() {
   return remote.getSession()
 }
 
-export async function isLoggedIn() {
+export async function getIsLoggedIn() {
   const session = await remote.getSession()
 
   return session.ok && session.userCtx && session.userCtx.name != null
@@ -320,7 +320,7 @@ export function startSync(localDB) {
   let sync = null
 
   const syncing = async () => {
-    const loggedIn = await isLoggedIn()
+    const loggedIn = await getIsLoggedIn()
 
     if (loggedIn && isActive) {
       sync = localDB.sync(remote, {
@@ -355,3 +355,156 @@ function getUserDatabaseName(name, prefix = 'userdb-') {
 We don't have to handle incoming changes, because changes subscriptions on the local database are emitting events when they are happening.
 
 ## Components
+
+Now to the component:
+
+```jsx
+// Session.js
+import React, { useState, useEffect } from 'react'
+import { usePouch } from 'use-pouchdb'
+
+import {
+  signUp,
+  logIn,
+  logOut,
+  getSession,
+  getIsLoggedIn,
+  startSync,
+} from './account'
+
+const sessionStates = {
+  loading: 0,
+  loggedIn: 1,
+  loggedOut: 2,
+}
+
+export default function Session() {
+  const db = usePouch()
+
+  const [sessionState, setSessionState] = useState(sessionStates.loading)
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+
+  const checkSessionState = async () => {
+    const isLoggedIn = await getIsLoggedIn()
+    setSessionState(isLoggedIn)
+
+    if (isLoggedIn) {
+      const info = await getSession()
+      setUsername(info.userCtx.name)
+    }
+  }
+
+  useEffect(() => {
+    // On first render: check if we are logged in
+    checkSessionState()
+  }, [])
+
+  useEffect(() => {
+    if (sessionState === sessionStates.loggedIn) {
+      // whenever we are logged in: start syncing
+      return startSync(db)
+    }
+  }, [sessionState, db])
+
+  async function doLogIn(event) {
+    if (event) {
+      event.preventDefault()
+    }
+    await logIn(username, password)
+    checkSessionState()
+  }
+
+  async function doSignUp(event) {
+    event.preventDefault()
+    await signUp(username, password)
+    doLogIn()
+  }
+
+  async function doLogOut(event) {
+    event.preventDefault()
+    await logOut()
+    // destroy local database, to remove all local data
+    await db.destroy()
+    checkSessionState()
+  }
+
+  switch (sessionState) {
+    case sessionStates.loggedOut:
+      return (
+        <form onSubmit={doLogIn}>
+          <label>
+            Username
+            <input
+              type="text"
+              autocomplete="username"
+              minlength="2"
+              required
+              value={username}
+              onChange={event => {
+                setUsername(event.target.value)
+              }}
+            />
+          </label>
+          <label>
+            Password
+            <input
+              type="password"
+              autocomplete="current-password"
+              minlength="2"
+              required
+              value={password}
+              onChange={event => {
+                setPassword(event.target.value)
+              }}
+            />
+          </label>
+          <button>Log in</button>
+          <button type="button" onClick={doSignUp}>
+            Sign Up
+          </button>
+        </form>
+      )
+
+    case sessionStates.loggedIn:
+      return (
+        <div>
+          Hello, {username}
+          <button type="button" onClick={doLogOut}>
+            Log out
+          </button>
+        </div>
+      )
+
+    case sessionStates.loading:
+    default:
+      return null
+  }
+}
+```
+
+This is a bigger component! But it does a lot!
+
+This component has 3 states:
+
+- On first render it checks the session and renders nothing.
+- No user is logged in. It renders a log in and sign up form.
+- User is logged in. It renders the username and a log out button.
+
+The first `useEffect` only runs after the first render. It checks if a user is logged in.
+
+The second `useEffect` runs every time the sessionState changes. And if a user is logged in it starts the sync process. Because `startSync` returns a cancel function, we can return the cancel function in the `useEffect` body. It will then cancel every time the effect re-runs.
+
+Then we have `doLogIn`, `doSignUp` and `doLogOut`. They call their counterpart in `account.js`, but also prevent the default effects of dom-events.
+
+`doSignUp` calls `doLogIn` after a user was created.
+
+`doLogIn` checks the session state after login.
+
+And `doLogOut` destroys the local database. When you destroy a database it's data will be deleted. But the deletion will not be synced! In [`Add the Provider`](./provider) we did add an event-listener for destroy events. And when the local database was destroyed, we did create a new one. This was for logging out.
+
+> We didn't implement error handling, because, well …, this component is already long.
+>
+> If you want to, you can add some error handling as an exercise. Read more about [PouchDB Authentication's API](https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/api.md) and [CouchDB's Session API](https://docs.couchdb.org/en/3.1.0/api/server/authn.html#cookie-authentication) to learn the error responses.
+
+If you now open a different browser, you will be able to sync your Todos between them. They should also be listed in Fauxton (http://127.0.0.1:5984/_utils/#/_all_dbs).

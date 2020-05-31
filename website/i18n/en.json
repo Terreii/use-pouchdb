@@ -31,6 +31,9 @@
       "basics/list-all": {
         "title": "List all Todos"
       },
+      "basics/more": {
+        "title": "More"
+      },
       "basics/provider": {
         "title": "Add the Provider"
       },

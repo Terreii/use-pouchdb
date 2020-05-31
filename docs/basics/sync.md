@@ -508,3 +508,7 @@ And `doLogOut` destroys the local database. When you destroy a database it's dat
 > If you want to, you can add some error handling as an exercise. Read more about [PouchDB Authentication's API](https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/api.md) and [CouchDB's Session API](https://docs.couchdb.org/en/3.1.0/api/server/authn.html#cookie-authentication) to learn the error responses.
 
 If you now open a different browser, you will be able to sync your Todos between them. They should also be listed in Fauxton (http://127.0.0.1:5984/_utils/#/_all_dbs).
+
+Now we are finished with our Todo example. All Todos are replicated, users can sign up and log in. I know, this was a long tutorial, but we did cover a lot!
+
+Happy coding! 🎉🎊

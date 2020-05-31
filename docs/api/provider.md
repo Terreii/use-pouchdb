@@ -8,13 +8,15 @@ sidebar_label: Provider
 
 The `<Provider />` component makes a PouchDB database available to any nested components' hooks.
 
-Most apps will render the `<Provider />` as one of the most top level components, with the entire app's component tree inside of it.
+Most apps will render the `<Provider />` as one of the most top level components, with the entire app's component
+tree inside of it.
 
 You can't use the hooks unless they are invoked from a component nested inside of a `<Provider />`.
 
 ## Props
 
-`pouchdb` ([PouchDB database](https://pouchdb.com/api.html#create_database)) The PouchDB database you want to provide to the child components.
+`pouchdb` ([PouchDB database](https://pouchdb.com/api.html#create_database)) The PouchDB database you want to
+provide to the child components.
 
 `children` (ReactElement) The root of your component hierarchy, which should have access to this database.
 
@@ -44,7 +46,8 @@ ReactDOM.render(
 
 ### Usage with React Router
 
-I recommend using `usePouchDB` with an routing solution, like [React Router](https://reacttraining.com/react-router/).
+I recommend using `usePouchDB` with an routing solution, like
+[React Router](https://reacttraining.com/react-router/).
 
 ```jsx
 import React from 'react'
@@ -86,7 +89,8 @@ ReactDOM.render(
 
 ### With Redux and React-Redux
 
-There are also some [Redux-PouchDB packages](https://pouchdb.com/external.html#framework_adapters), for example [redux-pouchdb](https://github.com/vicentedealencar/redux-pouchdb).
+There are also some [Redux-PouchDB packages](https://pouchdb.com/external.html#framework_adapters), for example
+[redux-pouchdb](https://github.com/vicentedealencar/redux-pouchdb).
 
 Read more about [Redux](https://redux.js.org/) and [React-Redux](https://react-redux.js.org/) at their sites.
 

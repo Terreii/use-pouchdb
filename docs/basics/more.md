@@ -3,7 +3,9 @@ id: more
 title: More
 ---
 
-Now that we have build our first React & PouchDB App it might be a good time to read [PouchDB guides](https://pouchdb.com/guides/) and [CouchDB guides](https://docs.couchdb.org/en/stable/index.html) (if you didn't).
+Now that we have build our first React & PouchDB App it might be a good time to read
+[PouchDB guides](https://pouchdb.com/guides/) and
+[CouchDB guides](https://docs.couchdb.org/en/stable/index.html) (if you didn't).
 
 ## Too long; didn't cover
 
@@ -11,7 +13,8 @@ There are some things we didn't handle in this tutorial:
 
 - How to [delete documents](https://pouchdb.com/guides/updating-deleting.html#deleting-documents).
 - Handling [eventual conflicts](https://pouchdb.com/guides/conflicts.html).
-- [Mango queries](https://pouchdb.com/guides/mango-queries.html) (also read [CouchDB's docs with all operators](https://docs.couchdb.org/en/stable/api/database/find.html)).
+- [Mango queries](https://pouchdb.com/guides/mango-queries.html) (also read
+  [CouchDB's docs with all operators](https://docs.couchdb.org/en/stable/api/database/find.html)).
 - [Map/reduce queries](https://pouchdb.com/guides/queries.html).
 - [Attachments](https://pouchdb.com/guides/attachments.html) (files on your documents).
 - [Local documents](https://pouchdb.com/guides/local-documents.html) (documents that don't sync).

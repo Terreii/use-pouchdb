@@ -5,7 +5,8 @@ title: usePouch
 
 ## Overview
 
-Sometimes you need more than the provided hooks alow, the `usePouch` is for those moments. `usePouch` returns a reference to the [PouchDB database](https://pouchdb.com/api.html#create_database) past into `<Provider />`.
+Sometimes you need more than the provided hooks alow, the `usePouch` is for those moments. `usePouch` returns a
+reference to the [PouchDB database](https://pouchdb.com/api.html#create_database) past into `<Provider />`.
 
 It can only be invoked from a component nested inside of a `<Provider />`.
 
@@ -15,7 +16,8 @@ It can only be invoked from a component nested inside of a `<Provider />`.
 
 ## Result
 
-`usePouch` returns a reference to the [PouchDB database](https://pouchdb.com/api.html#create_database) past into `<Provider />`.
+`usePouch` returns a reference to the [PouchDB database](https://pouchdb.com/api.html#create_database) past into
+`<Provider />`.
 
 ## Example Usage
 
@@ -23,7 +25,9 @@ The `usePouch` hook is for everything not covered by the provided hooks.
 
 ### Sync
 
-Access the pouchdb instance to start sync to another database. Read more about [syncing at PouchDB's API documentation](https://pouchdb.com/api.html#sync) or [PouchDB's Replication guide](https://pouchdb.com/guides/replication.html).
+Access the pouchdb instance to start sync to another database. Read more about
+[syncing at PouchDB's API documentation](https://pouchdb.com/api.html#sync) or
+[PouchDB's Replication guide](https://pouchdb.com/guides/replication.html).
 
 ```jsx
 import React, { useState, useEffect } from 'react'

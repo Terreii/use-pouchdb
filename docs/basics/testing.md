@@ -11,7 +11,8 @@ There are 3 packages I recommend you'll install:
 
 - [pouchdb-adapter-memory](https://www.npmjs.com/package/pouchdb-adapter-memory)
 - [react-hooks-testing-library](https://www.npmjs.com/package/@testing-library/react-hooks)
-- [React Testing Library](https://www.npmjs.com/package/@testing-library/react) (pre installed with Create-React-App)
+- [React Testing Library](https://www.npmjs.com/package/@testing-library/react) (pre installed with
+  Create-React-App)
 
 <!--DOCUSAURUS_CODE_TABS-->
 <!--npm-->
@@ -30,13 +31,17 @@ yarn add -D pouchdb-adapter-memory @testing-library/react-hooks @testing-library
 
 ### pouchdb-adapter-memory
 
-[pouchdb-adapter-memory](https://www.npmjs.com/package/pouchdb-adapter-memory) is a [PouchDB Adapter](https://pouchdb.com/adapters.html). Adapters translate how your documents are stored and accessed. For example [pouchdb-adapter-http](https://www.npmjs.com/package/pouchdb-adapter-http) (pre installed on most PouchDB setups) translates them into CouchDB's HTTP API.
+[pouchdb-adapter-memory](https://www.npmjs.com/package/pouchdb-adapter-memory) is a
+[PouchDB Adapter](https://pouchdb.com/adapters.html). Adapters translate how your documents are stored and
+accessed. For example [pouchdb-adapter-http](https://www.npmjs.com/package/pouchdb-adapter-http) (pre installed on
+most PouchDB setups) translates them into CouchDB's HTTP API.
 
 But pouchdb-adapter-memory only stores them in _memory_. Perfect or testing!
 
 ### react-hooks-testing-library
 
-[react-hooks-testing-library](https://www.npmjs.com/package/@testing-library/react-hooks) is a really good testing library, specialized in testing React Hooks.
+[react-hooks-testing-library](https://www.npmjs.com/package/@testing-library/react-hooks) is a really good testing
+library, specialized in testing React Hooks.
 
 The documentation for it can be found on https://react-hooks-testing-library.com/.
 
@@ -44,13 +49,16 @@ You can use it to test your own hooks. Be they extensions of hooks from `usePouc
 
 ### React Testing Library
 
-[React Testing Library](https://www.npmjs.com/package/@testing-library/react) comes pre-installed on create-react-app. It is a testing library that encourage you to test from the users perspective.
+[React Testing Library](https://www.npmjs.com/package/@testing-library/react) comes pre-installed on
+create-react-app. It is a testing library that encourage you to test from the users perspective.
 
 The documentation for it can be found at https://testing-library.com/docs/react-testing-library/intro.
 
 ## Tests
 
-Your tests should be closed systems. And no test before or after it should influence them. To achieve this I recommend that you create a new PouchDB database before each test. And that db should have the `pouchdb-adapter-http` active.
+Your tests should be closed systems. And no test before or after it should influence them. To achieve this I
+recommend that you create a new PouchDB database before each test. And that db should have the
+`pouchdb-adapter-http` active.
 
 ```javascript
 // Using jest
@@ -147,7 +155,8 @@ test('Test Component', async () => {
 
 To test hooks that depends on one of `usePouchDB`'s hooks, you also must warp it in `<Provider />`.
 
-**react-hooks-testing-library**'s `renderHook` function can receive in the second argument a warper ([documented here](https://react-hooks-testing-library.com/usage/advanced-hooks#context)).
+**react-hooks-testing-library**'s `renderHook` function can receive in the second argument a warper
+([documented here](https://react-hooks-testing-library.com/usage/advanced-hooks#context)).
 
 The addTodo from [**add-todo**](./add-todo) extracted into a hook.
 

@@ -3,7 +3,8 @@ id: list-all
 title: List all Todos
 ---
 
-The `<TodoList />` component is responsible for rendering the list of todos. Therefore, it needs to read data from the database. With `useAllDocs` we can! It loads all documents.
+The `<TodoList />` component is responsible for rendering the list of todos. Therefore, it needs to read data from
+the database. With `useAllDocs` we can! It loads all documents.
 
 Out `<Todo />` component takes the todo document as props and displays it.
 
@@ -28,7 +29,9 @@ export default function TodoList() {
 }
 ```
 
-`useAllDocs` loads all documents sorted by their _id_. It also subscripts to changes in the database. When ever a new document will be added, or an existing one updated, `useAllDocs` will refetch all documents. It can also only load a slice of all documents, but we don't need that here.
+`useAllDocs` loads all documents sorted by their _id_. It also subscripts to changes in the database. When ever a
+new document will be added, or an existing one updated, `useAllDocs` will refetch all documents. It can also only
+load a slice of all documents, but we don't need that here.
 
 The `rows` field will contain an array of objects.
 
@@ -53,7 +56,9 @@ The `rows` field will contain an array of objects.
 
 We use the option `include_docs: true` to load all documents in one go. Without it the `doc` field wouldn't exist.
 
-> Yes `key` and `id` are a little bit redundant. But the underlying [`db.allDocs`](https://pouchdb.com/api.html#batch_fetch) and [`db.query`](https://pouchdb.com/api.html#query_database) (for `useQuery`) share most of their API.
+> Yes `key` and `id` are a little bit redundant. But the underlying
+> [`db.allDocs`](https://pouchdb.com/api.html#batch_fetch) and
+> [`db.query`](https://pouchdb.com/api.html#query_database) (for `useQuery`) share most of their API.
 
 Now to the `<Todo />` component:
 

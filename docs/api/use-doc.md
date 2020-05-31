@@ -5,36 +5,44 @@ title: useDoc
 
 ## Overview
 
-To read a single document use `useDoc`. It is the hook version of [`db.get()`](https://pouchdb.com/api.html#fetch_document). It also subscripts to updates of that document.
+To read a single document use `useDoc`. It is the hook version of
+[`db.get()`](https://pouchdb.com/api.html#fetch_document). It also subscripts to updates of that document.
 
 `useDoc` can only be invoked from a component nested inside of a `<Provider />`.
 
 ## Parameters
 
-`useDoc` has the same options as [`db.get()`](https://pouchdb.com/api.html#fetch_document), with the only exception of `options.open_revs`. Options descriptions are copied from the PouchDB API page.
+`useDoc` has the same options as [`db.get()`](https://pouchdb.com/api.html#fetch_document), with the only exception
+of `options.open_revs`. Options descriptions are copied from the PouchDB API page.
 
 1. `id: string` - \_id of the document.
-2. `options?: object | null` - [`db.get()`](https://pouchdb.com/api.html#fetch_document) option object. All options except `options.open_revs` are allowed.
+2. `options?: object | null` - [`db.get()`](https://pouchdb.com/api.html#fetch_document) option object. All options
+   except `options.open_revs` are allowed.
    - `options.rev?: string` - If set: fetch specific revision of a document. It defaults to winning revision.
    - `options.revs?: boolean` - Include revision history of the document.
    - `options.revs_info?: boolean` - Include a list of revisions of the document, and their availability.
-   - `options.conflicts?: boolean` - If specified, conflicting leaf revisions will be attached in `_conflicts` array.
+   - `options.conflicts?: boolean` - If specified, conflicting leaf revisions will be attached in `_conflicts`
+     array.
    - `options.attachments?: boolean` - Include attachment data.
-   - `options.binary?: boolean` - Only evaluated when `attachments` is `true`. Return attachment data as Blobs/Buffers, instead of as base64-encoded strings.
+   - `options.binary?: boolean` - Only evaluated when `attachments` is `true`. Return attachment data as
+     Blobs/Buffers, instead of as base64-encoded strings.
    - `options.latest?: boolean` - Forces retrieving latest "leaf" revision, no matter what rev was requested.
-3. `initialValue?: Object | function` - Optional initial value of `doc` result. Has the same behavior as `useState`'s initialValue. If used then the `options` object must be set.
+3. `initialValue?: Object | function` - Optional initial value of `doc` result. Has the same behavior as
+   `useState`'s initialValue. If used then the `options` object must be set.
 
 ## Result
 
 `useDoc` results an object with those fields:
 
-- `doc: PouchDB.Core.Document | null` - The requested document. If there is an error, or its still loading the doc is `null`.
+- `doc: PouchDB.Core.Document | null` - The requested document. If there is an error, or its still loading the doc
+  is `null`.
 - `state: 'loading' | 'done' | 'error'` - Current state of the hook.
   - `loading` - It is loading the document. Or it is loading the updated version of it.
   - `done` - The document was loaded, and no update is being loaded.
   - `error` - There was an error with fetching the document. Look into the `error` field.
 - `loading: boolean` - It is loading. The state is `loading`. This is just a shorthand.
-- `error: PouchDB.Error | null` - If there was an error, then this field will contain the error. The error is reset to `null` once a document was successfully loaded.
+- `error: PouchDB.Error | null` - If there was an error, then this field will contain the error. The error is reset
+  to `null` once a document was successfully loaded.
 
 ## Example Usage
 

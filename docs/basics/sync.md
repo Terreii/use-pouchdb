@@ -485,7 +485,7 @@ export default function Session() {
 }
 ```
 
-This is a bigger component! But it does a lot!
+This is a more complicated component! It does quite a lot!
 
 This component has 3 states:
 

@@ -82,7 +82,7 @@ But don't store _everything_ in a single document. The more a document incorpora
 
 Another example: [HospitalRun](https://hospitalrun.io/).
 
-In HospitalRun they store patient data in 2 different documents types. In one they store the general data of a patient. While in the other type they store the data of a checkup. One document for every checkup. Reducing the possible data collisions.<br/>But Patricia Garcia explains it better in her [talk from JSConfEU 2015](https://2015.jsconf.eu/speakers/patricia-garcia-good-tech-for-hard-places-fighting-ebola-with-javascript-offline-apps.html) (at 17:13):
+In HospitalRun they store patient data in 2 different documents types. In one they store the general data of a patient. While in the other type they store the data of a checkup. One document for every checkup. Reducing the possible data collisions.<br/>But Patricia Garcia explains it better in this [talk from JSConfEU 2015](https://2015.jsconf.eu/speakers/patricia-garcia-good-tech-for-hard-places-fighting-ebola-with-javascript-offline-apps.html) (at 17:13):
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/1sLjWlWvCsc?start=1033" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 

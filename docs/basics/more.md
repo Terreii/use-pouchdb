@@ -43,4 +43,5 @@ There are some things we didn't handle in this tutorial:
 - CouchDB as a Service
   - [IBM Cloudant](https://www.ibm.com/cloud/cloudant)
   - [CloudStation](https://www.cloudstation.com/)
+  - [Couchbase](https://blog.couchbase.com/first-steps-with-pouchdb--sync-gateway-todomvc-todolite/)
   - more? (if you know more, send me a Pull Request)

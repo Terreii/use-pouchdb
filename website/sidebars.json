@@ -12,6 +12,7 @@
       "basics/list-all",
       "basics/update",
       "basics/sync",
+      "basics/testing",
       "basics/more"
     ],
     "API": [

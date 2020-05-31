@@ -11,6 +11,7 @@
   - [List all Todos](./basics/list-all.md)
   - [Update docs](./basics/update)
   - [Sync account](./basics/sync)
+  - [Testing](./basics/testing)
   - [More](./basics/more)
 - API
   - [Provider](./api/provider.md)

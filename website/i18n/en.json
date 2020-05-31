@@ -44,6 +44,9 @@
       "basics/sync": {
         "title": "Sync account"
       },
+      "basics/testing": {
+        "title": "Testing"
+      },
       "basics/update": {
         "title": "Update docs"
       },

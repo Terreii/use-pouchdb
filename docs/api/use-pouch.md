@@ -96,6 +96,7 @@ export function useAddBooking() {
 
       const doc = {
         _id: `booking_${new Date().toJSON()}`,
+        type: 'booking',
         name: name || 'unknown',
         amount: amount,
       }
@@ -124,7 +125,8 @@ export function NewBooking() {
 
   return (
     <form
-      onSubmit={() => {
+      onSubmit={event => {
+        event.preventDefault()
         addBooking(amount, name)
       }}
     >

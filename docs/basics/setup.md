@@ -101,7 +101,7 @@ To start enter:
 npx pouchdb-server
 ```
 
-All options can be found at [the README](https://github.com/pouchdb/pouchdb-server#readme).
+All options can be found in [the README](https://github.com/pouchdb/pouchdb-server#readme).
 
 Now it would be good if we could start the create-react-app dev-server and pouchdb-server with only one command!
 <br />First install [npm-run-all](https://www.npmjs.com/package/npm-run-all). It allows us to run multiple commands in parallel or sequential.
@@ -164,6 +164,18 @@ yarn run start:cra
 #### CORS
 
 Next up [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)! We will create an app that is going to be served from one server, while connecting to PouchDB-Server/CouchDB on another domain. That's why CORS must be enabled.
+
+##### Using add-cors-to-couchdb
+
+There is the npm tool [`add-cors-to-couchdb`](https://github.com/pouchdb/add-cors-to-couchdb), it auto configs CORS for you, to allow you to access CouchDB/PouchDB-Server from every domain.
+
+```sh
+npx add-cors-to-couchdb http://127.0.0.1:5984 -u myusername -p mypassword
+```
+
+Username and password is not required for PouchDB-Server, if you didn't setup an admin.
+
+##### Manually setting CORS
 
 First open Fauxton on http://127.0.0.1:5984/_utils/. Fauxton is the web-interface of both PouchDB-Server and CouchDB.
 

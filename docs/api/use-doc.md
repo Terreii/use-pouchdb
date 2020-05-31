@@ -93,7 +93,7 @@ export function ConflictResolver({ id }) {
   })
 
   const { doc: loosing, loading: loosingIsLoading } = useDoc(id, {
-    rev: winning._conflict.length > 0 ? [0] : undefined,
+    rev: winning._conflict.length > 0 ? winning._conflict[0] : undefined,
   })
 
   if (winningIsLoading || loosingIsLoading) {

@@ -3,15 +3,15 @@ id: quick_start
 title: Quick Start
 ---
 
-[usePouchDB](https://github.com/Terreii/use-pouchdb) is a collection of _React Hooks_ to access data in an PouchDB database.
+[usePouchDB](https://github.com/Terreii/use-pouchdb) is a collection of _React Hooks_ to access data in a _PouchDB database_.
 
 ## Purpose
 
 usePouchDB is intended to be used by small [CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete 'CRUD on Wikipedia') apps and more complicated Web-Apps alike. It was originally created by me, after I realized that with [PouchDB](https://pouchdb.com/) (and its [vast plugin ecosystem](https://pouchdb.com/external.html 'List of plugins for PouchDB')), [CouchDB](https://couchdb.apache.org/) as the data backend and [React](https://reactjs.org/) with [Hooks](https://reactjs.org/docs/hooks-intro.html), you have everything you need to build a CRUD Web-App.
 
-It is now intended to be a puzzle piece in the replacement of CouchApps (the ones that use the deprecated [show](https://docs.couchdb.org/en/3.1.0/ddocs/ddocs.html#show-functions) and [list](https://docs.couchdb.org/en/3.1.0/ddocs/ddocs.html#list-functions) functions). If CouchApp doesn't says you anything, don't worry for now, I will clear things up later.
+It is now intended to be a puzzle piece in the replacement of CouchApps (the ones that use the deprecated [show](https://docs.couchdb.org/en/3.1.0/ddocs/ddocs.html#show-functions) and [list](https://docs.couchdb.org/en/3.1.0/ddocs/ddocs.html#list-functions) functions).
 
-> Note that usePouchDB is, for now, only optimized for local DBs and not accessing a DB over HTTP!
+> Note that usePouchDB is, for now, only optimized for local DBs and not for accessing a DB over HTTP!
 >
 > It subscribes to all changes and once for every view! And every subscription is a HTTP request.
 > It will still work, but could exceed the 4 concurrent request per domain limit on HTTP 1.1.
@@ -33,6 +33,25 @@ yarn add use-pouchdb
 ```
 
 You'll also need to [install PouchDB](https://pouchdb.com/guides/setup-pouchdb.html 'PouchDBs installation guide'). There is also a special [browser version](https://www.npmjs.com/package/pouchdb-browser).
+
+<!--END_DOCUSAURUS_CODE_TABS-->
+
+There is a PouchDB plugin for the sign up, log in and log out flow: [PouchDB Authentication](https://github.com/pouchdb-community/pouchdb-authentication).
+
+<!--DOCUSAURUS_CODE_TABS-->
+<!--npm-->
+
+```sh
+npm i -D pouchdb-browser pouchdb-authentication
+```
+
+<!--yarn-->
+
+```sh
+yarn add -D pouchdb-browser pouchdb-authentication
+```
+
+<!--END_DOCUSAURUS_CODE_TABS-->
 
 ## Provider
 
@@ -121,7 +140,7 @@ export default function AllPosts() {
 
 ## useQuery
 
-Accessing a [view](https://docs.couchdb.org/en/stable/ddocs/views/index.html 'CouchDBs Guide to Views') ([PouchDBs query](https://pouchdb.com/api.html#query_database 'Documentation about db.query')) accomplished using the hook `useQuery`. It also automatically subscribes to updates of that view.
+Accessing a [view](https://docs.couchdb.org/en/stable/ddocs/views/index.html 'CouchDBs Guide to Views') ([PouchDBs query](https://pouchdb.com/api.html#query_database 'Documentation about db.query')) is accomplished using the hook `useQuery`. It also automatically subscribes to updates of that view.
 
 ```jsx
 import React from 'react'
@@ -158,7 +177,7 @@ export default function Comments({ id }) {
 
 ## usePouch
 
-Sometimes you need more direct access to a PouchDB instance. `usePouch` gives you access to it.
+Sometimes you need more direct access to a PouchDB instance. `usePouch` gives you access to the database provided to `<Provider />`.
 
 ```jsx
 import { useCallback } from 'react'

@@ -5,7 +5,7 @@ title: Update docs
 
 Up until now we don't have any way to update our docs, i.e. mark our todos as done.
 
-Updating will be the job of our `<Todo />` component:
+Updating will be the job of our updated `<Todo />` component:
 
 ```jsx
 // Todo.js
@@ -60,7 +60,7 @@ That seems a little bit of an over engineered example. But remember PouchDB is a
 
 `db.get()` and `db.put()` also take their time. And if in this time-frame another change did sync, we get a conflict! A conflict that throws right away: an [immediate conflict](https://pouchdb.com/guides/conflicts.html).
 
-In this example we've chosen to handle the immediate conflict by simply trying again. We run `update` again, with it still having a reverence to the old todo. It'll `get` the new version of the document, check if `done` is desired value, and update the new doc only if not.
+In this example we've chosen to handle the immediate conflict by simply trying again. We run `update` again, with it still having a reverence to the old todo. It'll `get` the new version of the document, check if `done` has the desired value, and update the new doc only if not.
 
 > This dance of conflict resolution is what allows PouchDB to sync! It requires you to handle conflicts.
 >

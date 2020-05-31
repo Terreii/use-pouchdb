@@ -15,7 +15,7 @@ import './App.css'
 import PouchDB from 'pouchdb-browser'
 import { Provider } from 'use-pouchdb'
 
-function App() {
+export default function App() {
   const [db, setDB] = useState(() => new PouchDB('local'))
 
   useEffect(() => {
@@ -34,12 +34,10 @@ function App() {
 
   return (
     <Provider pouchdb={db}>
-      <div className="App">More to come</div>
+      <div className="App">Add the future components here</div>
     </Provider>
   )
 }
-
-export default App
 ```
 
 What is happening here?

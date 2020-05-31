@@ -28,7 +28,7 @@ There are some things we didn't handle in this tutorial:
     - [redux-pouchdb](https://github.com/vicentedealencar/redux-pouchdb)
 - Map/reduce queries (views)
   - [CouchDB's Guide to Views](https://docs.couchdb.org/en/stable/ddocs/views/index.html)
-  - [Views Collation](https://docs.couchdb.org/en/stable/ddocs/views/collation.html)
+  - [Views Collation](https://docs.couchdb.org/en/stable/ddocs/views/collation.html) (sorting)
   - [Joins With Views](https://docs.couchdb.org/en/stable/ddocs/views/joins.html)
   - [View Cookbook for SQL Jockeys](https://docs.couchdb.org/en/stable/ddocs/views/nosql.html)
   - [Design Documents](https://docs.couchdb.org/en/stable/ddocs/ddocs.html)

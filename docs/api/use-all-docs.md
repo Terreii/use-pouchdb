@@ -18,7 +18,7 @@ As all hooks, it subscribes to updates of the documents and also its range.
 `useAllDocs` expects a single options object. It has the same options as [`db.allDocs()`](https://pouchdb.com/api.html#batch_fetch). Options descriptions are copied from the PouchDB API page.
 
 1. `options: object` - [`db.allDocs()`](https://pouchdb.com/api.html#batch_fetch) option object.
-   - `options.include_docs?: boolean` - Include the document itself in each row in the `doc` field. Otherwise be default you can only get the `_id` and `_rev` properties.
+   - `options.include_docs?: boolean` - Include the document itself in each row in the `doc` field. Otherwise by default you can only get the `_id` and `_rev` properties.
    - `options.conflicts?: boolean` - Include conflict information in the `_conflicts` field of a doc.
    - `options.attachments?: boolean` - Include attachment data as base64-encoded string.
    - `options.binary?: boolean` - Return attachment data as Blobs, instead of as base64-encoded strings.
@@ -34,7 +34,7 @@ As all hooks, it subscribes to updates of the documents and also its range.
      - The rows are returned in the same order as in the supplied `keys` array.
      - The row for a deleted document will have the revision ID of the deletion, and an extra key `deleted: true` in the `value` property.
      - The row for a nonexistent document will just contain an `error` property with the value `"not_found"`.
-     - For more For details, see the [`db.allDocs() documentation`](https://pouchdb.com/api.html#batch_fetch) or the [CouchDB query options documentation](https://docs.couchdb.org/en/stable/api/ddoc/views.html#db-design-design-doc-view-view-name).
+     - For more details, see the [`db.allDocs() documentation`](https://pouchdb.com/api.html#batch_fetch) or the [CouchDB query options documentation](https://docs.couchdb.org/en/stable/api/ddoc/views.html#db-design-design-doc-view-view-name).
    - `options.update_seq?: boolean` - Include an `update_seq` value indicating which sequence id of the underlying database the view reflects.
 
 ## Result
@@ -59,7 +59,7 @@ As all hooks, it subscribes to updates of the documents and also its range.
 
 ## Example Usage
 
-`useAllDocs` is useful for many orations where you need to load multiple documents.
+`useAllDocs` is useful for many operations where you need to load multiple documents.
 
 ### Prefix search
 

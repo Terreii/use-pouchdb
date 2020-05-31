@@ -72,11 +72,12 @@ Let's brake it down:
 
 **`_id`**
 
-The `_id` is the unique identifier of a document. It must be unique to it's database. We can use the **id** to later to retrieve the document. Besides that, we can use it to sort documents and other tricks.
+The `_id` is the unique identifier of a document. It must be unique to it's database. We can use the **id** later to retrieve the document. Besides that, we can use it to sort documents and other tricks.
 
 **`type`**
 
-The `type` field is technically not needed. It is a PouchDB and CouchDB convention to differentiate between document types. Like `type` in [Redux Actions](https://redux.js.org/basics/actions), but not needed.
+The `type` field is technically not needed. It is a PouchDB and CouchDB convention to differentiate between document types. Like `type` in [Redux Actions](https://redux.js.org/basics/actions), but not needed.<br />
+You could also store the type in the `_id` as a prefix: `'todo_2020-05-25T21:42:17.275Z'`.
 
 **`text`** and **`done`**
 
@@ -88,7 +89,7 @@ Next `await db.put(doc)`. Here we put the document into the database (db). `put(
 
 `setInput('')` resets the `<input />`.
 
-If `put()` fails the todo will not be added and the `<input />` not reset. The user could then try again.
+If `put()` fails, the todo will not be added and the `<input />` not reset. The user could then try again.
 
 > Normally you should _always_ catch and handle an write/update error. PouchDB is a _distributed_ system after all.
 >

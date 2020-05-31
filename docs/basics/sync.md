@@ -11,9 +11,9 @@ You should have PouchDB-Server running for this section.
 
 ## A word about Version 3
 
-With [version 3](https://docs.couchdb.org/en/3.1.0/whatsnew/3.0.html) Apache CouchDB's default settings became more secure. Now every newly created database is _admin only_ by default. You must change the [`_security document`](https://docs.couchdb.org/en/3.1.0/api/database/security.html#api-db-security) of a database, to alow users to access it. This also affects the `_users` database. Which means, that you need admin rights to create users.
+With [version 3](https://docs.couchdb.org/en/3.1.0/whatsnew/3.0.html) Apache CouchDB's default settings became more secure. Now every newly created database is _admin only_ by default. You must change the [`_security` document](https://docs.couchdb.org/en/3.1.0/api/database/security.html#api-db-security) of a database, to alow users to access it. This also affects the `_users` database. Which means, that you need admin rights to create users.
 
-Additionally you must change [a config](https://docs.couchdb.org/en/3.1.0/config/couchdb.html#couchdb/users_db_security_editable) to be able to change the `_security document` of the `_users` database. That config will be removed with version 4, though!
+Additionally you must change [a config](https://docs.couchdb.org/en/3.1.0/config/couchdb.html#couchdb/users_db_security_editable) to be able to change the `_security` document of the `_users` database. That config will be removed with version 4, though!
 
 _What does that mean for this tutorial?_ This is a beginners guide. We will be using [PouchDB-Server](https://github.com/pouchdb/pouchdb-server). At the time of writing, PouchDB-Server (v4.2) allows everyone to sign up. And [pouchdb-authentication](https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/api.md#dbsignupusername-password--options--callback) works fine. This does not mean PouchDB-Server is insecure! It just means that `_users`-database follows the rules listed [here](https://docs.couchdb.org/en/3.1.0/intro/security.html#authentication-database).
 
@@ -45,6 +45,8 @@ We will be using couch_peruser.
 > [couch_peruser](https://docs.couchdb.org/en/3.1.0/config/couch-peruser.html) became with Apache CouchDB version 3 a setting. If enabled, CouchDB will create for every user a database, pre-configured for their access!
 >
 > But couch_peruser was before version 3 possible, you just had to do everything yourself.
+>
+> If you don't setup an admin in PouchDB-Server, then everyone is admin (called **admin-party**)! Which allows the client PouchDB to create the user-database.
 
 ## Basics
 
@@ -52,7 +54,7 @@ First some basics about sessions in CouchDB and PouchDB-Server.
 
 ### Access a remote Database
 
-To access a remote database, create new instance of PouchDB with a url-string as the name:
+To access a remote database, create a new instance of PouchDB with a url-string as the name:
 
 ```javascript
 const remoteDB = new PouchDB(
@@ -123,7 +125,7 @@ You can add the login credentials by adding it to the URL or with the `auth` opt
 
 ```javascript
 const url = new URL('http://127.0.0.1:5984/')
-url.pathname = '/' + getUserDatabaseName(username)
+url.pathname += getUserDatabaseName(username)
 url.username = username
 url.password = password
 
@@ -205,7 +207,7 @@ Read more about [`db.logIn`](https://github.com/pouchdb-community/pouchdb-authen
 
 You might get a notice that the Cookie "AuthSession" uses the [`sameSite` attribute](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite) wrong and will be rejected in the future. Or if you are from the future, login doesn't work.
 
-In Apache CouchDB you can set the config [`[couch_httpd_auth] same_site`](https://docs.couchdb.org/en/3.1.0/config/auth.html#couch_httpd_auth/same_site) to `strict`. This will fix this message. To validate you must restart your browser.
+In Apache CouchDB you can set the config [`[couch_httpd_auth] same_site`](https://docs.couchdb.org/en/3.1.0/config/auth.html#couch_httpd_auth/same_site) to `strict`. This will fix this message. To validate you must restart your browser (just that the notice appears again).
 
 PouchDB-Server version 4.2 doesn't support it, yet. What you can do is Proxy every request to PouchDB-Server through Create-react-app's dev server. Docs about proxy can be found [here](https://create-react-app.dev/docs/proxying-api-requests-in-development).
 
@@ -493,11 +495,11 @@ This component has 3 states:
 
 The first `useEffect` only runs after the first render. It checks if a user is logged in.
 
-The second `useEffect` runs every time the sessionState changes. And if a user is logged in it starts the sync process. Because `startSync` returns a cancel function, we can return the cancel function in the `useEffect` body. It will then cancel every time the effect re-runs.
+The second `useEffect` runs every time the sessionState (or the db) changes. And if a user is logged in it starts the sync process. Because `startSync` returns a cancel function, we can return the cancel function in the `useEffect` body. It will then cancel every time the effect re-runs.
 
 Then we have `doLogIn`, `doSignUp` and `doLogOut`. They call their counterpart in `account.js`, but also prevent the default effects of dom-events.
 
-`doSignUp` calls `doLogIn` after a user was created.
+`doSignUp` calls `doLogIn` after a new user was created.
 
 `doLogIn` checks the session state after login.
 

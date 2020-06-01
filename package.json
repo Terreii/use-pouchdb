@@ -16,6 +16,8 @@
   "keywords": [
     "react",
     "hooks",
+    "react-hooks",
+    "typescript",
     "pouchdb",
     "couchdb"
   ],
@@ -29,6 +31,7 @@
     "type": "git",
     "url": "https://github.com/Terreii/use-pouchdb.git"
   },
+  "homepage": "https://christopher-astfalk.de/use-pouchdb",
   "devDependencies": {
     "@babel/core": "^7.9.6",
     "@babel/preset-env": "^7.9.6",

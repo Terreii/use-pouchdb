@@ -1,0 +1,26 @@
+{
+  "docs": {
+    "Introduction": [
+      "introduction/quick_start",
+      "introduction/pouchdb_couchdb"
+    ],
+    "Basic Tutorial": [
+      "basics/intro",
+      "basics/setup",
+      "basics/provider",
+      "basics/add-todo",
+      "basics/list-all",
+      "basics/update",
+      "basics/sync",
+      "basics/testing",
+      "basics/more"
+    ],
+    "API": [
+      "api/provider",
+      "api/use-pouch",
+      "api/use-doc",
+      "api/use-all-docs",
+      "api/use-query"
+    ]
+  }
+}

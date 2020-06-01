@@ -6,7 +6,9 @@
         reject,
         rejects,
         hook,
-        hooks
+        hooks,
+        destroy,
+        destroys
       ]
     },
     "common-misspellings": true

@@ -43,8 +43,6 @@ yarn add use-pouchdb
 You'll also need to [install PouchDB](https://pouchdb.com/guides/setup-pouchdb.html 'PouchDBs installation guide').
 There is also a special [browser version](https://www.npmjs.com/package/pouchdb-browser).
 
-<!--END_DOCUSAURUS_CODE_TABS-->
-
 There is a PouchDB plugin for the sign up, log in and log out flow:
 [PouchDB Authentication](https://github.com/pouchdb-community/pouchdb-authentication).
 

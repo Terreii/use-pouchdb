@@ -11,9 +11,9 @@ test('should render a Provider which provide the passed pouchdb database', () =>
   const myPouch = new PouchDB('test', { adapter: 'memory' })
 
   const { result } = renderHook(() => useContext(PouchContext), {
-    wrapper: ({ children }) => (
-      <Provider pouchdb={myPouch}>{children}</Provider>
-    ),
+    wrapper: function Wrapper({ children }: { children: React.ReactChildren }) {
+      return <Provider pouchdb={myPouch}>{children}</Provider>
+    },
   })
 
   expect(result.current.pouchdb).toBe(myPouch)
@@ -31,7 +31,9 @@ test('should unsubscribe all when the database changes', () => {
   let db = myPouch
 
   const { result, rerender } = renderHook(() => useContext(PouchContext), {
-    wrapper: ({ children }) => <Provider pouchdb={db}>{children}</Provider>,
+    wrapper: function Wrapper({ children }: { children: React.ReactChildren }) {
+      return <Provider pouchdb={db}>{children}</Provider>
+    },
   })
 
   const unsubscribe = jest.fn()
@@ -51,9 +53,9 @@ test('should unsubscribe all when a database gets destroyed', async () => {
   const myPouch = new PouchDB('test', { adapter: 'memory' })
 
   const { result } = renderHook(() => useContext(PouchContext), {
-    wrapper: ({ children }) => (
-      <Provider pouchdb={myPouch}>{children}</Provider>
-    ),
+    wrapper: function Wrapper({ children }: { children: React.ReactChildren }) {
+      return <Provider pouchdb={myPouch}>{children}</Provider>
+    },
   })
 
   const unsubscribe = jest.fn()

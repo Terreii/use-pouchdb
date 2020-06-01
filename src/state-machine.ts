@@ -59,7 +59,7 @@ export default function useStateMachine<Result>(
 
 export type QueryState = 'loading' | 'done' | 'error'
 
-type reducerType<Result extends {}> = (
+type reducerType<Result> = (
   state: State & Result,
   action: Actions<Result>
 ) => State & Result
@@ -113,7 +113,7 @@ export interface DidError<Result = undefined> {
 
 export type Actions<T> = StartLoading | FinishedLoading<T> | DidError<T>
 
-function reducer<Result extends {}>(
+function reducer<Result>(
   state: State & Result,
   action: Actions<Result>
 ): State & Result {

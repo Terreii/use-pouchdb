@@ -17,6 +17,11 @@ afterEach(async () => {
   await myPouch.destroy()
 })
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const emit = (key: any, value?: any) => {
+  console.log('this is only for typescript and eslint', key, value)
+}
+
 test('should have subscription methods for docs and views', () => {
   const subscriptionManager = new SubscriptionManager(myPouch)
 
@@ -31,6 +36,7 @@ test('should subscribe to document updates', () => {
     cancel: jest.fn(),
   }
   const changes = jest.fn(() => changesObject)
+  const callback = jest.fn()
 
   myPouch.changes = changes
 
@@ -38,7 +44,7 @@ test('should subscribe to document updates', () => {
 
   const unsubscribe = subscriptionManager.subscribeToDocs(
     ['test', 'userDoc', 'other'],
-    (_deleted, _id, _doc) => {}
+    callback
   )
 
   expect(changes).toHaveBeenCalledWith({
@@ -51,6 +57,7 @@ test('should subscribe to document updates', () => {
   unsubscribe()
 
   expect(changesObject.cancel).toHaveBeenCalled()
+  expect(callback).not.toHaveBeenCalled()
 })
 
 test('should only subscribe once to document updates', () => {
@@ -59,6 +66,8 @@ test('should only subscribe once to document updates', () => {
     cancel: jest.fn(),
   }
   const changes = jest.fn(() => changesObject)
+  const callback1 = jest.fn()
+  const callback2 = jest.fn()
 
   myPouch.changes = changes
 
@@ -66,11 +75,11 @@ test('should only subscribe once to document updates', () => {
 
   const unsubscribe = subscriptionManager.subscribeToDocs(
     ['test', 'userDoc', 'other'],
-    (_deleted, _id, _doc) => {}
+    callback1
   )
   const unsubscribe2 = subscriptionManager.subscribeToDocs(
     ['moar', 'why_couchdb_is_awesome'],
-    (_deleted, _id, _doc) => {}
+    callback2
   )
 
   expect(changes).toHaveBeenCalledTimes(1)
@@ -79,9 +88,11 @@ test('should only subscribe once to document updates', () => {
   unsubscribe()
   expect(changesObject.cancel).not.toHaveBeenCalled()
 
+  const callback3 = jest.fn()
+
   const unsubscribe3 = subscriptionManager.subscribeToDocs(
     ['why_pouchdb_is_needed'],
-    (_deleted, _id, _doc) => {}
+    callback3
   )
   expect(changes).toHaveBeenCalledTimes(1)
 
@@ -90,6 +101,10 @@ test('should only subscribe once to document updates', () => {
 
   unsubscribe3()
   expect(changesObject.cancel).toHaveBeenCalled()
+
+  expect(callback1).not.toHaveBeenCalled()
+  expect(callback2).not.toHaveBeenCalled()
+  expect(callback3).not.toHaveBeenCalled()
 })
 
 test('should subscribe to view updates', () => {
@@ -98,6 +113,7 @@ test('should subscribe to view updates', () => {
     cancel: jest.fn(),
   }
   const changes = jest.fn(() => changesObject)
+  const callback = jest.fn()
 
   myPouch.changes = changes
 
@@ -105,7 +121,7 @@ test('should subscribe to view updates', () => {
 
   const unsubscribe = subscriptionManager.subscribeToView(
     'ddoc/aView',
-    _id => {}
+    callback
   )
 
   expect(changes).toHaveBeenCalledWith({
@@ -120,6 +136,7 @@ test('should subscribe to view updates', () => {
   unsubscribe()
 
   expect(changesObject.cancel).toHaveBeenCalled()
+  expect(callback).not.toHaveBeenCalled()
 })
 
 test('should subscribe a view updates only once', () => {
@@ -128,6 +145,7 @@ test('should subscribe a view updates only once', () => {
     cancel: jest.fn(),
   }
   const changes = jest.fn(() => changesObject)
+  const callback1 = jest.fn()
 
   myPouch.changes = changes
 
@@ -135,15 +153,17 @@ test('should subscribe a view updates only once', () => {
 
   const unsubscribe = subscriptionManager.subscribeToView(
     'ddoc/aView',
-    _id => {}
+    callback1
   )
 
   expect(changes).toHaveBeenCalledTimes(1)
   expect(changesObject.cancel).not.toHaveBeenCalled()
 
+  const callback2 = jest.fn()
+
   const unsubscribeSame = subscriptionManager.subscribeToView(
     'ddoc/aView',
-    _id => {}
+    callback2
   )
   expect(changes).toHaveBeenCalledTimes(1)
   expect(changesObject.cancel).not.toHaveBeenCalled()
@@ -151,9 +171,11 @@ test('should subscribe a view updates only once', () => {
   unsubscribe()
   expect(changesObject.cancel).not.toHaveBeenCalled()
 
+  const callback3 = jest.fn()
+
   const unsubscribeOther = subscriptionManager.subscribeToView(
     'ddoc/otherView',
-    _id => {}
+    callback3
   )
   expect(changes).toHaveBeenCalledTimes(2)
   expect(changes).toHaveBeenLastCalledWith({
@@ -169,15 +191,18 @@ test('should subscribe a view updates only once', () => {
 
   unsubscribeOther()
   expect(changesObject.cancel).toHaveBeenCalledTimes(2)
+
+  expect(callback1).not.toHaveBeenCalled()
+  expect(callback2).not.toHaveBeenCalled()
+  expect(callback3).not.toHaveBeenCalled()
 })
 
 test('should call the callback to documents with a document and to views with an id', async () => {
-  const emit = (_key: any, _value?: any) => {}
-
   await myPouch.put({
     _id: '_design/test',
     views: {
       test: {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         map: function (doc: any) {
           emit(doc.id)
         }.toString(),
@@ -235,12 +260,11 @@ test('should call the callback to documents with a document and to views with an
 })
 
 test('should have a unsubscribeAll method', async () => {
-  const emit = (_key: any, _value?: any) => {}
-
   await myPouch.put({
     _id: '_design/test',
     views: {
       test: {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         map: function (doc: any) {
           emit(doc.id)
         }.toString(),
@@ -333,7 +357,7 @@ test('should subscribe to all docs if null is passed to doc subscription', async
   const unsubscribe = subscriptionManager.subscribeToDocs(null, callback)
 
   const docs = []
-  for (var i = 0; i < 15; ++i) {
+  for (let i = 0; i < 15; ++i) {
     docs.push({
       _id: 'doc_' + Math.random(),
       value: i,

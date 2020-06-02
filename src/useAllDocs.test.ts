@@ -270,7 +270,7 @@ describe('options', () => {
   })
 
   test('should handle the conflicts option', async () => {
-    const [{ rev: revA }, { rev: revB }] = await myPouch.bulkDocs([
+    const [{ rev: revA }] = await myPouch.bulkDocs([
       { _id: 'a', test: 'value' },
       { _id: 'b', test: 'other' },
     ])
@@ -496,11 +496,8 @@ describe('options', () => {
       { id: 'a', key: 'a', value: { rev: revA } },
     ])
 
-    let revC: string
     act(() => {
-      myPouch.put({ _id: 'c', test: 'moar' }).then(result => {
-        revC = result.rev
-      })
+      myPouch.put({ _id: 'c', test: 'moar' })
     })
 
     await new Promise(resolve => {
@@ -535,11 +532,8 @@ describe('options', () => {
       { id: 'b', key: 'b', value: { rev: revB } },
     ])
 
-    let revC: string
     act(() => {
-      myPouch.put({ _id: 'c', test: 'moar' }).then(result => {
-        revC = result.rev
-      })
+      myPouch.put({ _id: 'c', test: 'moar' })
     })
 
     await new Promise(resolve => {

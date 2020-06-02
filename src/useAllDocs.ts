@@ -7,13 +7,13 @@ import useStateMachine, { ResultType } from './state-machine'
  * Get all docs or a slice of all docs and subscribe to their updates.
  * @param options PouchDB's allDocs options.
  */
-export default function useAllDocs<Content extends {}, Model = Content>(
+export default function useAllDocs<Content>(
   options?:
     | PouchDB.Core.AllDocsWithKeyOptions
     | PouchDB.Core.AllDocsWithKeysOptions
     | PouchDB.Core.AllDocsWithinRangeOptions
     | PouchDB.Core.AllDocsOptions
-): ResultType<PouchDB.Core.AllDocsResponse<Content & Model>> {
+): ResultType<PouchDB.Core.AllDocsResponse<Content>> {
   const { pouchdb: pouch, subscriptionManager } = useContext()
 
   const {
@@ -32,7 +32,7 @@ export default function useAllDocs<Content extends {}, Model = Content>(
   const { keys } = (options as PouchDB.Core.AllDocsWithKeysOptions) || {}
 
   const [state, dispatch, replace] = useStateMachine<
-    PouchDB.Core.AllDocsResponse<Content & Model>
+    PouchDB.Core.AllDocsResponse<Content>
   >(() => ({
     rows: [],
     total_rows: 0,
@@ -44,6 +44,22 @@ export default function useAllDocs<Content extends {}, Model = Content>(
     let isFetching = false
     let shouldUpdateAfter = false
 
+    const opt = {
+      include_docs,
+      conflicts,
+      attachments,
+      binary,
+      limit,
+      skip,
+      descending,
+      update_seq,
+      startkey,
+      endkey,
+      inclusive_end,
+      key,
+      keys,
+    }
+
     const fetch = async () => {
       if (isFetching) {
         shouldUpdateAfter = true
@@ -54,7 +70,7 @@ export default function useAllDocs<Content extends {}, Model = Content>(
       dispatch({ type: 'loading_started' })
 
       try {
-        const result = await pouch.allDocs<Content & Model>(options || {})
+        const result = await pouch.allDocs<Content>(opt)
 
         if (isMounted) {
           dispatch({
@@ -122,7 +138,10 @@ export default function useAllDocs<Content extends {}, Model = Content>(
       unsubscribe()
     }
   }, [
+    dispatch,
+    replace,
     pouch,
+    subscriptionManager,
     include_docs,
     conflicts,
     attachments,

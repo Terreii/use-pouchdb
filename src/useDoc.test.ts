@@ -709,7 +709,7 @@ describe('pouchdb get options', () => {
       revpos: 2,
     })
 
-    const doc = await myPouch.get<any>('test')
+    const doc = await myPouch.get<Record<string, unknown>>('test')
     doc.value = 'moreData'
     await myPouch.put(doc)
 
@@ -794,7 +794,7 @@ describe('pouchdb get options', () => {
       revpos: 2,
     })
 
-    const doc = await myPouch.get<any>('test')
+    const doc = await myPouch.get<Record<string, unknown>>('test')
     doc.value = 'moreData'
     await myPouch.put(doc)
 

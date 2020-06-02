@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useCallback } from 'react'
 
 import { useContext } from './context'
 import useStateMachine, { ResultType } from './state-machine'
@@ -13,7 +13,7 @@ type DocResultType<T> = ResultType<{
  * @param {object} [options] - PouchDB get options. Excluding 'open_revs'.
  * @param {object|function} [initialValue] - Value that should be returned while fetching the doc.
  */
-export default function useDoc<Content extends {}>(
+export default function useDoc<Content>(
   id: PouchDB.Core.DocumentId,
   options?: PouchDB.Core.GetOptions,
   initialValue?: (() => Content) | Content
@@ -25,11 +25,11 @@ export default function useDoc<Content extends {}>(
   const { rev, revs, revs_info, conflicts, attachments, binary, latest } =
     options || {}
 
-  const getInitialValue = (): { doc: Document } => {
+  const getInitialValue = useCallback((): { doc: Document } => {
     let doc: Content | null = null
 
     if (typeof initialValue === 'function') {
-      doc = (initialValue as Function)()
+      doc = (initialValue as () => Content)()
     } else if (initialValue && typeof initialValue === 'object') {
       doc = initialValue
     }
@@ -45,7 +45,7 @@ export default function useDoc<Content extends {}>(
     }
 
     return { doc: resultDoc }
-  }
+  }, [id, initialValue])
 
   const [state, dispatch] = useStateMachine(getInitialValue)
 
@@ -61,7 +61,12 @@ export default function useDoc<Content extends {}>(
         payload: getInitialValue(),
       })
     }
-  }, [id, initialValue])
+  }, [id, initialValue, getInitialValue, dispatch])
+
+  // Workaround, that initial value can change on every render, without re-run the query effect.
+  // eslint-plugin-react-hooks missing dependency for all other dependency, but getInitialValue.
+  const getInitialValueRef = useRef(getInitialValue)
+  getInitialValueRef.current = getInitialValue
 
   useEffect(() => {
     // Is this instance still current?
@@ -79,7 +84,7 @@ export default function useDoc<Content extends {}>(
           attachments,
           binary,
           latest,
-        })!
+        })
 
         if (isMounted) {
           dispatch({
@@ -94,7 +99,7 @@ export default function useDoc<Content extends {}>(
             payload: {
               error: err,
               setResult: true,
-              result: getInitialValue(),
+              result: getInitialValueRef.current(),
             },
           })
         }
@@ -106,7 +111,9 @@ export default function useDoc<Content extends {}>(
     // Use the changes feed to get updates to the document
     const unsubscribe =
       rev && !latest // but don't subscribe if a specific rev is requested.
-        ? () => {}
+        ? () => {
+            return
+          }
         : subscriptionManager.subscribeToDocs([id], (deleted, _id, doc) => {
             if (!isMounted) return
 
@@ -129,7 +136,19 @@ export default function useDoc<Content extends {}>(
       isMounted = false
       unsubscribe()
     }
-  }, [pouch, id, rev, revs, revs_info, conflicts, attachments, binary, latest])
+  }, [
+    dispatch,
+    pouch,
+    subscriptionManager,
+    id,
+    rev,
+    revs,
+    revs_info,
+    conflicts,
+    attachments,
+    binary,
+    latest,
+  ])
 
   return state
 }

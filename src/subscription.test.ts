@@ -17,8 +17,7 @@ afterEach(async () => {
   await myPouch.destroy()
 })
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const emit = (key: any, value?: any) => {
+const emit = (key: unknown, value?: unknown) => {
   console.log('this is only for typescript and eslint', key, value)
 }
 
@@ -202,8 +201,7 @@ test('should call the callback to documents with a document and to views with an
     _id: '_design/test',
     views: {
       test: {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        map: function (doc: any) {
+        map: function (doc: Record<string, unknown>) {
           emit(doc.id)
         }.toString(),
       },
@@ -264,8 +262,7 @@ test('should have a unsubscribeAll method', async () => {
     _id: '_design/test',
     views: {
       test: {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        map: function (doc: any) {
+        map: function (doc: Record<string, unknown>) {
           emit(doc.id)
         }.toString(),
       },

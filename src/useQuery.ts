@@ -1,5 +1,6 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { MISSING_DOC } from 'pouchdb-errors'
+import { isEqual } from 'underscore'
 
 import { useContext } from './context'
 import type SubscriptionManager from './subscription'
@@ -20,7 +21,7 @@ export type QueryResponse<T> = ResultType<QueryResponseBase<T>>
  * @param {string | function | object} fun The name of the view or a temporary view.
  * @param {object} [opts] PouchDB's query-options
  */
-export default function useQuery<Content extends {}, Result, Model = Content>(
+export default function useQuery<Content, Result, Model = Content>(
   fun: string | PouchDB.Map<Model, Result> | PouchDB.Filter<Model, Result>,
   opts?: PouchDB.Query.Options<Model, Result> & { update_seq?: boolean }
 ): QueryResponse<Result> {
@@ -47,10 +48,10 @@ export default function useQuery<Content extends {}, Result, Model = Content>(
     update_seq,
   } = opts || {}
 
-  const startkey = optionToString(opts?.startkey)
-  const endkey = optionToString(opts?.endkey)
-  const key = optionToString(opts?.key)
-  const keys = optionToString(opts?.keys)
+  const startkey = useDeepMemo(opts?.startkey)
+  const endkey = useDeepMemo(opts?.endkey)
+  const key = useDeepMemo(opts?.key)
+  const keys = useDeepMemo(opts?.keys)
 
   const [state, dispatch] = useStateMachine<QueryResponseBase<Result>>(() => ({
     rows: [],
@@ -72,10 +73,10 @@ export default function useQuery<Content extends {}, Result, Model = Content>(
       group,
       group_level,
       update_seq,
-      startkey: opts?.startkey,
-      endkey: opts?.endkey,
-      key: opts?.key,
-      keys: opts?.keys,
+      startkey,
+      endkey,
+      key,
+      keys,
       // stale is not yet supported
       // stale: stale,
     }
@@ -92,7 +93,9 @@ export default function useQuery<Content extends {}, Result, Model = Content>(
       )
     }
   }, [
+    dispatch,
     pouch,
+    subscriptionManager,
     fun,
     reduce,
     include_docs,
@@ -126,7 +129,7 @@ export default function useQuery<Content extends {}, Result, Model = Content>(
  */
 function doDDocQuery<Model, Result>(
   dispatch: Dispatch<PouchDB.Query.Response<Result>>,
-  pouch: PouchDB.Database<{}>,
+  pouch: PouchDB.Database<Record<string, unknown>>,
   subscriptionManager: SubscriptionManager,
   fn: string,
   option?: PouchDB.Query.Options<Model, Result>
@@ -254,7 +257,7 @@ function doDDocQuery<Model, Result>(
  */
 function doTemporaryQuery<Model, Result>(
   dispatch: Dispatch<PouchDB.Query.Response<Result>>,
-  pouch: PouchDB.Database<{}>,
+  pouch: PouchDB.Database<Record<string, unknown>>,
   subscriptionManager: SubscriptionManager,
   fn: PouchDB.Map<Model, Result> | PouchDB.Filter<Model, Result>,
   option?: PouchDB.Query.Options<Model, Result>
@@ -316,7 +319,7 @@ function doTemporaryQuery<Model, Result>(
 
   query()
 
-  let viewFunction: (doc: any, emit: (key: any, value?: any) => void) => void
+  let viewFunction: PouchDB.Map<Model, Result>
 
   if (typeof fn === 'function') {
     viewFunction = fn
@@ -325,14 +328,14 @@ function doTemporaryQuery<Model, Result>(
   }
 
   // Subscribe to updates of the view.
-  const unsubscribe = subscriptionManager.subscribeToDocs(
+  const unsubscribe = subscriptionManager.subscribeToDocs<Model>(
     null,
     (_deleted, id, doc) => {
-      let isDocInView: boolean = false
+      let isDocInView = false
 
       try {
         if (doc) {
-          viewFunction(doc, (_key: any, _value?: any) => {
+          viewFunction(doc, () => {
             isDocInView = true
           })
         }
@@ -355,20 +358,17 @@ function doTemporaryQuery<Model, Result>(
 }
 
 /**
- * Parses a option that can be a JSON data structure.
- * It is then transformed into a comparable data type (null, number, or string).
- * For example key: It can be any valid JSON type.
- * @param option A option that can be a JSON data structure.
+ * Memorize a value. Only invalidate if the value in it did change. Does a deep equal.
+ * @param option Options to memorize.
  */
-function optionToString(
-  option: any | null | undefined
-): string | number | boolean | undefined {
-  if (option != null && typeof option === 'object') {
-    // also arrays
-    return '_usePouchDB_json_encoded:' + JSON.stringify(option)
-  } else if (option || option === null) {
-    return option
-  } else {
-    return undefined
-  }
+function useDeepMemo<T>(option: T): T {
+  const last = useRef(option)
+  return useMemo(() => {
+    if (isEqual(last.current, option)) {
+      return last.current
+    } else {
+      last.current = option
+      return option
+    }
+  }, [option])
 }

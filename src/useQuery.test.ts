@@ -11,7 +11,9 @@ PouchDB.plugin(mapReduce)
 let myPouch: PouchDB.Database
 
 // mock for the view emit function
-const emit = (_key: any, _value?: any) => {}
+const emit = (key: unknown, value?: unknown) => {
+  console.log('this is only for typescript and eslint', key, value)
+}
 
 beforeEach(() => {
   myPouch = new PouchDB('test', { adapter: 'memory' })
@@ -51,8 +53,8 @@ describe('temporary function only views', () => {
     ])
 
     const view = (
-      doc: PouchDB.Core.Document<any>,
-      emit: (key: any, value?: any) => void
+      doc: PouchDB.Core.Document<Record<string, unknown>>,
+      emit: (key: unknown, value?: unknown) => void
     ) => {
       if (doc.type === 'tester') {
         emit(doc.test, 42)
@@ -91,8 +93,8 @@ describe('temporary function only views', () => {
     ])
 
     const view = (
-      doc: PouchDB.Core.Document<any>,
-      emit: (key: any, value?: any) => void
+      doc: PouchDB.Core.Document<Record<string, unknown>>,
+      emit: (key: unknown, value?: unknown) => void
     ) => {
       if (doc.type === 'tester') {
         emit(doc.test, 42)
@@ -180,8 +182,8 @@ describe('temporary function only views', () => {
     ])
 
     const view = (
-      doc: PouchDB.Core.Document<any>,
-      emit: (key: any, value?: any) => void
+      doc: PouchDB.Core.Document<Record<string, unknown>>,
+      emit: (key: unknown, value?: unknown) => void
     ) => {
       if (doc.type === 'tester') {
         emit(doc.test, 42)
@@ -239,8 +241,8 @@ describe('temporary function only views', () => {
     ])
 
     const view = (
-      doc: PouchDB.Core.Document<any>,
-      emit: (key: any, value?: any) => void
+      doc: PouchDB.Core.Document<Record<string, unknown>>,
+      emit: (key: unknown, value?: unknown) => void
     ) => {
       if (doc.type === 'tester') {
         emit(doc.test, 42)
@@ -282,8 +284,8 @@ describe('temporary function only views', () => {
       ])
 
       const view = (
-        doc: PouchDB.Core.Document<any>,
-        emit: (key: any, value?: any) => void
+        doc: PouchDB.Core.Document<Record<string, unknown>>,
+        emit: (key: unknown, value?: unknown) => void
       ) => {
         if (doc.type === 'tester') {
           emit(doc.test, 42)
@@ -349,8 +351,8 @@ describe('temporary function only views', () => {
       )
 
       const view = (
-        doc: PouchDB.Core.Document<any>,
-        emit: (key: any, value?: any) => void
+        doc: PouchDB.Core.Document<Record<string, unknown>>,
+        emit: (key: unknown, value?: unknown) => void
       ) => {
         if (doc.type === 'tester') {
           emit(doc.test, 42)
@@ -400,8 +402,8 @@ describe('temporary function only views', () => {
       ])
 
       const view = (
-        doc: PouchDB.Core.Document<any>,
-        emit: (key: any, value?: any) => void
+        doc: PouchDB.Core.Document<Record<string, unknown>>,
+        emit: (key: unknown, value?: unknown) => void
       ) => {
         if (doc.type === 'tester') {
           emit(doc.test, 42)
@@ -458,8 +460,8 @@ describe('temporary function only views', () => {
       ])
 
       const view = (
-        doc: PouchDB.Core.Document<any>,
-        emit: (key: any, value?: any) => void
+        doc: PouchDB.Core.Document<Record<string, unknown>>,
+        emit: (key: unknown, value?: unknown) => void
       ) => {
         if (doc.type === 'tester') {
           emit(doc.test, 42)
@@ -506,8 +508,8 @@ describe('temporary function only views', () => {
       ])
 
       const view = (
-        doc: PouchDB.Core.Document<any>,
-        emit: (key: any, value?: any) => void
+        doc: PouchDB.Core.Document<Record<string, unknown>>,
+        emit: (key: unknown, value?: unknown) => void
       ) => {
         if (doc.type === 'tester') {
           emit(doc.test, 42)
@@ -515,7 +517,7 @@ describe('temporary function only views', () => {
       }
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (startkey: any) => useQuery(view, { startkey }),
+        (startkey: unknown) => useQuery(view, { startkey }),
         {
           initialProps: 'x',
           pouchdb: myPouch,
@@ -548,8 +550,8 @@ describe('temporary function only views', () => {
       ])
 
       const view = (
-        doc: PouchDB.Core.Document<any>,
-        emit: (key: any, value?: any) => void
+        doc: PouchDB.Core.Document<Record<string, unknown>>,
+        emit: (key: unknown, value?: unknown) => void
       ) => {
         if (doc.type === 'tester') {
           emit(doc.test, 42)
@@ -557,7 +559,7 @@ describe('temporary function only views', () => {
       }
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (endkey: any) => useQuery(view, { endkey }),
+        (endkey: unknown) => useQuery(view, { endkey }),
         {
           initialProps: 'value\uffff',
           pouchdb: myPouch,
@@ -587,8 +589,8 @@ describe('temporary function only views', () => {
       ])
 
       const view = (
-        doc: PouchDB.Core.Document<any>,
-        emit: (key: any, value?: any) => void
+        doc: PouchDB.Core.Document<Record<string, unknown>>,
+        emit: (key: unknown, value?: unknown) => void
       ) => {
         if (doc.type === 'tester') {
           emit([doc._id, doc.test], 42)
@@ -596,7 +598,7 @@ describe('temporary function only views', () => {
       }
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        ({ startkey, endkey }: { startkey: any; endkey: any }) =>
+        ({ startkey, endkey }: { startkey: unknown; endkey: unknown }) =>
           useQuery(view, { startkey, endkey }),
         {
           initialProps: {
@@ -659,8 +661,8 @@ describe('temporary function only views', () => {
       ])
 
       const view = (
-        doc: PouchDB.Core.Document<any>,
-        emit: (key: any, value?: any) => void
+        doc: PouchDB.Core.Document<Record<string, unknown>>,
+        emit: (key: unknown, value?: unknown) => void
       ) => {
         if (doc.type === 'tester') {
           emit(doc.test, 42)
@@ -702,8 +704,8 @@ describe('temporary function only views', () => {
       ])
 
       const view = (
-        doc: PouchDB.Core.Document<any>,
-        emit: (key: any, value?: any) => void
+        doc: PouchDB.Core.Document<Record<string, unknown>>,
+        emit: (key: unknown, value?: unknown) => void
       ) => {
         if (doc.type === 'tester') {
           emit(doc.test, 42)
@@ -744,8 +746,8 @@ describe('temporary function only views', () => {
       ])
 
       const view = (
-        doc: PouchDB.Core.Document<any>,
-        emit: (key: any, value?: any) => void
+        doc: PouchDB.Core.Document<Record<string, unknown>>,
+        emit: (key: unknown, value?: unknown) => void
       ) => {
         if (doc.type === 'tester') {
           emit(doc.test, 42)
@@ -783,8 +785,8 @@ describe('temporary function only views', () => {
       ])
 
       const view = (
-        doc: PouchDB.Core.Document<any>,
-        emit: (key: any, value?: any) => void
+        doc: PouchDB.Core.Document<Record<string, unknown>>,
+        emit: (key: unknown, value?: unknown) => void
       ) => {
         if (doc.type === 'tester') {
           emit(doc.test, 42)
@@ -826,8 +828,8 @@ describe('temporary function only views', () => {
       ])
 
       const view = (
-        doc: PouchDB.Core.Document<any>,
-        emit: (key: any, value?: any) => void
+        doc: PouchDB.Core.Document<Record<string, unknown>>,
+        emit: (key: unknown, value?: unknown) => void
       ) => {
         if (doc.type === 'tester') {
           emit(doc.test, 42)
@@ -835,7 +837,7 @@ describe('temporary function only views', () => {
       }
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (key: any) => useQuery(view, { key }),
+        (key: unknown) => useQuery(view, { key }),
         {
           initialProps: 'value',
           pouchdb: myPouch,
@@ -867,8 +869,8 @@ describe('temporary function only views', () => {
       ])
 
       const view = (
-        doc: PouchDB.Core.Document<any>,
-        emit: (key: any, value?: any) => void
+        doc: PouchDB.Core.Document<Record<string, unknown>>,
+        emit: (key: unknown, value?: unknown) => void
       ) => {
         if (doc.type === 'tester') {
           emit(doc.test, 42)
@@ -876,7 +878,7 @@ describe('temporary function only views', () => {
       }
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (keys: any[]) => useQuery(view, { keys }),
+        (keys: unknown[]) => useQuery(view, { keys }),
         {
           initialProps: ['value'],
           pouchdb: myPouch,
@@ -909,8 +911,8 @@ describe('temporary function only views', () => {
       ])
 
       const view = (
-        doc: PouchDB.Core.Document<any>,
-        emit: (key: any, value?: any) => void
+        doc: PouchDB.Core.Document<Record<string, unknown>>,
+        emit: (key: unknown, value?: unknown) => void
       ) => {
         if (doc.type === 'tester') {
           emit([doc._id, doc.test], 42)
@@ -918,7 +920,7 @@ describe('temporary function only views', () => {
       }
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (option: { key?: any; keys?: any[] }) => useQuery(view, option),
+        (option: { key?: unknown; keys?: unknown[] }) => useQuery(view, option),
         {
           initialProps: {
             key: ['b', 'other'],
@@ -1002,8 +1004,8 @@ describe('temporary function only views', () => {
       ])
 
       const view = (
-        doc: PouchDB.Core.Document<any>,
-        emit: (key: any, value?: any) => void
+        doc: PouchDB.Core.Document<Record<string, unknown>>,
+        emit: (key: unknown, value?: unknown) => void
       ) => {
         if (doc.type === 'tester') {
           emit(doc.test, 42)
@@ -1042,8 +1044,8 @@ describe('temporary views objects', () => {
 
     const view = {
       map: (
-        doc: PouchDB.Core.Document<any>,
-        emit: (key: any, value?: any) => void
+        doc: PouchDB.Core.Document<Record<string, unknown>>,
+        emit: (key: unknown, value?: unknown) => void
       ) => {
         if (doc.type === 'tester') {
           emit(doc.test, 42)
@@ -1084,8 +1086,8 @@ describe('temporary views objects', () => {
 
     const view = {
       map: (
-        doc: PouchDB.Core.Document<any>,
-        emit: (key: any, value?: any) => void
+        doc: PouchDB.Core.Document<Record<string, unknown>>,
+        emit: (key: unknown, value?: unknown) => void
       ) => {
         if (doc.type === 'tester') {
           emit(doc.test, 42)
@@ -1175,8 +1177,8 @@ describe('temporary views objects', () => {
 
     const view = {
       map: (
-        doc: PouchDB.Core.Document<any>,
-        emit: (key: any, value?: any) => void
+        doc: PouchDB.Core.Document<Record<string, unknown>>,
+        emit: (key: unknown, value?: unknown) => void
       ) => {
         if (doc.type === 'tester') {
           emit(doc.test, 42)
@@ -1236,8 +1238,8 @@ describe('temporary views objects', () => {
 
     const view = {
       map: (
-        doc: PouchDB.Core.Document<any>,
-        emit: (key: any, value?: any) => void
+        doc: PouchDB.Core.Document<Record<string, unknown>>,
+        emit: (key: unknown, value?: unknown) => void
       ) => {
         if (doc.type === 'tester') {
           emit(doc.test, 42)
@@ -1281,8 +1283,8 @@ describe('temporary views objects', () => {
 
       const view = {
         map: (
-          doc: PouchDB.Core.Document<any>,
-          emit: (key: any, value?: any) => void
+          doc: PouchDB.Core.Document<Record<string, unknown>>,
+          emit: (key: unknown, value?: unknown) => void
         ) => {
           if (doc.type === 'tester') {
             emit(doc.test, 42)
@@ -1322,8 +1324,8 @@ describe('temporary views objects', () => {
 
       const view = {
         map: (
-          doc: PouchDB.Core.Document<any>,
-          emit: (key: any, value?: any) => void
+          doc: PouchDB.Core.Document<Record<string, unknown>>,
+          emit: (key: unknown, value?: unknown) => void
         ) => {
           if (doc.type === 'tester') {
             emit(doc.test, 42)
@@ -1391,8 +1393,8 @@ describe('temporary views objects', () => {
 
       const view = {
         map: (
-          doc: PouchDB.Core.Document<any>,
-          emit: (key: any, value?: any) => void
+          doc: PouchDB.Core.Document<Record<string, unknown>>,
+          emit: (key: unknown, value?: unknown) => void
         ) => {
           if (doc.type === 'tester') {
             emit(doc.test, 42)
@@ -1444,8 +1446,8 @@ describe('temporary views objects', () => {
 
       const view = {
         map: (
-          doc: PouchDB.Core.Document<any>,
-          emit: (key: any, value?: any) => void
+          doc: PouchDB.Core.Document<Record<string, unknown>>,
+          emit: (key: unknown, value?: unknown) => void
         ) => {
           if (doc.type === 'tester') {
             emit(doc.test, 42)
@@ -1504,8 +1506,8 @@ describe('temporary views objects', () => {
 
       const view = {
         map: (
-          doc: PouchDB.Core.Document<any>,
-          emit: (key: any, value?: any) => void
+          doc: PouchDB.Core.Document<Record<string, unknown>>,
+          emit: (key: unknown, value?: unknown) => void
         ) => {
           if (doc.type === 'tester') {
             emit(doc.test, 42)
@@ -1554,8 +1556,8 @@ describe('temporary views objects', () => {
 
       const view = {
         map: (
-          doc: PouchDB.Core.Document<any>,
-          emit: (key: any, value?: any) => void
+          doc: PouchDB.Core.Document<Record<string, unknown>>,
+          emit: (key: unknown, value?: unknown) => void
         ) => {
           if (doc.type === 'tester') {
             emit(doc.test, 42)
@@ -1564,7 +1566,7 @@ describe('temporary views objects', () => {
       }
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (startkey: any) => useQuery(view, { startkey }),
+        (startkey: unknown) => useQuery(view, { startkey }),
         {
           initialProps: 'x',
           pouchdb: myPouch,
@@ -1598,8 +1600,8 @@ describe('temporary views objects', () => {
 
       const view = {
         map: (
-          doc: PouchDB.Core.Document<any>,
-          emit: (key: any, value?: any) => void
+          doc: PouchDB.Core.Document<Record<string, unknown>>,
+          emit: (key: unknown, value?: unknown) => void
         ) => {
           if (doc.type === 'tester') {
             emit(doc.test, 42)
@@ -1608,7 +1610,7 @@ describe('temporary views objects', () => {
       }
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (endkey: any) => useQuery(view, { endkey }),
+        (endkey: unknown) => useQuery(view, { endkey }),
         {
           initialProps: 'value\uffff',
           pouchdb: myPouch,
@@ -1639,8 +1641,8 @@ describe('temporary views objects', () => {
 
       const view = {
         map: (
-          doc: PouchDB.Core.Document<any>,
-          emit: (key: any, value?: any) => void
+          doc: PouchDB.Core.Document<Record<string, unknown>>,
+          emit: (key: unknown, value?: unknown) => void
         ) => {
           if (doc.type === 'tester') {
             emit([doc._id, doc.test], 42)
@@ -1649,7 +1651,7 @@ describe('temporary views objects', () => {
       }
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        ({ startkey, endkey }: { startkey: any; endkey: any }) =>
+        ({ startkey, endkey }: { startkey: unknown; endkey: unknown }) =>
           useQuery(view, { startkey, endkey }),
         {
           initialProps: {
@@ -1713,8 +1715,8 @@ describe('temporary views objects', () => {
 
       const view = {
         map: (
-          doc: PouchDB.Core.Document<any>,
-          emit: (key: any, value?: any) => void
+          doc: PouchDB.Core.Document<Record<string, unknown>>,
+          emit: (key: unknown, value?: unknown) => void
         ) => {
           if (doc.type === 'tester') {
             emit(doc.test, 42)
@@ -1758,8 +1760,8 @@ describe('temporary views objects', () => {
 
       const view = {
         map: (
-          doc: PouchDB.Core.Document<any>,
-          emit: (key: any, value?: any) => void
+          doc: PouchDB.Core.Document<Record<string, unknown>>,
+          emit: (key: unknown, value?: unknown) => void
         ) => {
           if (doc.type === 'tester') {
             emit(doc.test, 42)
@@ -1802,8 +1804,8 @@ describe('temporary views objects', () => {
 
       const view = {
         map: (
-          doc: PouchDB.Core.Document<any>,
-          emit: (key: any, value?: any) => void
+          doc: PouchDB.Core.Document<Record<string, unknown>>,
+          emit: (key: unknown, value?: unknown) => void
         ) => {
           if (doc.type === 'tester') {
             emit(doc.test, 42)
@@ -1843,8 +1845,8 @@ describe('temporary views objects', () => {
 
       const view = {
         map: (
-          doc: PouchDB.Core.Document<any>,
-          emit: (key: any, value?: any) => void
+          doc: PouchDB.Core.Document<Record<string, unknown>>,
+          emit: (key: unknown, value?: unknown) => void
         ) => {
           if (doc.type === 'tester') {
             emit(doc.test, 42)
@@ -1888,8 +1890,8 @@ describe('temporary views objects', () => {
 
       const view = {
         map: (
-          doc: PouchDB.Core.Document<any>,
-          emit: (key: any, value?: any) => void
+          doc: PouchDB.Core.Document<Record<string, unknown>>,
+          emit: (key: unknown, value?: unknown) => void
         ) => {
           if (doc.type === 'tester') {
             emit(doc.test, 42)
@@ -1898,7 +1900,7 @@ describe('temporary views objects', () => {
       }
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (key: any) => useQuery(view, { key }),
+        (key: unknown) => useQuery(view, { key }),
         {
           initialProps: 'value',
           pouchdb: myPouch,
@@ -1931,8 +1933,8 @@ describe('temporary views objects', () => {
 
       const view = {
         map: (
-          doc: PouchDB.Core.Document<any>,
-          emit: (key: any, value?: any) => void
+          doc: PouchDB.Core.Document<Record<string, unknown>>,
+          emit: (key: unknown, value?: unknown) => void
         ) => {
           if (doc.type === 'tester') {
             emit(doc.test, 42)
@@ -1941,7 +1943,7 @@ describe('temporary views objects', () => {
       }
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (keys: any[]) => useQuery(view, { keys }),
+        (keys: unknown[]) => useQuery(view, { keys }),
         {
           initialProps: ['value'],
           pouchdb: myPouch,
@@ -1975,8 +1977,8 @@ describe('temporary views objects', () => {
 
       const view = {
         map: (
-          doc: PouchDB.Core.Document<any>,
-          emit: (key: any, value?: any) => void
+          doc: PouchDB.Core.Document<Record<string, unknown>>,
+          emit: (key: unknown, value?: unknown) => void
         ) => {
           if (doc.type === 'tester') {
             emit(doc.test, 42)
@@ -2009,7 +2011,7 @@ describe('temporary views objects', () => {
       ])
     })
 
-    test('should handle the group option', async () => {
+    test('should handle the group_level option', async () => {
       await myPouch.bulkDocs([
         { _id: 'a', test: 'value', type: 'tester' },
         { _id: 'b', test: 'value', type: 'tester' },
@@ -2018,8 +2020,8 @@ describe('temporary views objects', () => {
 
       const view = {
         map: (
-          doc: PouchDB.Core.Document<any>,
-          emit: (key: any, value?: any) => void
+          doc: PouchDB.Core.Document<Record<string, unknown>>,
+          emit: (key: unknown, value?: unknown) => void
         ) => {
           if (doc.type === 'tester') {
             emit([13, doc.test], 42)
@@ -2061,8 +2063,8 @@ describe('temporary views objects', () => {
 
       const view = {
         map: (
-          doc: PouchDB.Core.Document<any>,
-          emit: (key: any, value?: any) => void
+          doc: PouchDB.Core.Document<Record<string, unknown>>,
+          emit: (key: unknown, value?: unknown) => void
         ) => {
           if (doc.type === 'tester') {
             emit([doc._id, doc.test], 42)
@@ -2071,7 +2073,7 @@ describe('temporary views objects', () => {
       }
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (option: { key?: any; keys?: any[] }) => useQuery(view, option),
+        (option: { key?: unknown; keys?: unknown[] }) => useQuery(view, option),
         {
           initialProps: {
             key: ['b', 'other'],
@@ -2156,8 +2158,8 @@ describe('temporary views objects', () => {
 
       const view = {
         map: (
-          doc: PouchDB.Core.Document<any>,
-          emit: (key: any, value?: any) => void
+          doc: PouchDB.Core.Document<Record<string, unknown>>,
+          emit: (key: unknown, value?: unknown) => void
         ) => {
           if (doc.type === 'tester') {
             emit([doc._id, doc.test], 42)
@@ -2199,7 +2201,7 @@ describe('design documents', () => {
       _id: '_design/ddoc',
       views: {
         test: {
-          map: function (doc: PouchDB.Core.Document<any>) {
+          map: function (doc: PouchDB.Core.Document<Record<string, unknown>>) {
             if (doc.type === 'tester') {
               emit(doc.test, 42)
             }
@@ -2267,7 +2269,7 @@ describe('design documents', () => {
       _id: '_design/ddoc',
       views: {
         test: {
-          map: function (doc: PouchDB.Core.Document<any>) {
+          map: function (doc: PouchDB.Core.Document<Record<string, unknown>>) {
             if (doc.type === 'tester') {
               emit(doc.test, 42)
             }
@@ -2364,7 +2366,7 @@ describe('design documents', () => {
       _id: '_design/ddoc',
       views: {
         test: {
-          map: function (doc: PouchDB.Core.Document<any>) {
+          map: function (doc: PouchDB.Core.Document<Record<string, unknown>>) {
             if (doc.type === 'tester') {
               emit(doc.test, 42)
             }
@@ -2407,7 +2409,7 @@ describe('design documents', () => {
       _id: '_design/ddoc',
       views: {
         test: {
-          map: function (doc: PouchDB.Core.Document<any>) {
+          map: function (doc: PouchDB.Core.Document<Record<string, unknown>>) {
             if (doc.type === 'tester') {
               emit(doc.test, 42)
             }
@@ -2453,7 +2455,7 @@ describe('design documents', () => {
       _id: '_design/ddoc',
       views: {
         test: {
-          map: function (doc: PouchDB.Core.Document<any>) {
+          map: function (doc: PouchDB.Core.Document<Record<string, unknown>>) {
             if (doc.type === 'tester') {
               emit(doc.test, 42)
             }
@@ -2520,7 +2522,7 @@ describe('design documents', () => {
       _id: '_design/ddoc',
       views: {
         test: {
-          map: function (doc: PouchDB.Core.Document<any>) {
+          map: function (doc: PouchDB.Core.Document<Record<string, unknown>>) {
             if (doc.type === 'tester') {
               emit(doc.test, 42)
             }
@@ -2572,7 +2574,9 @@ describe('design documents', () => {
         _id: '_design/ddoc',
         views: {
           test: {
-            map: function (doc: PouchDB.Core.Document<any>) {
+            map: function (
+              doc: PouchDB.Core.Document<Record<string, unknown>>
+            ) {
               if (doc.type === 'tester') {
                 emit(doc.test, 42)
               }
@@ -2617,7 +2621,9 @@ describe('design documents', () => {
         _id: '_design/ddoc',
         views: {
           test: {
-            map: function (doc: PouchDB.Core.Document<any>) {
+            map: function (
+              doc: PouchDB.Core.Document<Record<string, unknown>>
+            ) {
               if (doc.type === 'tester') {
                 emit(doc.test, 42)
               }
@@ -2690,7 +2696,9 @@ describe('design documents', () => {
         _id: '_design/ddoc',
         views: {
           test: {
-            map: function (doc: PouchDB.Core.Document<any>) {
+            map: function (
+              doc: PouchDB.Core.Document<Record<string, unknown>>
+            ) {
               if (doc.type === 'tester') {
                 emit(doc.test, 42)
               }
@@ -2747,7 +2755,9 @@ describe('design documents', () => {
         _id: '_design/ddoc',
         views: {
           test: {
-            map: function (doc: PouchDB.Core.Document<any>) {
+            map: function (
+              doc: PouchDB.Core.Document<Record<string, unknown>>
+            ) {
               if (doc.type === 'tester') {
                 emit(doc.test, 42)
               }
@@ -2811,7 +2821,9 @@ describe('design documents', () => {
         _id: '_design/ddoc',
         views: {
           test: {
-            map: function (doc: PouchDB.Core.Document<any>) {
+            map: function (
+              doc: PouchDB.Core.Document<Record<string, unknown>>
+            ) {
               if (doc.type === 'tester') {
                 emit(doc.test, 42)
               }
@@ -2869,7 +2881,9 @@ describe('design documents', () => {
         _id: '_design/ddoc',
         views: {
           test: {
-            map: function (doc: PouchDB.Core.Document<any>) {
+            map: function (
+              doc: PouchDB.Core.Document<Record<string, unknown>>
+            ) {
               if (doc.type === 'tester') {
                 emit(doc.test, 42)
               }
@@ -2881,7 +2895,7 @@ describe('design documents', () => {
       await myPouch.put(ddoc)
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (startkey: any) => useQuery('ddoc/test', { startkey }),
+        (startkey: unknown) => useQuery('ddoc/test', { startkey }),
         {
           initialProps: 'x',
           pouchdb: myPouch,
@@ -2917,7 +2931,9 @@ describe('design documents', () => {
         _id: '_design/ddoc',
         views: {
           test: {
-            map: function (doc: PouchDB.Core.Document<any>) {
+            map: function (
+              doc: PouchDB.Core.Document<Record<string, unknown>>
+            ) {
               if (doc.type === 'tester') {
                 emit(doc.test, 42)
               }
@@ -2929,7 +2945,7 @@ describe('design documents', () => {
       await myPouch.put(ddoc)
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (endkey: any) => useQuery('ddoc/test', { endkey }),
+        (endkey: unknown) => useQuery('ddoc/test', { endkey }),
         {
           initialProps: 'value\uffff',
           pouchdb: myPouch,
@@ -2962,7 +2978,9 @@ describe('design documents', () => {
         _id: '_design/ddoc',
         views: {
           test: {
-            map: function (doc: PouchDB.Core.Document<any>) {
+            map: function (
+              doc: PouchDB.Core.Document<Record<string, unknown>>
+            ) {
               if (doc.type === 'tester') {
                 emit([doc._id, doc.test], 42)
               }
@@ -2974,7 +2992,7 @@ describe('design documents', () => {
       await myPouch.put(ddoc)
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        ({ startkey, endkey }: { startkey: any; endkey: any }) =>
+        ({ startkey, endkey }: { startkey: unknown; endkey: unknown }) =>
           useQuery('ddoc/test', { startkey, endkey }),
         {
           initialProps: {
@@ -3040,7 +3058,9 @@ describe('design documents', () => {
         _id: '_design/ddoc',
         views: {
           test: {
-            map: function (doc: PouchDB.Core.Document<any>) {
+            map: function (
+              doc: PouchDB.Core.Document<Record<string, unknown>>
+            ) {
               if (doc.type === 'tester') {
                 emit(doc.test, 42)
               }
@@ -3089,7 +3109,9 @@ describe('design documents', () => {
         _id: '_design/ddoc',
         views: {
           test: {
-            map: function (doc: PouchDB.Core.Document<any>) {
+            map: function (
+              doc: PouchDB.Core.Document<Record<string, unknown>>
+            ) {
               if (doc.type === 'tester') {
                 emit(doc.test, 42)
               }
@@ -3137,7 +3159,9 @@ describe('design documents', () => {
         _id: '_design/ddoc',
         views: {
           test: {
-            map: function (doc: PouchDB.Core.Document<any>) {
+            map: function (
+              doc: PouchDB.Core.Document<Record<string, unknown>>
+            ) {
               if (doc.type === 'tester') {
                 emit(doc.test, 42)
               }
@@ -3182,7 +3206,9 @@ describe('design documents', () => {
         _id: '_design/ddoc',
         views: {
           test: {
-            map: function (doc: PouchDB.Core.Document<any>) {
+            map: function (
+              doc: PouchDB.Core.Document<Record<string, unknown>>
+            ) {
               if (doc.type === 'tester') {
                 emit(doc.test, 42)
               }
@@ -3231,7 +3257,9 @@ describe('design documents', () => {
         _id: '_design/ddoc',
         views: {
           test: {
-            map: function (doc: PouchDB.Core.Document<any>) {
+            map: function (
+              doc: PouchDB.Core.Document<Record<string, unknown>>
+            ) {
               if (doc.type === 'tester') {
                 emit(doc.test, 42)
               }
@@ -3243,7 +3271,7 @@ describe('design documents', () => {
       await myPouch.put(ddoc)
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (key: any) => useQuery('ddoc/test', { key }),
+        (key: unknown) => useQuery('ddoc/test', { key }),
         {
           initialProps: 'value',
           pouchdb: myPouch,
@@ -3278,7 +3306,9 @@ describe('design documents', () => {
         _id: '_design/ddoc',
         views: {
           test: {
-            map: function (doc: PouchDB.Core.Document<any>) {
+            map: function (
+              doc: PouchDB.Core.Document<Record<string, unknown>>
+            ) {
               if (doc.type === 'tester') {
                 emit(doc.test, 42)
               }
@@ -3290,7 +3320,7 @@ describe('design documents', () => {
       await myPouch.put(ddoc)
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (keys: any[]) => useQuery('ddoc/test', { keys }),
+        (keys: unknown[]) => useQuery('ddoc/test', { keys }),
         {
           initialProps: ['value'],
           pouchdb: myPouch,
@@ -3326,7 +3356,9 @@ describe('design documents', () => {
         _id: '_design/ddoc',
         views: {
           test: {
-            map: function (doc: PouchDB.Core.Document<any>) {
+            map: function (
+              doc: PouchDB.Core.Document<Record<string, unknown>>
+            ) {
               if (doc.type === 'tester') {
                 emit(doc.test, 42)
               }
@@ -3362,7 +3394,7 @@ describe('design documents', () => {
       ])
     })
 
-    test('should handle the group option', async () => {
+    test('should handle the group_level option', async () => {
       await myPouch.bulkDocs([
         { _id: 'a', test: 'value', type: 'tester' },
         { _id: 'b', test: 'value', type: 'tester' },
@@ -3373,7 +3405,9 @@ describe('design documents', () => {
         _id: '_design/ddoc',
         views: {
           test: {
-            map: function (doc: PouchDB.Core.Document<any>) {
+            map: function (
+              doc: PouchDB.Core.Document<Record<string, unknown>>
+            ) {
               if (doc.type === 'tester') {
                 emit([13, doc.test], 42)
               }
@@ -3420,7 +3454,9 @@ describe('design documents', () => {
         _id: '_design/ddoc',
         views: {
           test: {
-            map: function (doc: PouchDB.Core.Document<any>) {
+            map: function (
+              doc: PouchDB.Core.Document<Record<string, unknown>>
+            ) {
               if (doc.type === 'tester') {
                 emit([doc._id, doc.test], 42)
               }
@@ -3432,7 +3468,8 @@ describe('design documents', () => {
       await myPouch.put(ddoc)
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (option: { key?: any; keys?: any[] }) => useQuery('ddoc/test', option),
+        (option: { key?: unknown; keys?: unknown[] }) =>
+          useQuery('ddoc/test', option),
         {
           initialProps: {
             key: ['b', 'other'],
@@ -3519,7 +3556,9 @@ describe('design documents', () => {
         _id: '_design/ddoc',
         views: {
           test: {
-            map: function (doc: PouchDB.Core.Document<any>) {
+            map: function (
+              doc: PouchDB.Core.Document<Record<string, unknown>>
+            ) {
               if (doc.type === 'tester') {
                 emit([doc._id, doc.test], 42)
               }

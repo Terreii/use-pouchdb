@@ -63,6 +63,9 @@ descriptions are copied from the PouchDB API page.
    - `options.update_seq?: boolean` - Include an `update_seq` value indicating which sequence id of the underlying
      database the view reflects.
 
+> `startkey`, `endkey`, `key` and `keys` are check for equality with a deep equal algorithm.
+> And only if they differentiate by _value_ will a new query be made.
+
 ## Result
 
 `useQuery` results an object with those fields:

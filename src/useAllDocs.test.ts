@@ -166,7 +166,6 @@ test('should reload if a change did happen while a query is running', async () =
   await waitForNextUpdate()
 
   expect(result.current.state).toBe('done')
-  expect(result.current.rows.map(doc => doc))
   expect(result.current.rows).toEqual([
     { id: 'a', key: 'a', value: { rev: revA } },
     { id: 'b', key: 'b', value: { rev: revB } },

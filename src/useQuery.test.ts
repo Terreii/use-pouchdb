@@ -2011,7 +2011,7 @@ describe('temporary views objects', () => {
       ])
     })
 
-    test('should handle the group option', async () => {
+    test('should handle the group_level option', async () => {
       await myPouch.bulkDocs([
         { _id: 'a', test: 'value', type: 'tester' },
         { _id: 'b', test: 'value', type: 'tester' },
@@ -3394,7 +3394,7 @@ describe('design documents', () => {
       ])
     })
 
-    test('should handle the group option', async () => {
+    test('should handle the group_level option', async () => {
       await myPouch.bulkDocs([
         { _id: 'a', test: 'value', type: 'tester' },
         { _id: 'b', test: 'value', type: 'tester' },

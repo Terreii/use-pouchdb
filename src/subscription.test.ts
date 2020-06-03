@@ -338,7 +338,7 @@ test('should clone the documents that are passed to document callbacks', async (
 
   docs[0].value = 43
 
-  expect(docs.length).toBe(2)
+  expect(docs).toHaveLength(2)
   expect(docs[0].value).toBe(43)
   expect(docs[1].value).toBe(42)
 

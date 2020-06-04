@@ -18,8 +18,8 @@
       "api/use-pouch": {
         "title": "usePouch"
       },
-      "api/use-query": {
-        "title": "useQuery"
+      "api/use-view": {
+        "title": "useView"
       },
       "basics/add-todo": {
         "title": "Add Todos"

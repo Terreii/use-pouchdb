@@ -1,11 +1,11 @@
 ---
-id: use-query
-title: useQuery
+id: use-view
+title: useView
 ---
 
 ## Overview
 
-For accessing [map-reduce view](https://pouchdb.com/guides/queries.html) use the `useQuery` hook.
+For accessing [map-reduce view](https://pouchdb.com/guides/queries.html) use the `useView` hook.
 
 It also subscripts to updates of the view. With the added bonus of also subscribing to updates of the documents in
 the [result](#result). If you update or delete a document in a way that would remove it from the view, than it will
@@ -13,11 +13,11 @@ be removed from the result of this hook.
 
 Read more about views in [CouchDB's Guide to Views](https://docs.couchdb.org/en/stable/ddocs/views/index.html).
 
-`useQuery` can only be invoked from a component nested inside of a `<Provider />`.
+`useView` can only be invoked from a component nested inside of a `<Provider />`.
 
 ## Parameters
 
-`useQuery` has the same options as [`db.query()`](https://pouchdb.com/api.html#query_database). Options
+`useView` has the same options as [`db.query()`](https://pouchdb.com/api.html#query_database). Options
 descriptions are copied from the PouchDB API page.
 
 1. `fun: string | PouchDB.Map` - Map/reduce function, which can be one of the following:
@@ -68,7 +68,7 @@ descriptions are copied from the PouchDB API page.
 
 ## Result
 
-`useQuery` results an object with those fields:
+`useView` results an object with those fields:
 
 - `rows: object[]` - Array of objects that contain the requested information. Empty during the first fetch or
   during an error. Each object has following fields:
@@ -93,11 +93,11 @@ descriptions are copied from the PouchDB API page.
 
 ## Example Usage
 
-`useQuery` is for more more complex secondary indexes and statistics.
+`useView` is for more more complex secondary indexes and statistics.
 
 ### Find by tags
 
-If you use a tag system and want to list all documents with this tag, then use `useQuery`.
+If you use a tag system and want to list all documents with this tag, then use `useView`.
 
 ```javascript
 var designDoc = {
@@ -120,16 +120,21 @@ var designDoc = {
 
 ```jsx
 import React from 'react'
-import { useAllDocs } from 'use-pouchdb'
+import { useView } from 'use-pouchdb'
+import { ErrorMessage } from './ErrorMessage'
 
 export function ListAllOfTag({ tag }) {
-  const { rows, loading } = useQuery('app/tags', {
+  const { rows, loading, error } = useView('app/tags', {
     key: tag,
     reduce: false, // don't reduce
   })
 
   if (loading && rows.length === 0) {
     return <div>loading ...</div>
+  }
+
+  if (error) {
+    return <ErrorMessage error={error}>
   }
 
   return (
@@ -169,16 +174,21 @@ var designDoc = {
 
 ```jsx
 import React from 'react'
-import { useAllDocs } from 'use-pouchdb'
+import { useView } from 'use-pouchdb'
+import { ErrorMessage } from './ErrorMessage'
 
 export function ListAllTags() {
-  const { rows, loading } = useQuery('app/tags', {
+  const { rows, loading, error } = useView('app/tags', {
     group: true,
     // reduce: true // do reduce
   })
 
   if (loading && rows.length === 0) {
     return <div>loading ...</div>
+  }
+
+  if (error) {
+    return <ErrorMessage error={error}>
   }
 
   return (
@@ -231,10 +241,11 @@ var designDoc = {
 
 ```jsx
 import React from 'react'
-import { useAllDocs } from 'use-pouchdb'
+import { useView } from 'use-pouchdb'
+import { ErrorMessage } from './ErrorMessage'
 
 export function BankAccountChange({ year }) {
-  const { rows, loading } = useQuery('app/tags', {
+  const { rows, loading, error } = useView('app/tags', {
     group_level: 1, // sum together all keys with the same year
     startkey: [year],
     // objects are sorted last:
@@ -245,6 +256,10 @@ export function BankAccountChange({ year }) {
 
   if (loading && rows.length === 0) {
     return <div>loading ...</div>
+  }
+
+  if (error) {
+    return <ErrorMessage error={error}>
   }
 
   return (

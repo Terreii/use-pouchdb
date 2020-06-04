@@ -58,7 +58,7 @@ We use the option `include_docs: true` to load all documents in one go. Without 
 
 > Yes `key` and `id` are a little bit redundant. But the underlying
 > [`db.allDocs`](https://pouchdb.com/api.html#batch_fetch) and
-> [`db.query`](https://pouchdb.com/api.html#query_database) (for `useQuery`) share most of their API.
+> [`db.query`](https://pouchdb.com/api.html#query_database) (for `useView`) share most of their API.
 
 Now to the `<Todo />` component:
 

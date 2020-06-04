@@ -148,19 +148,19 @@ export default function AllPosts() {
 }
 ```
 
-## useQuery
+## useView
 
 Accessing a [view](https://docs.couchdb.org/en/stable/ddocs/views/index.html 'CouchDBs Guide to Views') ([PouchDBs
 query](https://pouchdb.com/api.html#query_database 'Documentation about db.query')) is accomplished using the hook
-`useQuery`. It also automatically subscribes to updates of that view.
+`useView`. It also automatically subscribes to updates of that view.
 
 ```jsx
 import React from 'react'
 
-import { useQuery } from 'use-pouchdb'
+import { useView } from 'use-pouchdb'
 
 export default function Comments({ id }) {
-  const { rows, offset, total_rows, state, loading, error } = useQuery(
+  const { rows, offset, total_rows, state, loading, error } = useView(
     'blog/comments',
     {
       startkey: [id],

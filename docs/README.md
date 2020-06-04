@@ -18,4 +18,4 @@
   - [usePouch](./api/use-pouch.md)
   - [useDoc](./api/use-doc.md)
   - [useAllDocs](./api/use-all-docs.md)
-  - [useQuery](./api/use-query.md)
+  - [useView](./api/use-view.md)

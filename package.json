@@ -2,12 +2,14 @@
   "name": "use-pouchdb",
   "version": "1.0.0",
   "description": "React Hooks for PouchDB",
-  "main": "lib/index.js",
+  "browser": "lib/index.js",
+  "module": "lib/index.js",
   "jsnext:main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
     "build": "tsc",
     "format": "prettier --write .",
+    "prepublish": "npm run build",
     "test": "jest --watch",
     "test-ci": "jest --ci",
     "lint": "eslint ./src --ext .js,.jsx,.ts,.tsx",
@@ -34,6 +36,9 @@
     "url": "https://github.com/Terreii/use-pouchdb.git"
   },
   "homepage": "https://christopher-astfalk.de/use-pouchdb",
+  "files": [
+    "lib"
+  ],
   "devDependencies": {
     "@babel/core": "^7.10.2",
     "@babel/preset-env": "^7.10.2",

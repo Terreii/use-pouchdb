@@ -1,0 +1,33 @@
+language: node_js
+
+node_js:
+  - '10'
+  - '12'
+  - '14'
+  - 'node'
+
+# Trigger a push build on latest. PRs build on every branches.
+# Avoid double build on PRs (See https://github.com/travis-ci/travis-ci/issues/1147)
+branches:
+  only:
+    - latest
+
+jobs:
+  include:
+    - stage: docs
+      node_js: lts/*
+      script:
+        - npm run textlint
+    - stage: page
+      node_js: lts/*
+      script:
+        - git config --global user.name "${GH_NAME}"
+        - git config --global user.email "${GH_EMAIL}"
+        - echo "machine github.com login ${GH_NAME} password ${GH_TOKEN}" > ~/.netrc
+        - cd website && npm install && GIT_USER="${GH_NAME}" npm run publish-gh-pages
+
+stages:
+  - test
+  - docs
+  - name: page
+    if: branch = latest AND type != pull_request

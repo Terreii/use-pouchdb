@@ -7,7 +7,7 @@ import { Provider, PouchContext } from './context'
 
 PouchDB.plugin(memory)
 
-test('should render a Provider which provide the passed pouchdb database', () => {
+test('should render a Provider which provide the passed pouchdb database', async () => {
   const myPouch = new PouchDB('test', { adapter: 'memory' })
 
   const { result } = renderHook(() => useContext(PouchContext), {
@@ -24,9 +24,11 @@ test('should render a Provider which provide the passed pouchdb database', () =>
   expect(typeof result.current.subscriptionManager.subscribeToView).toBe(
     'function'
   )
+
+  await myPouch.destroy()
 })
 
-test('should unsubscribe all when the database changes', () => {
+test('should unsubscribe all when the database changes', async () => {
   const myPouch = new PouchDB('test', { adapter: 'memory' })
   let db = myPouch
 
@@ -43,10 +45,14 @@ test('should unsubscribe all when the database changes', () => {
 
   rerender()
 
+  await new Promise(resolve => {
+    setTimeout(resolve, 10)
+  })
+
   expect(unsubscribe).toHaveBeenCalled()
 
-  myPouch.destroy()
-  db.destroy()
+  await myPouch.destroy()
+  await db.destroy()
 })
 
 test('should unsubscribe all when a database gets destroyed', async () => {
@@ -61,7 +67,7 @@ test('should unsubscribe all when a database gets destroyed', async () => {
   const unsubscribe = jest.fn()
   result.current.subscriptionManager.unsubscribeAll = unsubscribe
 
-  myPouch.destroy()
+  await myPouch.destroy()
 
   await new Promise(resolve => {
     setTimeout(resolve, 10)

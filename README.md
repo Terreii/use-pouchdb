@@ -1,5 +1,10 @@
 # usePouchDB
 
+[![Build Status](https://travis-ci.com/Terreii/use-pouchdb.svg?branch=latest)](https://travis-ci.com/Terreii/use-pouchdb)
+[![dependencies Status](https://david-dm.org/Terreii/use-pouchdb/status.svg)](https://david-dm.org/Terreii/use-pouchdb)
+[![devDependencies Status](https://david-dm.org/Terreii/use-pouchdb/dev-status.svg)](https://david-dm.org/Terreii/use-pouchdb?type=dev)
+[![peerDependencies Status](https://david-dm.org/Terreii/use-pouchdb/peer-status.svg)](https://david-dm.org/Terreii/use-pouchdb?type=peer)
+
 [React Hooks](https://reactjs.org/) for [PouchDB](https://pouchdb.com/).
 
 ## Overview

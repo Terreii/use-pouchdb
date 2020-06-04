@@ -1,0 +1,197 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>usePouch · usePouchDB</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="## Overview"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="usePouch · usePouchDB"/><meta property="og:type" content="website"/><meta property="og:url" content="https://christopher-astfalk.de/use-pouchdb/"/><meta property="og:description" content="## Overview"/><meta property="og:image" content="https://christopher-astfalk.de/use-pouchdb/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://christopher-astfalk.de/use-pouchdb/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/use-pouchdb/img/favicon.ico"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="/use-pouchdb/js/scrollSpy.js"></script><link rel="stylesheet" href="/use-pouchdb/css/main.css"/><script src="/use-pouchdb/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/use-pouchdb/"><img class="logo" src="/use-pouchdb/img/favicon.ico" alt="usePouchDB"/><h2 class="headerTitleWithLogo">usePouchDB</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/use-pouchdb/docs/introduction/quick_start" target="_self">Docs</a></li><li class="siteNavGroupActive"><a href="/use-pouchdb/docs/api/provider" target="_self">API</a></li><li class=""><a href="/use-pouchdb/help" target="_self">Help</a></li><li class=""><a href="https://github.com/Terreii/use-pouchdb" target="_self">GitHub</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>API</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Introduction<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/introduction/quick_start">Quick Start</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/introduction/pouchdb_couchdb">PouchDB and CouchDB</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Basic Tutorial<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/basics/intro">&#x27;Basic Tutorial: Intro&#x27;</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/basics/setup">Setup</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/basics/provider">Add the Provider</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/basics/add-todo">Add Todos</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/basics/list-all">List all Todos</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/basics/update">Update docs</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/basics/sync">Sync account</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/basics/testing">Testing</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/basics/more">More</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">API<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/api/provider">Provider</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/use-pouchdb/docs/api/use-pouch">usePouch</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/api/use-doc">useDoc</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/api/use-all-docs">useAllDocs</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/api/use-view">useView</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 id="__docusaurus" class="postHeaderTitle">usePouch</h1></header><article><div><span><h2><a class="anchor" aria-hidden="true" id="overview"></a><a href="#overview" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Overview</h2>
+<p>Sometimes you need more than the provided hooks alow, the <code>usePouch</code> is for those moments. <code>usePouch</code> returns a
+reference to the <a href="https://pouchdb.com/api.html#create_database">PouchDB database</a> past into <code>&lt;Provider /&gt;</code>.</p>
+<p>It can only be invoked from a component nested inside of a <code>&lt;Provider /&gt;</code>.</p>
+<h2><a class="anchor" aria-hidden="true" id="parameters"></a><a href="#parameters" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Parameters</h2>
+<p><code>usePouch</code> doesn't have any parameters, yet.</p>
+<h2><a class="anchor" aria-hidden="true" id="result"></a><a href="#result" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Result</h2>
+<p><code>usePouch</code> returns a reference to the <a href="https://pouchdb.com/api.html#create_database">PouchDB database</a> past into
+<code>&lt;Provider /&gt;</code>.</p>
+<h2><a class="anchor" aria-hidden="true" id="example-usage"></a><a href="#example-usage" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example Usage</h2>
+<p>The <code>usePouch</code> hook is for everything not covered by the provided hooks.</p>
+<h3><a class="anchor" aria-hidden="true" id="sync"></a><a href="#sync" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Sync</h3>
+<p>Access the pouchdb instance to start sync to another database. Read more about
+<a href="https://pouchdb.com/api.html#sync">syncing at PouchDB's API documentation</a> or
+<a href="https://pouchdb.com/guides/replication.html">PouchDB's Replication guide</a>.</p>
+<pre><code class="hljs css language-jsx"><span class="hljs-keyword">import</span> React, { useState, useEffect } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<span class="hljs-keyword">import</span> PouchDB <span class="hljs-keyword">from</span> <span class="hljs-string">'pouchdb-browser'</span>
+<span class="hljs-keyword">import</span> { usePouch } <span class="hljs-keyword">from</span> <span class="hljs-string">'use-pouchdb'</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">SyncComponent</span>(<span class="hljs-params">{ username, password }</span>) </span>{
+  <span class="hljs-comment">// get the database you want to sync</span>
+  <span class="hljs-keyword">const</span> db = usePouch()
+
+  <span class="hljs-keyword">const</span> [isSyncing, setIsSyncing] = useState(<span class="hljs-literal">false</span>)
+
+  useEffect(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-keyword">if</span> (!username || !password) {
+      <span class="hljs-keyword">return</span>
+    }
+
+    <span class="hljs-keyword">const</span> url = <span class="hljs-keyword">new</span> URL(<span class="hljs-string">'/db'</span>, <span class="hljs-built_in">window</span>.location.href)
+    <span class="hljs-comment">// create the remote database with authentication</span>
+    <span class="hljs-keyword">const</span> remote = <span class="hljs-keyword">new</span> PouchDB(url.href, {
+      <span class="hljs-attr">auth</span>: {
+        username,
+        password,
+      },
+    })
+
+    <span class="hljs-comment">// start syncing</span>
+    <span class="hljs-keyword">const</span> sync = db
+      .sync(remote, { <span class="hljs-attr">live</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">retry</span>: <span class="hljs-literal">true</span> })
+      .on(<span class="hljs-string">'paused'</span>, () =&gt; {
+        setIsSyncing(<span class="hljs-literal">false</span>)
+      })
+      .on(<span class="hljs-string">'active'</span>, () =&gt; {
+        setIsSyncing(<span class="hljs-literal">true</span>)
+      })
+      .on(<span class="hljs-string">'denied'</span>, err =&gt; {
+        <span class="hljs-comment">// handle permission errors</span>
+      })
+
+    <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+      <span class="hljs-comment">// stop syncing</span>
+      sync.cancel()
+    }
+  }, [db, username, password])
+
+  <span class="hljs-keyword">if</span> (!isSyncing) {
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>
+  }
+
+  <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>syncing your data<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+}
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="creating-your-own-hooks"></a><a href="#creating-your-own-hooks" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Creating your own hooks</h3>
+<p>With access to the database, you can create your own hooks.</p>
+<pre><code class="hljs css language-javascript"><span class="hljs-keyword">import</span> { useCallback } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<span class="hljs-keyword">import</span> { usePouch } <span class="hljs-keyword">from</span> <span class="hljs-string">'use-pouchdb'</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">useAddBooking</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">const</span> db = usePouch()
+
+  <span class="hljs-keyword">return</span> useCallback(
+    <span class="hljs-keyword">async</span> (amount, name) =&gt; {
+      <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> amount !== <span class="hljs-string">'number'</span>) {
+        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">TypeError</span>(<span class="hljs-string">'amount must be a number!'</span>)
+      }
+
+      <span class="hljs-keyword">const</span> doc = {
+        <span class="hljs-attr">_id</span>: <span class="hljs-string">`booking_<span class="hljs-subst">${<span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>().toJSON()}</span>`</span>,
+        <span class="hljs-attr">type</span>: <span class="hljs-string">'booking'</span>,
+        <span class="hljs-attr">name</span>: name || <span class="hljs-string">'unknown'</span>,
+        <span class="hljs-attr">amount</span>: amount,
+      }
+
+      <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> db.put(doc)
+
+      <span class="hljs-keyword">return</span> result
+    },
+    [db]
+  )
+}
+</code></pre>
+<p>and then in your component:</p>
+<pre><code class="hljs css language-jsx"><span class="hljs-keyword">import</span> React, { useState } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+
+<span class="hljs-keyword">import</span> { useAddBooking } <span class="hljs-keyword">from</span> <span class="hljs-string">'./hooks'</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">NewBooking</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">const</span> addBooking = useAddBooking()
+
+  <span class="hljs-keyword">const</span> [name, setName] = useState()
+  <span class="hljs-keyword">const</span> [amount, setAmount] = useState(<span class="hljs-number">0</span>)
+
+  <span class="hljs-keyword">return</span> (
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">form</span>
+      <span class="hljs-attr">onSubmit</span>=<span class="hljs-string">{event</span> =&gt;</span> {
+        event.preventDefault()
+        addBooking(amount, name)
+      }}
+    &gt;
+      <span class="hljs-tag">&lt;<span class="hljs-name">label</span>&gt;</span>
+        Name of booking
+        <span class="hljs-tag">&lt;<span class="hljs-name">input</span>
+          <span class="hljs-attr">type</span>=<span class="hljs-string">"text"</span>
+          <span class="hljs-attr">value</span>=<span class="hljs-string">{name}</span>
+          <span class="hljs-attr">onChange</span>=<span class="hljs-string">{event</span> =&gt;</span> {
+            setName(event.target.value)
+          }}
+        /&gt;
+      <span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+
+      <span class="hljs-tag">&lt;<span class="hljs-name">label</span>&gt;</span>
+        Amount
+        <span class="hljs-tag">&lt;<span class="hljs-name">input</span>
+          <span class="hljs-attr">type</span>=<span class="hljs-string">"number"</span>
+          <span class="hljs-attr">required</span>
+          <span class="hljs-attr">value</span>=<span class="hljs-string">{amount}</span>
+          <span class="hljs-attr">onChange</span>=<span class="hljs-string">{event</span> =&gt;</span> {
+            setAmount(event.target.value)
+          }}
+        /&gt;
+      <span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+
+      <span class="hljs-tag">&lt;<span class="hljs-name">button</span>&gt;</span>add<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span></span>
+  )
+}
+</code></pre>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/use-pouchdb/docs/api/provider"><span class="arrow-prev">← </span><span>Provider</span></a><a class="docs-next button" href="/use-pouchdb/docs/api/use-doc"><span class="function-name-prevnext">useDoc</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#overview">Overview</a></li><li><a href="#parameters">Parameters</a></li><li><a href="#result">Result</a></li><li><a href="#example-usage">Example Usage</a><ul class="toc-headings"><li><a href="#sync">Sync</a></li><li><a href="#creating-your-own-hooks">Creating your own hooks</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/use-pouchdb/" class="nav-home"><img src="/use-pouchdb/img/favicon.ico" alt="usePouchDB" width="66" height="58"/></a><div><h5>Docs</h5><a href="/use-pouchdb/docs/introduction/quick_start">Getting Started</a><a href="/use-pouchdb/docs/api/provider">API Reference</a></div><div><h5>Contact</h5><a href="/use-pouchdb/blog">Blog</a><a href="https://github.com/Terreii/use-pouchdb" rel="noreferrer noopener">GitHub</a><a class="github-button" href="https://github.com/Terreii/use-pouchdb" data-icon="octicon-star" data-count-href="/Terreii/use-pouchdb/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a><div class="social"><a href="../impressum.html">Impressum</a></div></div></section><section class="copyright">Copyright © 2020 Christopher Astfalk</section></footer></div></body></html>

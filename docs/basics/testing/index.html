@@ -1,0 +1,236 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Testing · usePouchDB</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="Now that everything is working, let&#x27;s make sure that it stays that way!"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Testing · usePouchDB"/><meta property="og:type" content="website"/><meta property="og:url" content="https://christopher-astfalk.de/use-pouchdb/"/><meta property="og:description" content="Now that everything is working, let&#x27;s make sure that it stays that way!"/><meta property="og:image" content="https://christopher-astfalk.de/use-pouchdb/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://christopher-astfalk.de/use-pouchdb/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/use-pouchdb/img/favicon.ico"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="/use-pouchdb/js/scrollSpy.js"></script><link rel="stylesheet" href="/use-pouchdb/css/main.css"/><script src="/use-pouchdb/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/use-pouchdb/"><img class="logo" src="/use-pouchdb/img/favicon.ico" alt="usePouchDB"/><h2 class="headerTitleWithLogo">usePouchDB</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/use-pouchdb/docs/introduction/quick_start" target="_self">Docs</a></li><li class="siteNavGroupActive"><a href="/use-pouchdb/docs/api/provider" target="_self">API</a></li><li class=""><a href="/use-pouchdb/help" target="_self">Help</a></li><li class=""><a href="https://github.com/Terreii/use-pouchdb" target="_self">GitHub</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Basic Tutorial</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Introduction<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/introduction/quick_start">Quick Start</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/introduction/pouchdb_couchdb">PouchDB and CouchDB</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Basic Tutorial<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/basics/intro">&#x27;Basic Tutorial: Intro&#x27;</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/basics/setup">Setup</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/basics/provider">Add the Provider</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/basics/add-todo">Add Todos</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/basics/list-all">List all Todos</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/basics/update">Update docs</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/basics/sync">Sync account</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/use-pouchdb/docs/basics/testing">Testing</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/basics/more">More</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">API<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/api/provider">Provider</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/api/use-pouch">usePouch</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/api/use-doc">useDoc</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/api/use-all-docs">useAllDocs</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/api/use-view">useView</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 id="__docusaurus" class="postHeaderTitle">Testing</h1></header><article><div><span><p>Now that everything is working, let's make sure that it stays that way!</p>
+<h2><a class="anchor" aria-hidden="true" id="packages-to-install"></a><a href="#packages-to-install" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Packages to install</h2>
+<p>There are 3 packages I recommend you'll install:</p>
+<ul>
+<li><a href="https://www.npmjs.com/package/pouchdb-adapter-memory">pouchdb-adapter-memory</a></li>
+<li><a href="https://www.npmjs.com/package/@testing-library/react-hooks">react-hooks-testing-library</a></li>
+<li><a href="https://www.npmjs.com/package/@testing-library/react">React Testing Library</a> (pre installed with
+Create-React-App)</li>
+</ul>
+<div class="tabs"><div class="nav-tabs"><div id="tab-group-19-tab-20" class="nav-link active" data-group="group_19" data-tab="tab-group-19-content-20">npm</div><div id="tab-group-19-tab-21" class="nav-link" data-group="group_19" data-tab="tab-group-19-content-21">yarn</div></div><div class="tab-content"><div id="tab-group-19-content-20" class="tab-pane active" data-group="group_19" tabindex="-1"><div><span><pre><code class="hljs css language-sh">npm i -D pouchdb-adapter-memory @testing-library/react-hooks @testing-library/react<br /></code></pre>
+</span></div></div><div id="tab-group-19-content-21" class="tab-pane" data-group="group_19" tabindex="-1"><div><span><pre><code class="hljs css language-sh">yarn add -D pouchdb-adapter-memory @testing-library/react-hooks @testing-library/react<br /></code></pre>
+</span></div></div></div></div>
+<h3><a class="anchor" aria-hidden="true" id="pouchdb-adapter-memory"></a><a href="#pouchdb-adapter-memory" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>pouchdb-adapter-memory</h3>
+<p><a href="https://www.npmjs.com/package/pouchdb-adapter-memory">pouchdb-adapter-memory</a> is a
+<a href="https://pouchdb.com/adapters.html">PouchDB Adapter</a>. Adapters translate how your documents are stored and
+accessed. For example <a href="https://www.npmjs.com/package/pouchdb-adapter-http">pouchdb-adapter-http</a> (pre installed on
+most PouchDB setups) translates them into CouchDB's HTTP API.</p>
+<p>But pouchdb-adapter-memory only stores them in <em>memory</em>. Perfect or testing!</p>
+<h3><a class="anchor" aria-hidden="true" id="react-hooks-testing-library"></a><a href="#react-hooks-testing-library" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>react-hooks-testing-library</h3>
+<p><a href="https://www.npmjs.com/package/@testing-library/react-hooks">react-hooks-testing-library</a> is a really good testing
+library, specialized in testing React Hooks.</p>
+<p>The documentation for it can be found on <a href="https://react-hooks-testing-library.com/">https://react-hooks-testing-library.com/</a>.</p>
+<p>You can use it to test your own hooks. Be they extensions of hooks from <code>usePouchDB</code> or your own.</p>
+<h3><a class="anchor" aria-hidden="true" id="react-testing-library"></a><a href="#react-testing-library" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>React Testing Library</h3>
+<p><a href="https://www.npmjs.com/package/@testing-library/react">React Testing Library</a> comes pre-installed on
+create-react-app. It is a testing library that encourage you to test from the users perspective.</p>
+<p>The documentation for it can be found at <a href="https://testing-library.com/docs/react-testing-library/intro">https://testing-library.com/docs/react-testing-library/intro</a>.</p>
+<h2><a class="anchor" aria-hidden="true" id="tests"></a><a href="#tests" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Tests</h2>
+<p>Your tests should be closed systems. And no test before or after it should influence them. To achieve this I
+recommend that you create a new PouchDB database before each test. And that db should have the
+<code>pouchdb-adapter-http</code> active.</p>
+<pre><code class="hljs css language-javascript"><span class="hljs-comment">// Using jest</span>
+<span class="hljs-keyword">import</span> PouchDB <span class="hljs-keyword">from</span> <span class="hljs-string">'pouchdb'</span>
+<span class="hljs-keyword">import</span> memory <span class="hljs-keyword">from</span> <span class="hljs-string">'pouchdb-adapter-memory'</span>
+
+<span class="hljs-comment">// add the adapter to PouchDB</span>
+PouchDB.plugin(memory)
+
+<span class="hljs-keyword">let</span> myPouch = <span class="hljs-literal">null</span>
+
+beforeEach(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+  <span class="hljs-comment">// before each test, create a new DB with the memory adapter.</span>
+  <span class="hljs-comment">// nothing will be saved on disc!</span>
+  myPouch = <span class="hljs-keyword">new</span> PouchDB(<span class="hljs-string">'test'</span>, { <span class="hljs-attr">adapter</span>: <span class="hljs-string">'memory'</span> })
+})
+
+afterEach(<span class="hljs-keyword">async</span> () =&gt; {
+  <span class="hljs-comment">// After each test the database will get destroyed.</span>
+  <span class="hljs-comment">// No data will be left from the previous test.</span>
+  <span class="hljs-keyword">await</span> myPouch.destroy()
+})
+</code></pre>
+<p>Also remember, that you must add all needed document before/during the test!</p>
+<h3><a class="anchor" aria-hidden="true" id="components"></a><a href="#components" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Components</h3>
+<p>All hooks must be in child components of <code>&lt;Provider /&gt;</code>.</p>
+<p>For <strong>React Testing Library</strong> you can warp your component with <code>&lt;Provider /&gt;</code>:</p>
+<pre><code class="hljs css language-jsx"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<span class="hljs-keyword">import</span> { render } <span class="hljs-keyword">from</span> <span class="hljs-string">'@testing-library/react'</span>
+<span class="hljs-keyword">import</span> PouchDB <span class="hljs-keyword">from</span> <span class="hljs-string">'pouchdb'</span>
+<span class="hljs-keyword">import</span> memory <span class="hljs-keyword">from</span> <span class="hljs-string">'pouchdb-adapter-memory'</span>
+
+<span class="hljs-keyword">import</span> TodoList <span class="hljs-keyword">from</span> <span class="hljs-string">'./TodoList'</span>
+
+PouchDB.plugin(memory)
+
+<span class="hljs-keyword">let</span> myPouch = <span class="hljs-literal">null</span>
+
+beforeEach(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+  myPouch = <span class="hljs-keyword">new</span> PouchDB(<span class="hljs-string">'test'</span>, { <span class="hljs-attr">adapter</span>: <span class="hljs-string">'memory'</span> })
+})
+
+afterEach(<span class="hljs-keyword">async</span> () =&gt; {
+  <span class="hljs-keyword">await</span> myPouch.destroy()
+})
+
+test(<span class="hljs-string">'Test Component'</span>, <span class="hljs-keyword">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> putResult = <span class="hljs-keyword">await</span> myPouch.bulkDocs([
+    {
+      <span class="hljs-attr">_id</span>: <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>(<span class="hljs-number">2020</span>, <span class="hljs-number">4</span>, <span class="hljs-number">30</span>, <span class="hljs-number">22</span>, <span class="hljs-number">03</span>, <span class="hljs-number">45</span>, <span class="hljs-number">0</span>).toJSON(),
+      <span class="hljs-attr">type</span>: <span class="hljs-string">'todo'</span>,
+      <span class="hljs-attr">text</span>: <span class="hljs-string">'a todo'</span>,
+      <span class="hljs-attr">done</span>: <span class="hljs-literal">false</span>,
+    },
+    {
+      <span class="hljs-attr">_id</span>: <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>(<span class="hljs-number">2020</span>, <span class="hljs-number">4</span>, <span class="hljs-number">30</span>, <span class="hljs-number">21</span>, <span class="hljs-number">03</span>, <span class="hljs-number">45</span>, <span class="hljs-number">0</span>).toJSON(),
+      <span class="hljs-attr">type</span>: <span class="hljs-string">'todo'</span>,
+      <span class="hljs-attr">text</span>: <span class="hljs-string">'moar todo'</span>,
+      <span class="hljs-attr">done</span>: <span class="hljs-literal">false</span>,
+    },
+  ])
+
+  <span class="hljs-keyword">const</span> { queryByByText } = render(
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Provider</span> <span class="hljs-attr">pouchdb</span>=<span class="hljs-string">{db}</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">TodoList</span> /&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">Provider</span>&gt;</span></span>
+  )
+
+  <span class="hljs-keyword">const</span> first = queryByByText(<span class="hljs-string">'moar todo'</span>)
+  expect(first).toBeTruthy()
+  expect(first.nodeName).toBe(<span class="hljs-string">'SPAN'</span>)
+  expect(first.parentNode.nodeName).toBe(<span class="hljs-string">'LI'</span>)
+  expect(first.previousElementSibling.nodeName).toBe(<span class="hljs-string">'INPUT'</span>)
+  expect(first.previousElementSibling.nodeName.type).toBe(<span class="hljs-string">'checkbox'</span>)
+
+  <span class="hljs-keyword">const</span> second = queryByByText(<span class="hljs-string">'a todo'</span>)
+  expect(second).toBeTruthy()
+  expect(second.nodeName).toBe(<span class="hljs-string">'SPAN'</span>)
+  expect(second.parentNode.nodeName).toBe(<span class="hljs-string">'LI'</span>)
+  expect(second.previousElementSibling.nodeName).toBe(<span class="hljs-string">'INPUT'</span>)
+  expect(second.previousElementSibling.nodeName.type).toBe(<span class="hljs-string">'checkbox'</span>)
+
+  expect(second.parentNode.previousElementSibling).toBe(first.parentNode)
+})
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="hooks"></a><a href="#hooks" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Hooks</h3>
+<p>To test hooks that depends on one of <code>usePouchDB</code>'s hooks, you also must warp it in <code>&lt;Provider /&gt;</code>.</p>
+<p><strong>react-hooks-testing-library</strong>'s <code>renderHook</code> function can receive in the second argument a warper
+(<a href="https://react-hooks-testing-library.com/usage/advanced-hooks#context">documented here</a>).</p>
+<p>The addTodo from <a href="./add-todo"><strong>add-todo</strong></a> extracted into a hook.</p>
+<pre><code class="hljs css language-javascript"><span class="hljs-keyword">import</span> { useCallback } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<span class="hljs-keyword">import</span> { usePouch } <span class="hljs-keyword">from</span> <span class="hljs-string">'use-pouchdb'</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">useAddDoc</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">const</span> db = usePouch()
+
+  <span class="hljs-keyword">return</span> useCallback(
+    <span class="hljs-function"><span class="hljs-params">text</span> =&gt;</span> {
+      <span class="hljs-keyword">const</span> doc = {
+        <span class="hljs-attr">_id</span>: <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>().toJSON(),
+        <span class="hljs-attr">type</span>: <span class="hljs-string">'todo'</span>,
+        <span class="hljs-attr">text</span>: text,
+        <span class="hljs-attr">done</span>: <span class="hljs-literal">false</span>,
+      }
+
+      <span class="hljs-keyword">return</span> db.put(doc)
+    },
+    [db]
+  )
+}
+</code></pre>
+<pre><code class="hljs css language-jsx"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<span class="hljs-keyword">import</span> { renderHook, act } <span class="hljs-keyword">from</span> <span class="hljs-string">'@testing-library/react-hooks'</span>
+<span class="hljs-keyword">import</span> PouchDB <span class="hljs-keyword">from</span> <span class="hljs-string">'pouchdb'</span>
+<span class="hljs-keyword">import</span> memory <span class="hljs-keyword">from</span> <span class="hljs-string">'pouchdb-adapter-memory'</span>
+<span class="hljs-keyword">import</span> { Provider } <span class="hljs-keyword">from</span> <span class="hljs-string">'use-pouchdb'</span>
+
+<span class="hljs-keyword">import</span> { useAddDoc } <span class="hljs-keyword">from</span> <span class="hljs-string">'./hooks'</span>
+
+PouchDB.plugin(memory)
+
+<span class="hljs-keyword">let</span> myPouch = <span class="hljs-literal">null</span>
+
+beforeEach(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+  myPouch = <span class="hljs-keyword">new</span> PouchDB(<span class="hljs-string">'test'</span>, { <span class="hljs-attr">adapter</span>: <span class="hljs-string">'memory'</span> })
+})
+
+afterEach(<span class="hljs-keyword">async</span> () =&gt; {
+  <span class="hljs-keyword">await</span> myPouch.destroy()
+})
+
+test(<span class="hljs-string">'add document'</span>, <span class="hljs-keyword">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> wrapper = <span class="hljs-function">(<span class="hljs-params">{ children }</span>) =&gt;</span> (
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Provider</span> <span class="hljs-attr">pouchdb</span>=<span class="hljs-string">{myPouch}</span>&gt;</span>{children}<span class="hljs-tag">&lt;/<span class="hljs-name">Provider</span>&gt;</span></span>
+  )
+  <span class="hljs-keyword">const</span> { result, waitForNextUpdate } = renderHook(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> useAddDoc(), {
+    wrapper,
+  })
+
+  expect(<span class="hljs-keyword">typeof</span> result.current).toBe(<span class="hljs-string">'function'</span>)
+
+  <span class="hljs-keyword">await</span> result.current(<span class="hljs-string">'test todo'</span>)
+
+  <span class="hljs-keyword">const</span> { rows } = <span class="hljs-keyword">await</span> myPouch.allDocs({ <span class="hljs-attr">include_docs</span>: <span class="hljs-literal">true</span> })
+  expect(rows.length).toBe(<span class="hljs-number">1</span>)
+  expect(rows[<span class="hljs-number">0</span>].doc.type).toBe(<span class="hljs-string">'todo'</span>)
+  expect(rows[<span class="hljs-number">0</span>].doc.text).toBe(<span class="hljs-string">'test todo'</span>)
+  expect(rows[<span class="hljs-number">0</span>].doc.done).toBe(<span class="hljs-literal">false</span>)
+})
+</code></pre>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/use-pouchdb/docs/basics/sync"><span class="arrow-prev">← </span><span>Sync account</span></a><a class="docs-next button" href="/use-pouchdb/docs/basics/more"><span>More</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#packages-to-install">Packages to install</a><ul class="toc-headings"><li><a href="#pouchdb-adapter-memory">pouchdb-adapter-memory</a></li><li><a href="#react-hooks-testing-library">react-hooks-testing-library</a></li><li><a href="#react-testing-library">React Testing Library</a></li></ul></li><li><a href="#tests">Tests</a><ul class="toc-headings"><li><a href="#components">Components</a></li><li><a href="#hooks">Hooks</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/use-pouchdb/" class="nav-home"><img src="/use-pouchdb/img/favicon.ico" alt="usePouchDB" width="66" height="58"/></a><div><h5>Docs</h5><a href="/use-pouchdb/docs/introduction/quick_start">Getting Started</a><a href="/use-pouchdb/docs/api/provider">API Reference</a></div><div><h5>Contact</h5><a href="/use-pouchdb/blog">Blog</a><a href="https://github.com/Terreii/use-pouchdb" rel="noreferrer noopener">GitHub</a><a class="github-button" href="https://github.com/Terreii/use-pouchdb" data-icon="octicon-star" data-count-href="/Terreii/use-pouchdb/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a><div class="social"><a href="../impressum.html">Impressum</a></div></div></section><section class="copyright">Copyright © 2020 Christopher Astfalk</section></footer></div></body></html>

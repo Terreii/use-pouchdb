@@ -1,0 +1,317 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>useView · usePouchDB</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="## Overview"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="useView · usePouchDB"/><meta property="og:type" content="website"/><meta property="og:url" content="https://christopher-astfalk.de/use-pouchdb/"/><meta property="og:description" content="## Overview"/><meta property="og:image" content="https://christopher-astfalk.de/use-pouchdb/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://christopher-astfalk.de/use-pouchdb/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/use-pouchdb/img/favicon.ico"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="/use-pouchdb/js/scrollSpy.js"></script><link rel="stylesheet" href="/use-pouchdb/css/main.css"/><script src="/use-pouchdb/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/use-pouchdb/"><img class="logo" src="/use-pouchdb/img/favicon.ico" alt="usePouchDB"/><h2 class="headerTitleWithLogo">usePouchDB</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/use-pouchdb/docs/introduction/quick_start" target="_self">Docs</a></li><li class="siteNavGroupActive"><a href="/use-pouchdb/docs/api/provider" target="_self">API</a></li><li class=""><a href="/use-pouchdb/help" target="_self">Help</a></li><li class=""><a href="https://github.com/Terreii/use-pouchdb" target="_self">GitHub</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>API</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Introduction<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/introduction/quick_start">Quick Start</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/introduction/pouchdb_couchdb">PouchDB and CouchDB</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Basic Tutorial<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/basics/intro">&#x27;Basic Tutorial: Intro&#x27;</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/basics/setup">Setup</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/basics/provider">Add the Provider</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/basics/add-todo">Add Todos</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/basics/list-all">List all Todos</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/basics/update">Update docs</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/basics/sync">Sync account</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/basics/testing">Testing</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/basics/more">More</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">API<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/api/provider">Provider</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/api/use-pouch">usePouch</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/api/use-doc">useDoc</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/api/use-all-docs">useAllDocs</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/use-pouchdb/docs/api/use-view">useView</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 id="__docusaurus" class="postHeaderTitle">useView</h1></header><article><div><span><h2><a class="anchor" aria-hidden="true" id="overview"></a><a href="#overview" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Overview</h2>
+<p>For accessing <a href="https://pouchdb.com/guides/queries.html">map-reduce view</a> use the <code>useView</code> hook.</p>
+<p>It also subscripts to updates of the view. With the added bonus of also subscribing to updates of the documents in
+the <a href="#result">result</a>. If you update or delete a document in a way that would remove it from the view, than it will
+be removed from the result of this hook.</p>
+<p>If a design document isn't replicated yet, useView will error. But once it did sync, useView will query it.
+Same when the design document did change. Whenever it changes, useView will re-query.</p>
+<p>Read more about views in <a href="https://docs.couchdb.org/en/stable/ddocs/views/index.html">CouchDB's Guide to Views</a>.</p>
+<p><code>useView</code> can only be invoked from a component nested inside of a <code>&lt;Provider /&gt;</code>.</p>
+<blockquote>
+<p><code>useView</code> requires <a href="https://www.npmjs.com/package/pouchdb-mapreduce"><code>pouchdb-mapreduce</code></a> to be
+installed and setup. If you use the <a href="https://www.npmjs.com/package/pouchdb"><code>pouchdb</code></a> or
+<a href="https://www.npmjs.com/package/pouchdb-browser"><code>pouchdb-browser</code></a> packages, it is already setup.</p>
+</blockquote>
+<h2><a class="anchor" aria-hidden="true" id="parameters"></a><a href="#parameters" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Parameters</h2>
+<p><code>useView</code> has the same options as <a href="https://pouchdb.com/api.html#query_database"><code>db.query()</code></a>. Options
+descriptions are copied from the PouchDB API page.</p>
+<ol>
+<li><code>fun: string | PouchDB.Map</code> - Map/reduce function, which can be one of the following:
+<ul>
+<li>The name of a view in an existing design document. It can be <code>'designDocName/viewName'</code> or <code>'viewName'</code> as a
+shorthand for <code>'viewName/viewName'</code>.</li>
+<li>A map function. <strong>Danger! It will scan the <em>entire database</em> every time a parameter or document did change!
+Use only for development!</strong></li>
+<li>A full CouchDB-style map/reduce view <code>{map: ..., reduce: ...}</code>. <strong>Danger! It will scan the <em>entire database</em>
+every time a parameter or document did change! Use only for development!</strong></li>
+</ul></li>
+<li><code>options?: object</code> - An options object. It has the same options as
+<a href="https://pouchdb.com/api.html#query_database"><code>db.query()</code></a> with the exception that <code>options.stale</code> is not yet
+implemented.
+<ul>
+<li><code>options.reduce?: boolean</code> - Should the result be reduced by the defined <code>reduce</code> function? Defaults to <code>true</code>.
+<ul>
+<li><code>true</code> - Return the result of the reduce function.</li>
+<li><code>false</code> - Don't use the reduce function.</li>
+<li>It gets ignored if no reduce function is defined in the view.</li>
+</ul></li>
+<li><code>options.include_docs?: boolean</code> - Include the document in each row in the <code>doc</code> field.</li>
+<li><code>options.conflicts?: boolean</code> - If <code>options.include_docs</code> is <code>true</code>, include conflicts in the <code>_conflicts</code>
+field of a doc.</li>
+<li><code>options.attachments?: boolean</code> - If <code>options.include_docs</code> is <code>true</code>, include attachment data as
+base64-encoded string.</li>
+<li><code>options.binary?: boolean</code> - If <code>options.include_docs</code> and <code>options.attachments</code> are <code>true</code>, return attachment
+data as Blobs, instead of as base64-encoded strings.</li>
+<li><code>options.startkey?: any</code> - Get documents with IDs in a certain range. The range starts with this key.</li>
+<li><code>options.endkey?: any</code> - Get documents with IDs in a certain range. The range ends with this key.</li>
+<li><code>options.inclusive_end?: boolean</code> - Include rows having a key equal to the given <code>options.endkey</code>. Default is
+<code>true</code>.</li>
+<li><code>options.limit?: number</code> - Maximum number of rows to return.</li>
+<li><code>options.skip?: number</code> - Number of rows to skip before returning (warning: poor performance).</li>
+<li><code>options.descending?: boolean</code> - Reverse the order of the output rows. Also revers <code>options.startkey</code> and
+<code>options.endkey</code>!</li>
+<li><code>options.key?: any</code> - Only return rows matching this key.</li>
+<li><code>options.keys?: any[]</code> - Array of keys to fetch in a single shout.
+<ul>
+<li>Neither <code>options.startkey</code> nor <code>options.endkey</code> can be specified with this option.</li>
+<li>The rows are returned in the same order as the supplied <code>keys</code> array.</li>
+<li>The row for a deleted document will have the revision ID of the deletion, and an extra key <code>&quot;deleted&quot;: true</code>
+in the <code>value</code> property.</li>
+<li>The row for a nonexistent document will just contain an <code>&quot;error&quot;</code> property with the value <code>&quot;not_found&quot;</code>.</li>
+</ul></li>
+<li><code>options.group?: boolean</code> - True if you want the reduce function to group results by keys, rather than
+returning a single result. Defaults to <code>false</code>.</li>
+<li><code>options.group_level?: number</code> - Number of elements in a key to group by, assuming the keys are arrays.
+Defaults to the full length of the array.</li>
+<li><code>options.update_seq?: boolean</code> - Include an <code>update_seq</code> value indicating which sequence id of the underlying
+database the view reflects.</li>
+</ul></li>
+</ol>
+<blockquote>
+<p><code>startkey</code>, <code>endkey</code>, <code>key</code> and <code>keys</code> are check for equality with a deep equal algorithm.
+And only if they differentiate by <em>value</em> will a new query be made.</p>
+</blockquote>
+<h2><a class="anchor" aria-hidden="true" id="result"></a><a href="#result" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Result</h2>
+<p><code>useView</code> results an object with those fields:</p>
+<ul>
+<li><code>rows: object[]</code> - Array of objects that contain the requested information. Empty during the first fetch or
+during an error. Each object has following fields:
+<ul>
+<li><code>id?: string</code> - <code>_id</code> of the document from which the row was mapped. If reduced this is not defined.</li>
+<li><code>key: any | null</code> - Key that was the first argument passed to <code>emit</code> in the <code>map</code> function.</li>
+<li><code>value: any</code> - Value of the row.
+<ul>
+<li>If no reduce was done: Value that was the second argument passed to <code>emit</code> in the <code>map</code> function.</li>
+<li>Result of the reduce function.</li>
+</ul></li>
+<li><code>doc?: PouchDB.Core.Document</code> - If <code>options.include_docs</code> was <code>true</code>, this field will contain the document. And
+if <code>attachments</code> is also <code>true</code>, the document will contain the attachment data in the <code>&quot;_attachments&quot;</code> field.</li>
+</ul></li>
+<li><code>offset?: number</code> - The <code>skip</code> provided.</li>
+<li><code>total_rows?: number</code> - The total number of non-deleted documents in the database.</li>
+<li><code>update_seq?: number | string</code> - If <code>update_seq</code> is <code>true</code>, this will contain the sequence id of the underlying
+database.</li>
+<li><code>state: 'loading' | 'done' | 'error'</code> - Current state of the hook.
+<ul>
+<li><code>loading</code> - It is loading the documents. Or it is loading the updated version of them.</li>
+<li><code>done</code> - The documents are loaded, and no update is being loaded.</li>
+<li><code>error</code> - There was an error with fetching the documents. Look into the <code>error</code> field.</li>
+</ul></li>
+<li><code>loading: boolean</code> - It is loading. The state is <code>loading</code>. This is just a shorthand.</li>
+<li><code>error: PouchDB.Error | null</code> - If there was an error, then this field will contain the error. The error is reset
+to <code>null</code> once a fetch was successful.</li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="example-usage"></a><a href="#example-usage" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example Usage</h2>
+<p><code>useView</code> is for more more complex secondary indexes and statistics.</p>
+<h3><a class="anchor" aria-hidden="true" id="find-by-tags"></a><a href="#find-by-tags" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Find by tags</h3>
+<p>If you use a tag system and want to list all documents with this tag, then use <code>useView</code>.</p>
+<pre><code class="hljs css language-javascript"><span class="hljs-keyword">var</span> designDoc = {
+  <span class="hljs-attr">_id</span>: <span class="hljs-string">'_design/app'</span>,
+  <span class="hljs-attr">views</span>: {
+    <span class="hljs-attr">tags</span>: {
+      <span class="hljs-attr">map</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">tagsMap</span>(<span class="hljs-params">doc</span>) </span>{
+        <span class="hljs-keyword">if</span> (isArray(doc.tags)) {
+          doc.tags.forEach(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">tag</span>) </span>{
+            <span class="hljs-comment">// emit tag as the key and the doc title as the value</span>
+            emit(tag, doc.title)
+          })
+        }
+      }.toString(),
+      <span class="hljs-attr">reduce</span>: <span class="hljs-string">'_count'</span>,
+    },
+  },
+}
+</code></pre>
+<pre><code class="hljs css language-jsx"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<span class="hljs-keyword">import</span> { useView } <span class="hljs-keyword">from</span> <span class="hljs-string">'use-pouchdb'</span>
+<span class="hljs-keyword">import</span> { ErrorMessage } <span class="hljs-keyword">from</span> <span class="hljs-string">'./ErrorMessage'</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">ListAllOfTag</span>(<span class="hljs-params">{ tag }</span>) </span>{
+  <span class="hljs-keyword">const</span> { rows, loading, error } = useView(<span class="hljs-string">'app/tags'</span>, {
+    <span class="hljs-attr">key</span>: tag,
+    <span class="hljs-attr">reduce</span>: <span class="hljs-literal">false</span>, <span class="hljs-comment">// don't reduce</span>
+  })
+
+  <span class="hljs-keyword">if</span> (loading &amp;&amp; rows.length === <span class="hljs-number">0</span>) {
+    <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>loading ...<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+  }
+
+  <span class="hljs-keyword">if</span> (error) {
+    <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">ErrorMessage</span> <span class="hljs-attr">error</span>=<span class="hljs-string">{error}</span>&gt;</span>
+  }
+
+  return (
+    <span class="hljs-tag">&lt;<span class="hljs-name">ul</span>&gt;</span>
+      {rows.map(row =&gt; (
+        <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">{row.id}</span>&gt;</span>{row.value}<span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+      ))}
+    <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span>
+  )
+}
+</span></code></pre>
+<h3><a class="anchor" aria-hidden="true" id="get-statistics"></a><a href="#get-statistics" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Get statistics</h3>
+<p>You can count things, or get other statistics.</p>
+<p>This example counts the number of documents with a tag.</p>
+<pre><code class="hljs css language-javascript"><span class="hljs-keyword">var</span> designDoc = {
+  <span class="hljs-attr">_id</span>: <span class="hljs-string">'_design/app'</span>,
+  <span class="hljs-attr">views</span>: {
+    <span class="hljs-attr">tags</span>: {
+      <span class="hljs-attr">map</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">tagsMap</span>(<span class="hljs-params">doc</span>) </span>{
+        <span class="hljs-keyword">if</span> (isArray(doc.tags)) {
+          doc.tags.forEach(<span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params">tag</span>) </span>{
+            <span class="hljs-comment">// emit tag as the key and the doc title as the value</span>
+            emit(tag, doc.title)
+          })
+        }
+      }.toString(),
+      <span class="hljs-attr">reduce</span>: <span class="hljs-string">'_count'</span>,
+    },
+  },
+}
+</code></pre>
+<pre><code class="hljs css language-jsx"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<span class="hljs-keyword">import</span> { useView } <span class="hljs-keyword">from</span> <span class="hljs-string">'use-pouchdb'</span>
+<span class="hljs-keyword">import</span> { ErrorMessage } <span class="hljs-keyword">from</span> <span class="hljs-string">'./ErrorMessage'</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">ListAllTags</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">const</span> { rows, loading, error } = useView(<span class="hljs-string">'app/tags'</span>, {
+    <span class="hljs-attr">group</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-comment">// reduce: true // do reduce</span>
+  })
+
+  <span class="hljs-keyword">if</span> (loading &amp;&amp; rows.length === <span class="hljs-number">0</span>) {
+    <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>loading ...<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+  }
+
+  <span class="hljs-keyword">if</span> (error) {
+    <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">ErrorMessage</span> <span class="hljs-attr">error</span>=<span class="hljs-string">{error}</span>&gt;</span>
+  }
+
+  return (
+    <span class="hljs-tag">&lt;<span class="hljs-name">ul</span>&gt;</span>
+      {rows.map(row =&gt; (
+        <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">{row.key}</span>&gt;</span>
+          Tag <span class="hljs-tag">&lt;<span class="hljs-name">strong</span>&gt;</span>{row.key}<span class="hljs-tag">&lt;/<span class="hljs-name">strong</span>&gt;</span> - Number of documents: {row.value}
+        <span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+      ))}
+    <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span>
+  )
+}
+</span></code></pre>
+<h3><a class="anchor" aria-hidden="true" id="booking-statistics"></a><a href="#booking-statistics" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Booking statistics</h3>
+<p>You can count values together.</p>
+<p>In this example you can sum the changes to a bank account in a time frame.</p>
+<pre><code class="hljs css language-javascript"><span class="hljs-keyword">var</span> designDoc = {
+  <span class="hljs-attr">_id</span>: <span class="hljs-string">'_design/accounting'</span>,
+  <span class="hljs-attr">views</span>: {
+    <span class="hljs-attr">change</span>: {
+      <span class="hljs-attr">map</span>: <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">tagsMap</span>(<span class="hljs-params">doc</span>) </span>{
+        <span class="hljs-comment">// only if it is the correct doc type</span>
+        <span class="hljs-keyword">if</span> (doc.type === <span class="hljs-string">'booking'</span>) {
+          <span class="hljs-keyword">var</span> time = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>(doc.timestamp)
+
+          <span class="hljs-comment">// use a complex key. Here an array</span>
+          emit(
+            [
+              time.getFullYear(),
+              time.getMonth() + <span class="hljs-number">1</span>,
+              time.getDate(),
+              time.getHours(),
+              time.getMinutes(),
+              time.getSeconds(),
+            ],
+            doc.amount
+          )
+        }
+      }.toString(),
+      <span class="hljs-attr">reduce</span>: <span class="hljs-string">'_sum'</span>,
+    },
+  },
+}
+</code></pre>
+<pre><code class="hljs css language-jsx"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<span class="hljs-keyword">import</span> { useView } <span class="hljs-keyword">from</span> <span class="hljs-string">'use-pouchdb'</span>
+<span class="hljs-keyword">import</span> { ErrorMessage } <span class="hljs-keyword">from</span> <span class="hljs-string">'./ErrorMessage'</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">BankAccountChange</span>(<span class="hljs-params">{ year }</span>) </span>{
+  <span class="hljs-keyword">const</span> { rows, loading, error } = useView(<span class="hljs-string">'app/tags'</span>, {
+    <span class="hljs-attr">group_level</span>: <span class="hljs-number">1</span>, <span class="hljs-comment">// sum together all keys with the same year</span>
+    <span class="hljs-attr">startkey</span>: [year],
+    <span class="hljs-comment">// objects are sorted last:</span>
+    <span class="hljs-comment">// https://docs.couchdb.org/en/stable/ddocs/views/collation.html#collation-specification</span>
+    <span class="hljs-attr">endkey</span>: [year, {}],
+    <span class="hljs-comment">// reduce: true // do reduce</span>
+  })
+
+  <span class="hljs-keyword">if</span> (loading &amp;&amp; rows.length === <span class="hljs-number">0</span>) {
+    <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>loading ...<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+  }
+
+  <span class="hljs-keyword">if</span> (error) {
+    <span class="hljs-keyword">return</span> <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">ErrorMessage</span> <span class="hljs-attr">error</span>=<span class="hljs-string">{error}</span>&gt;</span>
+  }
+
+  return (
+    <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>
+      Your account did change {rows[0].value}€ in {year}.
+    <span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+  )
+}
+</span></code></pre>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/use-pouchdb/docs/api/use-all-docs"><span class="arrow-prev">← </span><span class="function-name-prevnext">useAllDocs</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#overview">Overview</a></li><li><a href="#parameters">Parameters</a></li><li><a href="#result">Result</a></li><li><a href="#example-usage">Example Usage</a><ul class="toc-headings"><li><a href="#find-by-tags">Find by tags</a></li><li><a href="#get-statistics">Get statistics</a></li><li><a href="#booking-statistics">Booking statistics</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/use-pouchdb/" class="nav-home"><img src="/use-pouchdb/img/favicon.ico" alt="usePouchDB" width="66" height="58"/></a><div><h5>Docs</h5><a href="/use-pouchdb/docs/introduction/quick_start">Getting Started</a><a href="/use-pouchdb/docs/api/provider">API Reference</a></div><div><h5>Contact</h5><a href="/use-pouchdb/blog">Blog</a><a href="https://github.com/Terreii/use-pouchdb" rel="noreferrer noopener">GitHub</a><a class="github-button" href="https://github.com/Terreii/use-pouchdb" data-icon="octicon-star" data-count-href="/Terreii/use-pouchdb/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a><div class="social"><a href="../impressum.html">Impressum</a></div></div></section><section class="copyright">Copyright © 2020 Christopher Astfalk</section></footer></div></body></html>

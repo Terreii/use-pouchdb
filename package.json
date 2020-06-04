@@ -53,6 +53,7 @@
     "husky": "^4.2.5",
     "jest": "^26.0.1",
     "pouchdb-adapter-memory": "^7.2.1",
+    "pouchdb-mapreduce": "^7.2.1",
     "prettier": "2.0.5",
     "pretty-quick": "^2.0.1",
     "react-test-renderer": "^16.13.1",
@@ -69,10 +70,12 @@
     "@types/react": "^16.9.35",
     "pouchdb-core": "^7.2.1",
     "pouchdb-errors": "^7.2.1",
-    "pouchdb-mapreduce": "^7.2.1",
     "pouchdb-utils": "^7.2.1",
     "react": "^16.13.1",
     "underscore": "^1.10.2"
+  },
+  "peerDependencies": {
+    "pouchdb-mapreduce": "^7.2.1"
   },
   "husky": {
     "hooks": {

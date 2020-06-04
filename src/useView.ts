@@ -6,7 +6,7 @@ import { useContext } from './context'
 import type SubscriptionManager from './subscription'
 import useStateMachine, { ResultType, Dispatch } from './state-machine'
 
-type QueryResponseBase<Result> = PouchDB.Query.Response<Result> & {
+type ViewResponseBase<Result> = PouchDB.Query.Response<Result> & {
   /**
    * Include an update_seq value indicating which sequence id of the underlying database the view
    * reflects.
@@ -14,17 +14,17 @@ type QueryResponseBase<Result> = PouchDB.Query.Response<Result> & {
   update_seq?: number | string
 }
 
-export type QueryResponse<T> = ResultType<QueryResponseBase<T>>
+export type ViewResponse<T> = ResultType<ViewResponseBase<T>>
 
 /**
  * Query a view and subscribe to its updates.
  * @param {string | function | object} fun The name of the view or a temporary view.
  * @param {object} [opts] PouchDB's query-options
  */
-export default function useQuery<Content, Result, Model = Content>(
+export default function useView<Content, Result, Model = Content>(
   fun: string | PouchDB.Map<Model, Result> | PouchDB.Filter<Model, Result>,
   opts?: PouchDB.Query.Options<Model, Result> & { update_seq?: boolean }
-): QueryResponse<Result> {
+): ViewResponse<Result> {
   const { pouchdb: pouch, subscriptionManager } = useContext()
 
   if (typeof pouch?.query !== 'function') {
@@ -53,7 +53,7 @@ export default function useQuery<Content, Result, Model = Content>(
   const key = useDeepMemo(opts?.key)
   const keys = useDeepMemo(opts?.keys)
 
-  const [state, dispatch] = useStateMachine<QueryResponseBase<Result>>(() => ({
+  const [state, dispatch] = useStateMachine<ViewResponseBase<Result>>(() => ({
     rows: [],
     total_rows: 0,
     offset: 0,

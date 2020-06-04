@@ -20,7 +20,7 @@
       "api/use-pouch",
       "api/use-doc",
       "api/use-all-docs",
-      "api/use-query"
+      "api/use-view"
     ]
   }
 }

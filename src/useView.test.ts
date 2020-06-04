@@ -3,7 +3,7 @@ import memory from 'pouchdb-adapter-memory'
 import mapReduce from 'pouchdb-mapreduce'
 
 import { renderHook, act } from './test-utils'
-import useQuery from './useQuery'
+import useView from './useView'
 
 PouchDB.plugin(memory)
 PouchDB.plugin(mapReduce)
@@ -24,7 +24,7 @@ afterEach(async () => {
 })
 
 test('should throw an error if there is no pouchdb context', () => {
-  const { result } = renderHook(() => useQuery('test'))
+  const { result } = renderHook(() => useView('test'))
 
   expect(result.error).toBeInstanceOf(Error)
   expect(result.error.message).toBe(
@@ -35,7 +35,7 @@ test('should throw an error if there is no pouchdb context', () => {
 test('should return an error if the PouchDB database as no query', () => {
   myPouch.query = undefined
 
-  const { result } = renderHook(() => useQuery('test'), {
+  const { result } = renderHook(() => useView('test'), {
     pouchdb: myPouch,
   })
 
@@ -61,7 +61,7 @@ describe('temporary function only views', () => {
       }
     }
 
-    const { result, waitForNextUpdate } = renderHook(() => useQuery(view), {
+    const { result, waitForNextUpdate } = renderHook(() => useView(view), {
       pouchdb: myPouch,
     })
 
@@ -101,7 +101,7 @@ describe('temporary function only views', () => {
       }
     }
 
-    const { result, waitForNextUpdate } = renderHook(() => useQuery(view), {
+    const { result, waitForNextUpdate } = renderHook(() => useView(view), {
       pouchdb: myPouch,
     })
 
@@ -190,7 +190,7 @@ describe('temporary function only views', () => {
       }
     }
 
-    const { result, waitForNextUpdate } = renderHook(() => useQuery(view), {
+    const { result, waitForNextUpdate } = renderHook(() => useView(view), {
       pouchdb: myPouch,
     })
 
@@ -249,7 +249,7 @@ describe('temporary function only views', () => {
       }
     }
 
-    const { result, waitForNextUpdate } = renderHook(() => useQuery(view), {
+    const { result, waitForNextUpdate } = renderHook(() => useView(view), {
       initialProps: false,
       pouchdb: myPouch,
     })
@@ -293,7 +293,7 @@ describe('temporary function only views', () => {
       }
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (include_docs: boolean) => useQuery(view, { include_docs }),
+        (include_docs: boolean) => useView(view, { include_docs }),
         {
           initialProps: false,
           pouchdb: myPouch,
@@ -361,7 +361,7 @@ describe('temporary function only views', () => {
 
       const { result, waitForNextUpdate, rerender } = renderHook(
         (conflicts: boolean) =>
-          useQuery(view, { include_docs: true, conflicts }),
+          useView(view, { include_docs: true, conflicts }),
         {
           initialProps: false,
           pouchdb: myPouch,
@@ -412,7 +412,7 @@ describe('temporary function only views', () => {
 
       const { result, waitForNextUpdate, rerender } = renderHook(
         (attachments: boolean) =>
-          useQuery(view, { include_docs: true, attachments }),
+          useView(view, { include_docs: true, attachments }),
         {
           initialProps: false,
           pouchdb: myPouch,
@@ -470,7 +470,7 @@ describe('temporary function only views', () => {
 
       const { result, waitForNextUpdate, rerender } = renderHook(
         (binary: boolean) =>
-          useQuery(view, { include_docs: true, attachments: true, binary }),
+          useView(view, { include_docs: true, attachments: true, binary }),
         {
           initialProps: false,
           pouchdb: myPouch,
@@ -517,7 +517,7 @@ describe('temporary function only views', () => {
       }
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (startkey: unknown) => useQuery(view, { startkey }),
+        (startkey: unknown) => useView(view, { startkey }),
         {
           initialProps: 'x',
           pouchdb: myPouch,
@@ -559,7 +559,7 @@ describe('temporary function only views', () => {
       }
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (endkey: unknown) => useQuery(view, { endkey }),
+        (endkey: unknown) => useView(view, { endkey }),
         {
           initialProps: 'value\uffff',
           pouchdb: myPouch,
@@ -599,7 +599,7 @@ describe('temporary function only views', () => {
 
       const { result, waitForNextUpdate, rerender } = renderHook(
         ({ startkey, endkey }: { startkey: unknown; endkey: unknown }) =>
-          useQuery(view, { startkey, endkey }),
+          useView(view, { startkey, endkey }),
         {
           initialProps: {
             startkey: ['b'],
@@ -671,7 +671,7 @@ describe('temporary function only views', () => {
 
       const { result, waitForNextUpdate, rerender } = renderHook(
         (inclusive_end: boolean) =>
-          useQuery(view, { endkey: 'x-value', inclusive_end }),
+          useView(view, { endkey: 'x-value', inclusive_end }),
         {
           initialProps: true,
           pouchdb: myPouch,
@@ -713,7 +713,7 @@ describe('temporary function only views', () => {
       }
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (limit?: number) => useQuery(view, { limit }),
+        (limit?: number) => useView(view, { limit }),
         {
           initialProps: 1,
           pouchdb: myPouch,
@@ -755,7 +755,7 @@ describe('temporary function only views', () => {
       }
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (skip?: number) => useQuery(view, { skip }),
+        (skip?: number) => useView(view, { skip }),
         {
           initialProps: 1,
           pouchdb: myPouch,
@@ -794,7 +794,7 @@ describe('temporary function only views', () => {
       }
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (descending: boolean) => useQuery(view, { descending }),
+        (descending: boolean) => useView(view, { descending }),
         {
           initialProps: false,
           pouchdb: myPouch,
@@ -837,7 +837,7 @@ describe('temporary function only views', () => {
       }
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (key: unknown) => useQuery(view, { key }),
+        (key: unknown) => useView(view, { key }),
         {
           initialProps: 'value',
           pouchdb: myPouch,
@@ -878,7 +878,7 @@ describe('temporary function only views', () => {
       }
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (keys: unknown[]) => useQuery(view, { keys }),
+        (keys: unknown[]) => useView(view, { keys }),
         {
           initialProps: ['value'],
           pouchdb: myPouch,
@@ -920,7 +920,7 @@ describe('temporary function only views', () => {
       }
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (option: { key?: unknown; keys?: unknown[] }) => useQuery(view, option),
+        (option: { key?: unknown; keys?: unknown[] }) => useView(view, option),
         {
           initialProps: {
             key: ['b', 'other'],
@@ -1013,7 +1013,7 @@ describe('temporary function only views', () => {
       }
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (update_seq: boolean) => useQuery(view, { update_seq }),
+        (update_seq: boolean) => useView(view, { update_seq }),
         {
           initialProps: false,
           pouchdb: myPouch,
@@ -1053,7 +1053,7 @@ describe('temporary views objects', () => {
       },
     }
 
-    const { result, waitForNextUpdate } = renderHook(() => useQuery(view), {
+    const { result, waitForNextUpdate } = renderHook(() => useView(view), {
       pouchdb: myPouch,
     })
 
@@ -1095,7 +1095,7 @@ describe('temporary views objects', () => {
       },
     }
 
-    const { result, waitForNextUpdate } = renderHook(() => useQuery(view), {
+    const { result, waitForNextUpdate } = renderHook(() => useView(view), {
       pouchdb: myPouch,
     })
 
@@ -1186,7 +1186,7 @@ describe('temporary views objects', () => {
       },
     }
 
-    const { result, waitForNextUpdate } = renderHook(() => useQuery(view), {
+    const { result, waitForNextUpdate } = renderHook(() => useView(view), {
       pouchdb: myPouch,
     })
 
@@ -1247,7 +1247,7 @@ describe('temporary views objects', () => {
       },
     }
 
-    const { result, waitForNextUpdate } = renderHook(() => useQuery(view), {
+    const { result, waitForNextUpdate } = renderHook(() => useView(view), {
       initialProps: false,
       pouchdb: myPouch,
     })
@@ -1294,7 +1294,7 @@ describe('temporary views objects', () => {
       }
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (reduce: boolean) => useQuery(view, { reduce }),
+        (reduce: boolean) => useView(view, { reduce }),
         {
           initialProps: true,
           pouchdb: myPouch,
@@ -1334,7 +1334,7 @@ describe('temporary views objects', () => {
       }
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (include_docs: boolean) => useQuery(view, { include_docs }),
+        (include_docs: boolean) => useView(view, { include_docs }),
         {
           initialProps: false,
           pouchdb: myPouch,
@@ -1404,7 +1404,7 @@ describe('temporary views objects', () => {
 
       const { result, waitForNextUpdate, rerender } = renderHook(
         (conflicts: boolean) =>
-          useQuery(view, { include_docs: true, conflicts }),
+          useView(view, { include_docs: true, conflicts }),
         {
           initialProps: false,
           pouchdb: myPouch,
@@ -1457,7 +1457,7 @@ describe('temporary views objects', () => {
 
       const { result, waitForNextUpdate, rerender } = renderHook(
         (attachments: boolean) =>
-          useQuery(view, { include_docs: true, attachments }),
+          useView(view, { include_docs: true, attachments }),
         {
           initialProps: false,
           pouchdb: myPouch,
@@ -1517,7 +1517,7 @@ describe('temporary views objects', () => {
 
       const { result, waitForNextUpdate, rerender } = renderHook(
         (binary: boolean) =>
-          useQuery(view, { include_docs: true, attachments: true, binary }),
+          useView(view, { include_docs: true, attachments: true, binary }),
         {
           initialProps: false,
           pouchdb: myPouch,
@@ -1566,7 +1566,7 @@ describe('temporary views objects', () => {
       }
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (startkey: unknown) => useQuery(view, { startkey }),
+        (startkey: unknown) => useView(view, { startkey }),
         {
           initialProps: 'x',
           pouchdb: myPouch,
@@ -1610,7 +1610,7 @@ describe('temporary views objects', () => {
       }
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (endkey: unknown) => useQuery(view, { endkey }),
+        (endkey: unknown) => useView(view, { endkey }),
         {
           initialProps: 'value\uffff',
           pouchdb: myPouch,
@@ -1652,7 +1652,7 @@ describe('temporary views objects', () => {
 
       const { result, waitForNextUpdate, rerender } = renderHook(
         ({ startkey, endkey }: { startkey: unknown; endkey: unknown }) =>
-          useQuery(view, { startkey, endkey }),
+          useView(view, { startkey, endkey }),
         {
           initialProps: {
             startkey: ['b'],
@@ -1726,7 +1726,7 @@ describe('temporary views objects', () => {
 
       const { result, waitForNextUpdate, rerender } = renderHook(
         (inclusive_end: boolean) =>
-          useQuery(view, { endkey: 'x-value', inclusive_end }),
+          useView(view, { endkey: 'x-value', inclusive_end }),
         {
           initialProps: true,
           pouchdb: myPouch,
@@ -1770,7 +1770,7 @@ describe('temporary views objects', () => {
       }
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (limit?: number) => useQuery(view, { limit }),
+        (limit?: number) => useView(view, { limit }),
         {
           initialProps: 1,
           pouchdb: myPouch,
@@ -1814,7 +1814,7 @@ describe('temporary views objects', () => {
       }
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (skip?: number) => useQuery(view, { skip }),
+        (skip?: number) => useView(view, { skip }),
         {
           initialProps: 1,
           pouchdb: myPouch,
@@ -1855,7 +1855,7 @@ describe('temporary views objects', () => {
       }
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (descending: boolean) => useQuery(view, { descending }),
+        (descending: boolean) => useView(view, { descending }),
         {
           initialProps: false,
           pouchdb: myPouch,
@@ -1900,7 +1900,7 @@ describe('temporary views objects', () => {
       }
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (key: unknown) => useQuery(view, { key }),
+        (key: unknown) => useView(view, { key }),
         {
           initialProps: 'value',
           pouchdb: myPouch,
@@ -1943,7 +1943,7 @@ describe('temporary views objects', () => {
       }
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (keys: unknown[]) => useQuery(view, { keys }),
+        (keys: unknown[]) => useView(view, { keys }),
         {
           initialProps: ['value'],
           pouchdb: myPouch,
@@ -1988,7 +1988,7 @@ describe('temporary views objects', () => {
       }
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (group: boolean) => useQuery(view, { group }),
+        (group: boolean) => useView(view, { group }),
         {
           initialProps: false,
           pouchdb: myPouch,
@@ -2031,7 +2031,7 @@ describe('temporary views objects', () => {
       }
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (group_level: number) => useQuery(view, { group_level }),
+        (group_level: number) => useView(view, { group_level }),
         {
           initialProps: 1,
           pouchdb: myPouch,
@@ -2073,7 +2073,7 @@ describe('temporary views objects', () => {
       }
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (option: { key?: unknown; keys?: unknown[] }) => useQuery(view, option),
+        (option: { key?: unknown; keys?: unknown[] }) => useView(view, option),
         {
           initialProps: {
             key: ['b', 'other'],
@@ -2168,7 +2168,7 @@ describe('temporary views objects', () => {
       }
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (update_seq: boolean) => useQuery(view, { update_seq }),
+        (update_seq: boolean) => useView(view, { update_seq }),
         {
           initialProps: false,
           pouchdb: myPouch,
@@ -2213,7 +2213,7 @@ describe('design documents', () => {
     await myPouch.put(ddoc)
 
     const { result, waitForNextUpdate } = renderHook(
-      () => useQuery('ddoc/test'),
+      () => useView('ddoc/test'),
       {
         pouchdb: myPouch,
       }
@@ -2246,7 +2246,7 @@ describe('design documents', () => {
       { _id: 'b', test: 'other', type: 'checker' },
     ])
 
-    const { result, waitForNextUpdate } = renderHook(() => useQuery('view'), {
+    const { result, waitForNextUpdate } = renderHook(() => useView('view'), {
       pouchdb: myPouch,
     })
 
@@ -2281,7 +2281,7 @@ describe('design documents', () => {
     await myPouch.put(ddoc)
 
     const { result, waitForNextUpdate } = renderHook(
-      () => useQuery('ddoc/test'),
+      () => useView('ddoc/test'),
       {
         pouchdb: myPouch,
       }
@@ -2378,7 +2378,7 @@ describe('design documents', () => {
     const ddocResult = await myPouch.put(ddoc)
 
     const { result, waitForNextUpdate } = renderHook(
-      () => useQuery('ddoc/test'),
+      () => useView('ddoc/test'),
       {
         pouchdb: myPouch,
       }
@@ -2419,7 +2419,7 @@ describe('design documents', () => {
     }
 
     const { result, waitForNextUpdate } = renderHook(
-      () => useQuery('ddoc/test'),
+      () => useView('ddoc/test'),
       {
         pouchdb: myPouch,
       }
@@ -2467,7 +2467,7 @@ describe('design documents', () => {
     await myPouch.put(ddoc)
 
     const { result, waitForNextUpdate } = renderHook(
-      () => useQuery('ddoc/test'),
+      () => useView('ddoc/test'),
       {
         pouchdb: myPouch,
       }
@@ -2534,7 +2534,7 @@ describe('design documents', () => {
     await myPouch.put(ddoc)
 
     const { result, waitForNextUpdate } = renderHook(
-      () => useQuery('ddoc/test'),
+      () => useView('ddoc/test'),
       {
         initialProps: false,
         pouchdb: myPouch,
@@ -2589,7 +2589,7 @@ describe('design documents', () => {
       await myPouch.put(ddoc)
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (reduce: boolean) => useQuery('ddoc/test', { reduce }),
+        (reduce: boolean) => useView('ddoc/test', { reduce }),
         {
           initialProps: true,
           pouchdb: myPouch,
@@ -2635,7 +2635,7 @@ describe('design documents', () => {
       await myPouch.put(ddoc)
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (include_docs: boolean) => useQuery('ddoc/test', { include_docs }),
+        (include_docs: boolean) => useView('ddoc/test', { include_docs }),
         {
           initialProps: false,
           pouchdb: myPouch,
@@ -2711,7 +2711,7 @@ describe('design documents', () => {
 
       const { result, waitForNextUpdate, rerender } = renderHook(
         (conflicts: boolean) =>
-          useQuery('ddoc/test', { include_docs: true, conflicts }),
+          useView('ddoc/test', { include_docs: true, conflicts }),
         {
           initialProps: false,
           pouchdb: myPouch,
@@ -2770,7 +2770,7 @@ describe('design documents', () => {
 
       const { result, waitForNextUpdate, rerender } = renderHook(
         (attachments: boolean) =>
-          useQuery('ddoc/test', { include_docs: true, attachments }),
+          useView('ddoc/test', { include_docs: true, attachments }),
         {
           initialProps: false,
           pouchdb: myPouch,
@@ -2836,7 +2836,7 @@ describe('design documents', () => {
 
       const { result, waitForNextUpdate, rerender } = renderHook(
         (binary: boolean) =>
-          useQuery('ddoc/test', {
+          useView('ddoc/test', {
             include_docs: true,
             attachments: true,
             binary,
@@ -2895,7 +2895,7 @@ describe('design documents', () => {
       await myPouch.put(ddoc)
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (startkey: unknown) => useQuery('ddoc/test', { startkey }),
+        (startkey: unknown) => useView('ddoc/test', { startkey }),
         {
           initialProps: 'x',
           pouchdb: myPouch,
@@ -2945,7 +2945,7 @@ describe('design documents', () => {
       await myPouch.put(ddoc)
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (endkey: unknown) => useQuery('ddoc/test', { endkey }),
+        (endkey: unknown) => useView('ddoc/test', { endkey }),
         {
           initialProps: 'value\uffff',
           pouchdb: myPouch,
@@ -2993,7 +2993,7 @@ describe('design documents', () => {
 
       const { result, waitForNextUpdate, rerender } = renderHook(
         ({ startkey, endkey }: { startkey: unknown; endkey: unknown }) =>
-          useQuery('ddoc/test', { startkey, endkey }),
+          useView('ddoc/test', { startkey, endkey }),
         {
           initialProps: {
             startkey: ['b'],
@@ -3073,7 +3073,7 @@ describe('design documents', () => {
 
       const { result, waitForNextUpdate, rerender } = renderHook(
         (inclusive_end: boolean) =>
-          useQuery('ddoc/test', { endkey: 'x-value', inclusive_end }),
+          useView('ddoc/test', { endkey: 'x-value', inclusive_end }),
         {
           initialProps: true,
           pouchdb: myPouch,
@@ -3123,7 +3123,7 @@ describe('design documents', () => {
       await myPouch.put(ddoc)
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (limit?: number) => useQuery('ddoc/test', { limit }),
+        (limit?: number) => useView('ddoc/test', { limit }),
         {
           initialProps: 1,
           pouchdb: myPouch,
@@ -3173,7 +3173,7 @@ describe('design documents', () => {
       await myPouch.put(ddoc)
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (skip?: number) => useQuery('ddoc/test', { skip }),
+        (skip?: number) => useView('ddoc/test', { skip }),
         {
           initialProps: 1,
           pouchdb: myPouch,
@@ -3220,7 +3220,7 @@ describe('design documents', () => {
       await myPouch.put(ddoc)
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (descending: boolean) => useQuery('ddoc/test', { descending }),
+        (descending: boolean) => useView('ddoc/test', { descending }),
         {
           initialProps: false,
           pouchdb: myPouch,
@@ -3271,7 +3271,7 @@ describe('design documents', () => {
       await myPouch.put(ddoc)
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (key: unknown) => useQuery('ddoc/test', { key }),
+        (key: unknown) => useView('ddoc/test', { key }),
         {
           initialProps: 'value',
           pouchdb: myPouch,
@@ -3320,7 +3320,7 @@ describe('design documents', () => {
       await myPouch.put(ddoc)
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (keys: unknown[]) => useQuery('ddoc/test', { keys }),
+        (keys: unknown[]) => useView('ddoc/test', { keys }),
         {
           initialProps: ['value'],
           pouchdb: myPouch,
@@ -3371,7 +3371,7 @@ describe('design documents', () => {
       await myPouch.put(ddoc)
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (group: boolean) => useQuery('ddoc/test', { group }),
+        (group: boolean) => useView('ddoc/test', { group }),
         {
           initialProps: false,
           pouchdb: myPouch,
@@ -3420,7 +3420,7 @@ describe('design documents', () => {
       await myPouch.put(ddoc)
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (group_level: number) => useQuery('ddoc/test', { group_level }),
+        (group_level: number) => useView('ddoc/test', { group_level }),
         {
           initialProps: 1,
           pouchdb: myPouch,
@@ -3469,7 +3469,7 @@ describe('design documents', () => {
 
       const { result, waitForNextUpdate, rerender } = renderHook(
         (option: { key?: unknown; keys?: unknown[] }) =>
-          useQuery('ddoc/test', option),
+          useView('ddoc/test', option),
         {
           initialProps: {
             key: ['b', 'other'],
@@ -3570,7 +3570,7 @@ describe('design documents', () => {
       await myPouch.put(ddoc)
 
       const { result, waitForNextUpdate, rerender } = renderHook(
-        (update_seq: boolean) => useQuery('ddoc/test', { update_seq }),
+        (update_seq: boolean) => useView('ddoc/test', { update_seq }),
         {
           initialProps: false,
           pouchdb: myPouch,

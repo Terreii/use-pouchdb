@@ -23,7 +23,7 @@ const users = [
 const siteConfig = {
   title: 'usePouchDB', // Title for your website.
   tagline: 'Access PouchDB in React Components',
-  url: 'https://your-docusaurus-test-site.com', // Your website URL
+  url: 'https://christopher-astfalk.de', // Your website URL
   baseUrl: '/use-pouchdb/', // Base URL for your project */
   // For github.io type URLs, you would set the url and baseUrl like:
   //   url: 'https://facebook.github.io',

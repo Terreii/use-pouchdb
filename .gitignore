@@ -68,9 +68,5 @@ typings/
 # Publish
 lib/
 
-# Jekyll & Github pages
-docs/_site
-docs/.sass-cache
-docs/.jekyll-cache
-docs/.jekyll-metadata
-docs/vendor
+# Docusaurus & Github pages
+website/build

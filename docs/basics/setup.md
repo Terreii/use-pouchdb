@@ -79,12 +79,12 @@ writing, <time datetime="2020-05-23">2020-05-23</time>, CouchDB did release
 Regarding compatibility the biggest change was, that the default setup of CouchDB _is more secure_. In previous
 versions in the standard setup, everyone could create an user. Now you must be an admin or change some settings.
 
-Now, CouchDB lacks some user management features; for example sending Mails to the user, or resetting a password.
+Now, CouchDB lacks some user management features; for example sending Mails to the user, or password recovery.
 You need to implement them yourself. With
 [serverless functions (function as a service)](https://en.wikipedia.org/wiki/Function_as_a_service) it became more
 strate forward. But you won't be able to use every method of
 [**PouchDB Authentication**](https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/api.md#dbsignupusername-password--options--callback).
-Log in/out still works though.
+Log in/out didn't change.
 
 In this tutorial we will be using the old sign up method, where everyone can create an account and no verification
 mail is send. If in your app you need more, please visit
@@ -160,7 +160,7 @@ Now open `package.json` and change your scripts:
 The `pouchdb-server --dir db` command configures pouchdb-server to store all databases in the `./db/` directory
 ([more here](https://github.com/pouchdb/pouchdb-server#full-options)).
 
-Now with `npm start` or `yarn start` both you dev-server and pouchdb-server will start! To start just one enter:
+Now with `npm start` or `yarn start` both your dev-server and pouchdb-server will start! To start just one enter:
 
 <!--DOCUSAURUS_CODE_TABS-->
 <!--npm-->

@@ -158,9 +158,10 @@ To test hooks that depends on one of `usePouchDB`'s hooks, you also must warp it
 **react-hooks-testing-library**'s `renderHook` function can receive in the second argument a warper
 ([documented here](https://react-hooks-testing-library.com/usage/advanced-hooks#context)).
 
-The addTodo from [**add-todo**](./add-todo) extracted into a hook.
+The addTodo from [**add-todo**](./add-todo) extracted into a hook:
 
 ```javascript
+// hooks.js
 import { useCallback } from 'react'
 import { usePouch } from 'use-pouchdb'
 
@@ -217,9 +218,14 @@ test('add document', async () => {
   await result.current('test todo')
 
   const { rows } = await myPouch.allDocs({ include_docs: true })
-  expect(rows.length).toBe(1)
+  expect(rows).toHaveLength(1)
   expect(rows[0].doc.type).toBe('todo')
   expect(rows[0].doc.text).toBe('test todo')
-  expect(rows[0].doc.done).toBe(false)
+  expect(rows[0].doc.done).toBeFalsy()
 })
 ```
+
+Now we are finished with our Todo example. All Todos are replicated, users can sign up and log in.
+I know, this was a long tutorial, but we did cover a lot!
+
+Happy coding! 🎉🎊

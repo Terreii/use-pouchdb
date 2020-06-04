@@ -333,7 +333,7 @@ export function signUp(username, password) {
 }
 
 export async function logIn(username, password) {
-  // throws the error of logIn
+  // We don't capture errors from logIn
   const result = await remote.logIn(username, password)
 
   if (result.ok && result.name != null && result.name.length > 0) {
@@ -401,8 +401,8 @@ function getUserDatabaseName(name, prefix = 'userdb-') {
 }
 ```
 
-We don't have to handle incoming changes, because changes subscriptions on the local database are emitting events
-when they are happening.
+We don't have to handle incoming changes, because changes subscriptions on the local database are emitting
+those, too.
 
 ## Components
 
@@ -437,11 +437,13 @@ export default function Session() {
 
   const checkSessionState = async () => {
     const isLoggedIn = await getIsLoggedIn()
-    setSessionState(isLoggedIn)
 
     if (isLoggedIn) {
       const info = await getSession()
+      setSessionState(isLoggedIn)
       setUsername(info.userCtx.name)
+    } else {
+      setSessionState(isLoggedIn)
     }
   }
 
@@ -457,7 +459,7 @@ export default function Session() {
     }
   }, [sessionState, db])
 
-  async function doLogIn(event) {
+  const doLogIn = async event => {
     if (event) {
       event.preventDefault()
     }
@@ -465,13 +467,13 @@ export default function Session() {
     checkSessionState()
   }
 
-  async function doSignUp(event) {
+  const doSignUp = async event => {
     event.preventDefault()
     await signUp(username, password)
     doLogIn()
   }
 
-  async function doLogOut(event) {
+  const doLogOut = async event => {
     event.preventDefault()
     await logOut()
     // destroy local database, to remove all local data
@@ -537,13 +539,13 @@ This is a more complicated component! It does quite a lot!
 
 This component has 3 states:
 
-- On first render it checks the session and renders nothing.
-- No user is logged in. It renders a log in and sign up form.
-- User is logged in. It renders the username and a log out button.
+- On first render; It checks the session and renders nothing.
+- No user is logged in; It renders a log in and sign up form.
+- User is logged in; It renders the username and a log out button.
 
 The first `useEffect` only runs after the first render. It checks if a user is logged in.
 
-The second `useEffect` runs every time the sessionState (or the db) changes. And if a user is logged in it starts
+The second `useEffect` runs every time the sessionState (or the db) changes. And if a user is logged in, it starts
 the sync process. Because `startSync` returns a cancel function, we can return the cancel function in the
 `useEffect` body. It will then cancel every time the effect re-runs.
 
@@ -552,7 +554,7 @@ the default effects of dom-events.
 
 `doSignUp` calls `doLogIn` after a new user was created.
 
-`doLogIn` checks the session state after login.
+`doLogIn` checks the session state with `checkSessionState` after login.
 
 And `doLogOut` destroys the local database. When you destroy a database it's data will be deleted. But the deletion
 will not be synced! In [`Add the Provider`](./provider) we did add an event-listener for destroy events. And when
@@ -567,8 +569,3 @@ the local database was destroyed, we did create a new one. This was for logging 
 
 If you now open a different browser, you will be able to sync your Todos between them. They should also be listed
 in Fauxton (http://127.0.0.1:5984/_utils/#/_all_dbs).
-
-Now we are finished with our Todo example. All Todos are replicated, users can sign up and log in. I know, this was
-a long tutorial, but we did cover a lot!
-
-Happy coding! 🎉🎊

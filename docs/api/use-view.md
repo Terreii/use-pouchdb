@@ -100,7 +100,7 @@ descriptions are copied from the PouchDB API page.
 
 ## Example Usage
 
-`useView` is for more more complex secondary indexes and statistics.
+`useView` is for more complex secondary indexes and statistics.
 
 ### Find by tags
 
@@ -146,8 +146,8 @@ export function ListAllOfTag({ tag }) {
 
   return (
     <ul>
-      {rows.map(row => (
-        <li key={row.id}>{row.value}</li>
+      {rows.map(row => ( // row.key is the tag and row.id is the _id of the document.
+        <li key={row.key + ' ' + row.id}>{row.value}</li>
       ))}
     </ul>
   )

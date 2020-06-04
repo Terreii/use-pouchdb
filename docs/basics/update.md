@@ -46,7 +46,7 @@ export default function Todo({ todo }) {
 }
 ```
 
-Right way you might see some familiar functions, like `usePouch` and `db.put()`. But also the new `db.get()`.
+Right away you might see some familiar functions, like `usePouch` and `db.put()`. But also the new `db.get()`.
 
 [`db.get()`](https://pouchdb.com/api.html#fetch_document) fetches a single document. All it needs is the _id_ of
 the doc. Like most methods of PouchDB, it too can fail. For example, if the doc doesn't exist, or you don't have
@@ -72,10 +72,17 @@ In this example we've chosen to handle the immediate conflict by simply trying a
 it still having a reverence to the old todo. It'll `get` the new version of the document, check if `done` has the
 desired value, and update the new doc only if not.
 
+Ok, yes. Those two conflict examples are _extremely_ unlikely. In _this_ example, you would probably be save
+without error-handling. But in a typical app, you don't know how long something takes. What caching happens
+between your data source and your update component. Those examples are there to guide you to the best
+practice of PouchDB.
+
 > This dance of conflict resolution is what allows PouchDB to sync! It requires you to handle conflicts.
 >
 > In this example we know what the desired state of a doc should be: The last user interaction. There is also
 > almost no data lost if that assumption is wrong.
+>
+> But you should generally follow the role: **"Last write wins" means losing your users data!**
 
 > There are two types of conflicts: **immediate conflicts** and **eventual conflicts**. You can read more about
 > them in the [PouchDB Conflicts guide](https://pouchdb.com/guides/conflicts.html).

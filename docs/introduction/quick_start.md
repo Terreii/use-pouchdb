@@ -43,8 +43,8 @@ yarn add use-pouchdb
 You'll also need to [install PouchDB](https://pouchdb.com/guides/setup-pouchdb.html 'PouchDBs installation guide').
 There is also a special [browser version](https://www.npmjs.com/package/pouchdb-browser).
 
-There is a PouchDB plugin for the sign up, log in and log out flow:
-[PouchDB Authentication](https://github.com/pouchdb-community/pouchdb-authentication).
+[PouchDB Authentication](https://github.com/pouchdb-community/pouchdb-authentication) is a PouchDB
+plugin for the sign up, log in and log out flow.
 
 <!--DOCUSAURUS_CODE_TABS-->
 <!--npm-->
@@ -115,7 +115,7 @@ export default function BlogPost({ id }) {
 
 ## useAllDocs
 
-The [allDocs Method](https://pouchdb.com/api.html#batch_fetch) is accessible using the `useAllDocs` hook. It, too,
+The [allDocs method](https://pouchdb.com/api.html#batch_fetch) is accessible using the `useAllDocs` hook. It, too,
 automatically subscribes to updates of those documents (and new ones).
 
 ```jsx
@@ -161,7 +161,7 @@ import { useView } from 'use-pouchdb'
 
 export default function Comments({ id }) {
   const { rows, offset, total_rows, state, loading, error } = useView(
-    'blog/comments',
+    'blog/comments', // use the view 'comments' in '_design/blog' document
     {
       startkey: [id],
       endkey: [id, {}],

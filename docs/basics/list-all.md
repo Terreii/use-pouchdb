@@ -6,7 +6,7 @@ title: List all Todos
 The `<TodoList />` component is responsible for rendering the list of todos. Therefore, it needs to read data from
 the database. With `useAllDocs` we can! It loads all documents.
 
-Out `<Todo />` component takes the todo document as props and displays it.
+Our `<Todo />` component takes the todo document as props and displays it.
 
 ```jsx
 // TodoList.js

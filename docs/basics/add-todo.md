@@ -85,7 +85,9 @@ to retrieve the document. Besides that, we can use it to sort documents and othe
 
 The `type` field is technically not needed. It is a PouchDB and CouchDB convention to differentiate between
 document types. Like `type` in [Redux Actions](https://redux.js.org/basics/actions), but not needed.<br />
-You could also store the type in the `_id` as a prefix: `'todo_2020-05-25T21:42:17.275Z'`.
+You could also store the type in the `_id` as a prefix: `'todo_2020-05-25T21:42:17.275Z'`. That is how the
+[Relational Pouch](https://github.com/pouchdb-community/relational-pouch) plugin
+[does it](https://github.com/pouchdb-community/relational-pouch#how-does-it-work).
 
 **`text`** and **`done`**
 

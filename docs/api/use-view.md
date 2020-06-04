@@ -11,9 +11,16 @@ It also subscripts to updates of the view. With the added bonus of also subscrib
 the [result](#result). If you update or delete a document in a way that would remove it from the view, than it will
 be removed from the result of this hook.
 
+If a design document isn't replicated yet, useView will error. But once it did sync, useView will query it.
+Same when the design document did change. Whenever it changes, useView will re-query.
+
 Read more about views in [CouchDB's Guide to Views](https://docs.couchdb.org/en/stable/ddocs/views/index.html).
 
 `useView` can only be invoked from a component nested inside of a `<Provider />`.
+
+> `useView` requires [`pouchdb-mapreduce`](https://www.npmjs.com/package/pouchdb-mapreduce) to be
+> installed and setup. If you use the [`pouchdb`](https://www.npmjs.com/package/pouchdb) or
+> [`pouchdb-browser`](https://www.npmjs.com/package/pouchdb-browser) packages, it is already setup.
 
 ## Parameters
 

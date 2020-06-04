@@ -12,8 +12,15 @@ branches:
   only:
     - latest
 
+script:
+  - npm run test-ci
+
 jobs:
   include:
+    - stage: lint
+      node_js: lts/*
+      script:
+        - npm run lint
     - stage: docs
       node_js: lts/*
       script:
@@ -28,6 +35,7 @@ jobs:
 
 stages:
   - test
+  - lint
   - docs
   - name: page
     if: branch = latest AND type != pull_request

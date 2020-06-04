@@ -26,7 +26,7 @@ test('should render a Provider which provide the passed pouchdb database', () =>
   )
 })
 
-test('should unsubscribe all when the database changes', () => {
+test('should unsubscribe all when the database changes', async () => {
   const myPouch = new PouchDB('test', { adapter: 'memory' })
   let db = myPouch
 
@@ -42,6 +42,10 @@ test('should unsubscribe all when the database changes', () => {
   db = new PouchDB('test2', { adapter: 'memory' })
 
   rerender()
+
+  await new Promise(resolve => {
+    setTimeout(resolve, 10)
+  })
 
   expect(unsubscribe).toHaveBeenCalled()
 

@@ -35,7 +35,7 @@ of `options.open_revs`. Options descriptions are copied from the PouchDB API pag
 `useDoc` results an object with those fields:
 
 - `doc: PouchDB.Core.Document | null` - The requested document. If there is an error, or its still loading the doc
-  is `null`.
+  is `null` or the `initialValue`.
 - `state: 'loading' | 'done' | 'error'` - Current state of the hook.
   - `loading` - It is loading the document. Or it is loading the updated version of it.
   - `done` - The document was loaded, and no update is being loaded.
@@ -150,3 +150,6 @@ export function PostViewer({ id }) {
   )
 }
 ```
+
+The `initialValue` can also be used for a blue print of documents. If no doc was fount, use the
+initial value and edit it. Once it is saved, the `useDoc` will re-fetch the doc.

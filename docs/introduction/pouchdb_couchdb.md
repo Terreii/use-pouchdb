@@ -30,7 +30,8 @@ back online, sync it. With PouchDB on the clients browser and CouchDB on the bac
 _offline capable_.
 
 Then there is also the **changes feed**, which lists what did change in the order they did. Or that everything is
-stored as **JSON Objects**, or the **HTTP API** of CouchDB, and more.
+stored as **JSON Objects**, or the **HTTP API** of CouchDB, or integrated user authentication and
+authorization, and more.
 
 ## Basics
 
@@ -48,9 +49,10 @@ PouchDB and CouchDB. If I explicitly mean CouchDB, then I will write CouchDB. If
 I will note it so, or if I write about a PouchDB plugin, it will always be PouchDB (the JS package). The biggest
 difference is that CouchDB's API are URLs while PouchDB's API are methods.
 
-> There is a [PouchDB Server](https://github.com/pouchdb/pouchdb-server). It implements more/most of CouchDBs API
-> (like authentication and authorization). And most of what will be marked as CouchDB also works with PouchD
-> Server. Which makes PouchDB Server an ideal candidate for development. But use CouchDB in production!
+> There is a [PouchDB Server](https://github.com/pouchdb/pouchdb-server). It implements more/most
+> of CouchDBs API (like authentication and authorization). And most of what will be marked as
+> CouchDB also works with PouchDB Server. Which makes PouchDB Server an ideal candidate for
+> development. But use CouchDB in production!
 
 ### About Databases
 
@@ -172,7 +174,7 @@ or
 $ yarn add pouchdb
 ```
 
-You can now use it on `node`.
+You can now use it in `node`.
 
 ```javascript
 const PouchDB = require('pouchdb')
@@ -223,8 +225,9 @@ More in the [PouchDB guide](https://pouchdb.com/guides/databases.html) or
 
 ### Setup Sync
 
-You don't have to do much to setup syncing. If you don't have a CouchDB instance running, you probably won't be
-able to test this section. But later in the tutorials we will setup a CouchDB instance.
+You don't have to do much to setup syncing. If you don't have a CouchDB instance running, you
+probably won't be able to test this section. But later in the tutorials we will setup a PouchDB
+Server and start syncing.
 
 ```javascript
 // this syncs in both directions: from remote and to remote
@@ -339,17 +342,21 @@ There are two fields that every document in PouchDB has.
 - `_id` (string) is a for the database unique identifier.
 - `_rev` (string) is a version "number".
 
-The rev consists out of two parts: a **number** and a **hash**. On every update the **number** will be increased by
-
-1. And a new **hash** calculated. If you update a document you must include the `_rev` from the last version.
+The rev consists out of two parts: a **number** and a **hash**. On every update the **number** will
+be increased by 1. And a new **hash** calculated. If you update a document you must include the
+`_rev` from the last version.
 
 But why do we need `rev` in the first place?
 
-It is all about **sync**. Or: PouchDB is a _distributed_ system. While you where updating a document, someone else
-could have changed the doc, too!
+It is all about **sync**. Or: PouchDB is a _distributed_ system. While you where updating a
+document, someone else could have changed the doc, too!
 
-Internal PouchDB keeps a rev-history of every document. If you sync, then PouchDB uses the rev-history of a
-document to know if there is a conflict. Think like **Git** with _fast-forward-merging_.
+Internal PouchDB keeps a rev-history of every document. If you sync, then PouchDB uses the
+rev-history of a document to know if there is a conflict. Think like **Git** with
+_fast-forward-merging_.
+
+We are also not changing the `rev`. When we update a document we pass the old `_rev` along,
+stating to PouchDB which is the previous version of that document.
 
 Read more about it in the PouchDB guides about [working with documents](https://pouchdb.com/guides/documents.html)
 and [updating and deleting documents](https://pouchdb.com/guides/updating-deleting.html) and

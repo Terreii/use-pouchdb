@@ -129,7 +129,7 @@ import PouchDB from 'pouchdb-browser'
 import { Provider } from 'use-pouchdb'
 
 import { Main } from './Main'
-import { UserMenu } from 'UserMenu'
+import { UserMenu } from './UserMenu'
 
 const db = new PouchDB('local')
 

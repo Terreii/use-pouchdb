@@ -44,7 +44,7 @@ class Footer extends React.Component {
           </div>
           <div>
             <h5>Contact</h5>
-            <a href={`${this.props.config.baseUrl}blog`}>Blog</a>
+            <a href={`${this.props.config.url}/`}>Blog</a>
             <a href={this.props.config.repoUrl} rel="noreferrer noopener">
               GitHub
             </a>

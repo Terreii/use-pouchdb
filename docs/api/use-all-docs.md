@@ -11,7 +11,7 @@ ability to fetch multiple documents by their ids.
 It doesn't need the creation of a secondary index. This means that it is useable right away, even when not all
 documents did sync.
 
-As all hooks, it subscribes to updates of the documents and also its range.
+As all hooks, it subscribes to updates.
 
 `useAllDocs` can only be invoked from a component nested inside of a `<Provider />`.
 

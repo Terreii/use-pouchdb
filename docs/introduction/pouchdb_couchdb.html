@@ -71,7 +71,8 @@ CouchDB and PouchDB are build around the idea of syncing your data.</p>
 back online, sync it. With PouchDB on the clients browser and CouchDB on the backend your web app can become
 <em>offline capable</em>.</p>
 <p>Then there is also the <strong>changes feed</strong>, which lists what did change in the order they did. Or that everything is
-stored as <strong>JSON Objects</strong>, or the <strong>HTTP API</strong> of CouchDB, and more.</p>
+stored as <strong>JSON Objects</strong>, or the <strong>HTTP API</strong> of CouchDB, or integrated user authentication and
+authorization, and more.</p>
 <h2><a class="anchor" aria-hidden="true" id="basics"></a><a href="#basics" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Basics</h2>
 <p><strong>CouchDB</strong> is a schemaless, <em>NoSQL</em> database, that stores its data in JSON-Objects (called <strong>documents</strong>). It's
 aim is in allowing you to sync your data between different instances of a database. You interface with it over
@@ -85,9 +86,10 @@ PouchDB and CouchDB. If I explicitly mean CouchDB, then I will write CouchDB. If
 I will note it so, or if I write about a PouchDB plugin, it will always be PouchDB (the JS package). The biggest
 difference is that CouchDB's API are URLs while PouchDB's API are methods.</p>
 <blockquote>
-<p>There is a <a href="https://github.com/pouchdb/pouchdb-server">PouchDB Server</a>. It implements more/most of CouchDBs API
-(like authentication and authorization). And most of what will be marked as CouchDB also works with PouchD
-Server. Which makes PouchDB Server an ideal candidate for development. But use CouchDB in production!</p>
+<p>There is a <a href="https://github.com/pouchdb/pouchdb-server">PouchDB Server</a>. It implements more/most
+of CouchDBs API (like authentication and authorization). And most of what will be marked as
+CouchDB also works with PouchDB Server. Which makes PouchDB Server an ideal candidate for
+development. But use CouchDB in production!</p>
 </blockquote>
 <h3><a class="anchor" aria-hidden="true" id="about-databases"></a><a href="#about-databases" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>About Databases</h3>
 <p>People new to PouchDB are often confused about it's terminology. What is a <strong>database</strong>? And why are there
@@ -171,7 +173,7 @@ site.</p>
 <p>or</p>
 <pre><code class="hljs css language-sh">$ yarn add pouchdb
 </code></pre>
-<p>You can now use it on <code>node</code>.</p>
+<p>You can now use it in <code>node</code>.</p>
 <pre><code class="hljs css language-javascript"><span class="hljs-keyword">const</span> PouchDB = <span class="hljs-built_in">require</span>(<span class="hljs-string">'pouchdb'</span>)
 </code></pre>
 <p>To use it in your browser you have to bundle it. If you use <a href="https://create-react-app.dev/">create-react-app</a> all
@@ -203,8 +205,9 @@ object.</p>
 <p>More in the <a href="https://pouchdb.com/guides/databases.html">PouchDB guide</a> or
 <a href="https://pouchdb.com/api.html#create_database">API documentation</a>.</p>
 <h3><a class="anchor" aria-hidden="true" id="setup-sync"></a><a href="#setup-sync" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Setup Sync</h3>
-<p>You don't have to do much to setup syncing. If you don't have a CouchDB instance running, you probably won't be
-able to test this section. But later in the tutorials we will setup a CouchDB instance.</p>
+<p>You don't have to do much to setup syncing. If you don't have a CouchDB instance running, you
+probably won't be able to test this section. But later in the tutorials we will setup a PouchDB
+Server and start syncing.</p>
 <pre><code class="hljs css language-javascript"><span class="hljs-comment">// this syncs in both directions: from remote and to remote</span>
 <span class="hljs-keyword">const</span> syncHandler = localDB
   .sync(remoteDB, {
@@ -259,15 +262,17 @@ replace the old document.</p>
 <li><code>_id</code> (string) is a for the database unique identifier.</li>
 <li><code>_rev</code> (string) is a version &quot;number&quot;.</li>
 </ul>
-<p>The rev consists out of two parts: a <strong>number</strong> and a <strong>hash</strong>. On every update the <strong>number</strong> will be increased by</p>
-<ol>
-<li>And a new <strong>hash</strong> calculated. If you update a document you must include the <code>_rev</code> from the last version.</li>
-</ol>
+<p>The rev consists out of two parts: a <strong>number</strong> and a <strong>hash</strong>. On every update the <strong>number</strong> will
+be increased by 1. And a new <strong>hash</strong> calculated. If you update a document you must include the
+<code>_rev</code> from the last version.</p>
 <p>But why do we need <code>rev</code> in the first place?</p>
-<p>It is all about <strong>sync</strong>. Or: PouchDB is a <em>distributed</em> system. While you where updating a document, someone else
-could have changed the doc, too!</p>
-<p>Internal PouchDB keeps a rev-history of every document. If you sync, then PouchDB uses the rev-history of a
-document to know if there is a conflict. Think like <strong>Git</strong> with <em>fast-forward-merging</em>.</p>
+<p>It is all about <strong>sync</strong>. Or: PouchDB is a <em>distributed</em> system. While you where updating a
+document, someone else could have changed the doc, too!</p>
+<p>Internal PouchDB keeps a rev-history of every document. If you sync, then PouchDB uses the
+rev-history of a document to know if there is a conflict. Think like <strong>Git</strong> with
+<em>fast-forward-merging</em>.</p>
+<p>We are also not changing the <code>rev</code>. When we update a document we pass the old <code>_rev</code> along,
+stating to PouchDB which is the previous version of that document.</p>
 <p>Read more about it in the PouchDB guides about <a href="https://pouchdb.com/guides/documents.html">working with documents</a>
 and <a href="https://pouchdb.com/guides/updating-deleting.html">updating and deleting documents</a> and
 <a href="https://pouchdb.com/guides/conflicts.html">conflicts</a>.</p>
@@ -281,4 +286,4 @@ and <a href="https://pouchdb.com/guides/updating-deleting.html">updating and del
 <p>If you didn't yet, you could read the <a href="https://pouchdb.com/guides/">PouchDB's guide</a>, or their
 <a href="https://pouchdb.com/getting-started.html">Getting Started Guide</a>.</p>
 <p>I think we are now ready for the first tutorial for <code>usePouchDB</code>!</p>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/use-pouchdb/docs/introduction/quick_start"><span class="arrow-prev">← </span><span>Quick Start</span></a><a class="docs-next button" href="/use-pouchdb/docs/basics/intro"><span>&#x27;Basic Tutorial: Intro&#x27;</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#learn-pouchdb">Learn PouchDB</a></li><li><a href="#why-couchdb-and-pouchdb">Why CouchDB and PouchDB?</a></li><li><a href="#basics">Basics</a><ul class="toc-headings"><li><a href="#about-databases">About Databases</a></li><li><a href="#about-documents">About Documents</a></li></ul></li><li><a href="#show-me-some-code">Show me some code!</a><ul class="toc-headings"><li><a href="#setup-pouchdb">Setup PouchDB</a></li><li><a href="#create-a-database">Create a database</a></li><li><a href="#setup-sync">Setup Sync</a></li><li><a href="#write-a-document">Write a document</a></li><li><a href="#revision-rev-and-updating-documents">Revision (rev) and updating documents</a></li><li><a href="#reading-a-document">Reading a document</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/use-pouchdb/" class="nav-home"><img src="/use-pouchdb/img/favicon.ico" alt="usePouchDB" width="66" height="58"/></a><div><h5>Docs</h5><a href="/use-pouchdb/docs/introduction/quick_start">Getting Started</a><a href="/use-pouchdb/docs/api/provider">API Reference</a></div><div><h5>Contact</h5><a href="/use-pouchdb/blog">Blog</a><a href="https://github.com/Terreii/use-pouchdb" rel="noreferrer noopener">GitHub</a><a class="github-button" href="https://github.com/Terreii/use-pouchdb" data-icon="octicon-star" data-count-href="/Terreii/use-pouchdb/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a><div class="social"><a href="../impressum.html">Impressum</a></div></div></section><section class="copyright">Copyright © 2020 Christopher Astfalk</section></footer></div></body></html>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/use-pouchdb/docs/introduction/quick_start"><span class="arrow-prev">← </span><span>Quick Start</span></a><a class="docs-next button" href="/use-pouchdb/docs/basics/intro"><span>&#x27;Basic Tutorial: Intro&#x27;</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#learn-pouchdb">Learn PouchDB</a></li><li><a href="#why-couchdb-and-pouchdb">Why CouchDB and PouchDB?</a></li><li><a href="#basics">Basics</a><ul class="toc-headings"><li><a href="#about-databases">About Databases</a></li><li><a href="#about-documents">About Documents</a></li></ul></li><li><a href="#show-me-some-code">Show me some code!</a><ul class="toc-headings"><li><a href="#setup-pouchdb">Setup PouchDB</a></li><li><a href="#create-a-database">Create a database</a></li><li><a href="#setup-sync">Setup Sync</a></li><li><a href="#write-a-document">Write a document</a></li><li><a href="#revision-rev-and-updating-documents">Revision (rev) and updating documents</a></li><li><a href="#reading-a-document">Reading a document</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/use-pouchdb/" class="nav-home"><img src="/use-pouchdb/img/favicon.ico" alt="usePouchDB" width="66" height="58"/></a><div><h5>Docs</h5><a href="/use-pouchdb/docs/introduction/quick_start">Getting Started</a><a href="/use-pouchdb/docs/api/provider">API Reference</a></div><div><h5>Contact</h5><a href="https://christopher-astfalk.de/">Blog</a><a href="https://github.com/Terreii/use-pouchdb" rel="noreferrer noopener">GitHub</a><a class="github-button" href="https://github.com/Terreii/use-pouchdb" data-icon="octicon-star" data-count-href="/Terreii/use-pouchdb/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a><div class="social"><a href="../impressum.html">Impressum</a></div></div></section><section class="copyright">Copyright © 2020 Christopher Astfalk</section></footer></div></body></html>

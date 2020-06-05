@@ -93,7 +93,7 @@
   )
 }
 </code></pre>
-<p>Right way you might see some familiar functions, like <code>usePouch</code> and <code>db.put()</code>. But also the new <code>db.get()</code>.</p>
+<p>Right away you might see some familiar functions, like <code>usePouch</code> and <code>db.put()</code>. But also the new <code>db.get()</code>.</p>
 <p><a href="https://pouchdb.com/api.html#fetch_document"><code>db.get()</code></a> fetches a single document. All it needs is the <em>id</em> of
 the doc. Like most methods of PouchDB, it too can fail. For example, if the doc doesn't exist, or you don't have
 access to the database.</p>
@@ -113,10 +113,15 @@ conflict! A conflict that throws right away: an <a href="https://pouchdb.com/gui
 <p>In this example we've chosen to handle the immediate conflict by simply trying again. We run <code>update</code> again, with
 it still having a reverence to the old todo. It'll <code>get</code> the new version of the document, check if <code>done</code> has the
 desired value, and update the new doc only if not.</p>
+<p>Ok, yes. Those two conflict examples are <em>extremely</em> unlikely. In <em>this</em> example, you would probably be save
+without error-handling. But in a typical app, you don't know how long something takes. What caching happens
+between your data source and your update component. Those examples are there to guide you to the best
+practice of PouchDB.</p>
 <blockquote>
 <p>This dance of conflict resolution is what allows PouchDB to sync! It requires you to handle conflicts.</p>
 <p>In this example we know what the desired state of a doc should be: The last user interaction. There is also
 almost no data lost if that assumption is wrong.</p>
+<p>But you should generally follow the role: <strong>&quot;Last write wins&quot; means losing your users data!</strong></p>
 </blockquote>
 <blockquote>
 <p>There are two types of conflicts: <strong>immediate conflicts</strong> and <strong>eventual conflicts</strong>. You can read more about
@@ -205,4 +210,4 @@ them in the <a href="https://pouchdb.com/guides/conflicts.html">PouchDB Conflict
 <p><img src="../../img/oh_yes_indeed.gif" alt="Disney Marvel's Loki says &quot;Oh yes&quot;"></p>
 <p>Your todos sync between your tabs, while the filter state is local!</p>
 <p>Next: we going to implement syncing between different browsers/devices.</p>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/use-pouchdb/docs/basics/list-all"><span class="arrow-prev">← </span><span>List all Todos</span></a><a class="docs-next button" href="/use-pouchdb/docs/basics/sync"><span>Sync account</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/use-pouchdb/" class="nav-home"><img src="/use-pouchdb/img/favicon.ico" alt="usePouchDB" width="66" height="58"/></a><div><h5>Docs</h5><a href="/use-pouchdb/docs/introduction/quick_start">Getting Started</a><a href="/use-pouchdb/docs/api/provider">API Reference</a></div><div><h5>Contact</h5><a href="/use-pouchdb/blog">Blog</a><a href="https://github.com/Terreii/use-pouchdb" rel="noreferrer noopener">GitHub</a><a class="github-button" href="https://github.com/Terreii/use-pouchdb" data-icon="octicon-star" data-count-href="/Terreii/use-pouchdb/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a><div class="social"><a href="../impressum.html">Impressum</a></div></div></section><section class="copyright">Copyright © 2020 Christopher Astfalk</section></footer></div></body></html>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/use-pouchdb/docs/basics/list-all"><span class="arrow-prev">← </span><span>List all Todos</span></a><a class="docs-next button" href="/use-pouchdb/docs/basics/sync"><span>Sync account</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/use-pouchdb/" class="nav-home"><img src="/use-pouchdb/img/favicon.ico" alt="usePouchDB" width="66" height="58"/></a><div><h5>Docs</h5><a href="/use-pouchdb/docs/introduction/quick_start">Getting Started</a><a href="/use-pouchdb/docs/api/provider">API Reference</a></div><div><h5>Contact</h5><a href="https://christopher-astfalk.de/">Blog</a><a href="https://github.com/Terreii/use-pouchdb" rel="noreferrer noopener">GitHub</a><a class="github-button" href="https://github.com/Terreii/use-pouchdb" data-icon="octicon-star" data-count-href="/Terreii/use-pouchdb/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a><div class="social"><a href="../impressum.html">Impressum</a></div></div></section><section class="copyright">Copyright © 2020 Christopher Astfalk</section></footer></div></body></html>

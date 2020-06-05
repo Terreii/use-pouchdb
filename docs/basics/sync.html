@@ -311,7 +311,7 @@ PouchDB.plugin(auth) <span class="hljs-comment">// register pouchdb-authenticati
 }
 
 <span class="hljs-keyword">export</span> <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">logIn</span>(<span class="hljs-params">username, password</span>) </span>{
-  <span class="hljs-comment">// throws the error of logIn</span>
+  <span class="hljs-comment">// We don't capture errors from logIn</span>
   <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> remote.logIn(username, password)
 
   <span class="hljs-keyword">if</span> (result.ok &amp;&amp; result.name != <span class="hljs-literal">null</span> &amp;&amp; result.name.length &gt; <span class="hljs-number">0</span>) {
@@ -378,8 +378,8 @@ PouchDB.plugin(auth) <span class="hljs-comment">// register pouchdb-authenticati
   <span class="hljs-keyword">return</span> prefix + bytes.join(<span class="hljs-string">''</span>)
 }
 </code></pre>
-<p>We don't have to handle incoming changes, because changes subscriptions on the local database are emitting events
-when they are happening.</p>
+<p>We don't have to handle incoming changes, because changes subscriptions on the local database are emitting
+those, too.</p>
 <h2><a class="anchor" aria-hidden="true" id="components"></a><a href="#components" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Components</h2>
 <p>Now to the component:</p>
 <pre><code class="hljs css language-jsx"><span class="hljs-comment">// Session.js</span>
@@ -410,11 +410,13 @@ when they are happening.</p>
 
   <span class="hljs-keyword">const</span> checkSessionState = <span class="hljs-keyword">async</span> () =&gt; {
     <span class="hljs-keyword">const</span> isLoggedIn = <span class="hljs-keyword">await</span> getIsLoggedIn()
-    setSessionState(isLoggedIn)
 
     <span class="hljs-keyword">if</span> (isLoggedIn) {
       <span class="hljs-keyword">const</span> info = <span class="hljs-keyword">await</span> getSession()
+      setSessionState(isLoggedIn)
       setUsername(info.userCtx.name)
+    } <span class="hljs-keyword">else</span> {
+      setSessionState(isLoggedIn)
     }
   }
 
@@ -430,7 +432,7 @@ when they are happening.</p>
     }
   }, [sessionState, db])
 
-  <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">doLogIn</span>(<span class="hljs-params">event</span>) </span>{
+  <span class="hljs-keyword">const</span> doLogIn = <span class="hljs-keyword">async</span> event =&gt; {
     <span class="hljs-keyword">if</span> (event) {
       event.preventDefault()
     }
@@ -438,13 +440,13 @@ when they are happening.</p>
     checkSessionState()
   }
 
-  <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">doSignUp</span>(<span class="hljs-params">event</span>) </span>{
+  <span class="hljs-keyword">const</span> doSignUp = <span class="hljs-keyword">async</span> event =&gt; {
     event.preventDefault()
     <span class="hljs-keyword">await</span> signUp(username, password)
     doLogIn()
   }
 
-  <span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">doLogOut</span>(<span class="hljs-params">event</span>) </span>{
+  <span class="hljs-keyword">const</span> doLogOut = <span class="hljs-keyword">async</span> event =&gt; {
     event.preventDefault()
     <span class="hljs-keyword">await</span> logOut()
     <span class="hljs-comment">// destroy local database, to remove all local data</span>
@@ -508,18 +510,18 @@ when they are happening.</p>
 <p>This is a more complicated component! It does quite a lot!</p>
 <p>This component has 3 states:</p>
 <ul>
-<li>On first render it checks the session and renders nothing.</li>
-<li>No user is logged in. It renders a log in and sign up form.</li>
-<li>User is logged in. It renders the username and a log out button.</li>
+<li>On first render; It checks the session and renders nothing.</li>
+<li>No user is logged in; It renders a log in and sign up form.</li>
+<li>User is logged in; It renders the username and a log out button.</li>
 </ul>
 <p>The first <code>useEffect</code> only runs after the first render. It checks if a user is logged in.</p>
-<p>The second <code>useEffect</code> runs every time the sessionState (or the db) changes. And if a user is logged in it starts
+<p>The second <code>useEffect</code> runs every time the sessionState (or the db) changes. And if a user is logged in, it starts
 the sync process. Because <code>startSync</code> returns a cancel function, we can return the cancel function in the
 <code>useEffect</code> body. It will then cancel every time the effect re-runs.</p>
 <p>Then we have <code>doLogIn</code>, <code>doSignUp</code> and <code>doLogOut</code>. They call their counterpart in <code>account.js</code>, but also prevent
 the default effects of dom-events.</p>
 <p><code>doSignUp</code> calls <code>doLogIn</code> after a new user was created.</p>
-<p><code>doLogIn</code> checks the session state after login.</p>
+<p><code>doLogIn</code> checks the session state with <code>checkSessionState</code> after login.</p>
 <p>And <code>doLogOut</code> destroys the local database. When you destroy a database it's data will be deleted. But the deletion
 will not be synced! In <a href="./provider"><code>Add the Provider</code></a> we did add an event-listener for destroy events. And when
 the local database was destroyed, we did create a new one. This was for logging out.</p>
@@ -532,7 +534,4 @@ the error responses.</p>
 </blockquote>
 <p>If you now open a different browser, you will be able to sync your Todos between them. They should also be listed
 in Fauxton (<a href="http://127.0.0.1:5984/_utils/#/_all_dbs">http://127.0.0.1:5984/_utils/#/_all_dbs</a>).</p>
-<p>Now we are finished with our Todo example. All Todos are replicated, users can sign up and log in. I know, this was
-a long tutorial, but we did cover a lot!</p>
-<p>Happy coding! 🎉🎊</p>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/use-pouchdb/docs/basics/update"><span class="arrow-prev">← </span><span>Update docs</span></a><a class="docs-next button" href="/use-pouchdb/docs/basics/testing"><span>Testing</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#a-word-about-version-3">A word about Version 3</a></li><li><a href="#couch_peruser">couch_peruser</a></li><li><a href="#basics">Basics</a><ul class="toc-headings"><li><a href="#access-a-remote-database">Access a remote Database</a></li><li><a href="#sign-up">Sign up</a></li><li><a href="#log-in-and-out">Log in and out</a></li></ul></li><li><a href="#session-and-sync-functions">Session and sync functions</a></li><li><a href="#components">Components</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/use-pouchdb/" class="nav-home"><img src="/use-pouchdb/img/favicon.ico" alt="usePouchDB" width="66" height="58"/></a><div><h5>Docs</h5><a href="/use-pouchdb/docs/introduction/quick_start">Getting Started</a><a href="/use-pouchdb/docs/api/provider">API Reference</a></div><div><h5>Contact</h5><a href="/use-pouchdb/blog">Blog</a><a href="https://github.com/Terreii/use-pouchdb" rel="noreferrer noopener">GitHub</a><a class="github-button" href="https://github.com/Terreii/use-pouchdb" data-icon="octicon-star" data-count-href="/Terreii/use-pouchdb/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a><div class="social"><a href="../impressum.html">Impressum</a></div></div></section><section class="copyright">Copyright © 2020 Christopher Astfalk</section></footer></div></body></html>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/use-pouchdb/docs/basics/update"><span class="arrow-prev">← </span><span>Update docs</span></a><a class="docs-next button" href="/use-pouchdb/docs/basics/testing"><span>Testing</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#a-word-about-version-3">A word about Version 3</a></li><li><a href="#couch_peruser">couch_peruser</a></li><li><a href="#basics">Basics</a><ul class="toc-headings"><li><a href="#access-a-remote-database">Access a remote Database</a></li><li><a href="#sign-up">Sign up</a></li><li><a href="#log-in-and-out">Log in and out</a></li></ul></li><li><a href="#session-and-sync-functions">Session and sync functions</a></li><li><a href="#components">Components</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/use-pouchdb/" class="nav-home"><img src="/use-pouchdb/img/favicon.ico" alt="usePouchDB" width="66" height="58"/></a><div><h5>Docs</h5><a href="/use-pouchdb/docs/introduction/quick_start">Getting Started</a><a href="/use-pouchdb/docs/api/provider">API Reference</a></div><div><h5>Contact</h5><a href="https://christopher-astfalk.de/">Blog</a><a href="https://github.com/Terreii/use-pouchdb" rel="noreferrer noopener">GitHub</a><a class="github-button" href="https://github.com/Terreii/use-pouchdb" data-icon="octicon-star" data-count-href="/Terreii/use-pouchdb/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a><div class="social"><a href="../impressum.html">Impressum</a></div></div></section><section class="copyright">Copyright © 2020 Christopher Astfalk</section></footer></div></body></html>

@@ -20,6 +20,11 @@ To deepen your knowledge use [CouchDBs extensive documentation](https://docs.cou
 from setting it up, all through user management, views, to tips to write effective views. But most importantly, it
 teaches you how to think in CouchDB (and PouchDB).
 
+If you like to learn from videos: [IBM Cloudant](https://www.ibm.com/cloud/cloudant)
+(CouchDB as a Service Provider) has a great course:
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/videoseries?list=PLJa_sXrJUZb-Y4Q_5y3yPC8m5RxS5q-_J" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
 ## Why CouchDB and PouchDB?
 
 There are multiple answers to this question. But without doubt the most prominent one is **synchronization**.

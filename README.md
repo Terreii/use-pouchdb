@@ -33,8 +33,6 @@ just want to quick start, read on...
 
 usePouchDB requires **React 16.8.3 or later**.
 
-To use usePouchDB with your React app:
-
 ```sh
 npm install use-pouchdb
 # or
@@ -48,6 +46,16 @@ There is also a special [browser version](https://www.npmjs.com/package/pouchdb-
 npm install pouchdb-browser
 # or
 yarn add pouchdb-browser
+```
+
+To use the `useView` hook [`pouchdb-mapreduce`](https://www.npmjs.com/package/pouchdb-mapreduce)
+must be installed and setup. If you use the [`pouchdb`](https://www.npmjs.com/package/pouchdb) or
+[`pouchdb-browser`](https://www.npmjs.com/package/pouchdb-browser) packages, it is already setup.
+
+```sh
+npm install pouchdb-mapreduce
+# or
+yarn add pouchdb-mapreduce
 ```
 
 ### Bind usePouchDB
@@ -78,7 +86,7 @@ ReactDOM.render(
 [All hooks are listed here](https://christopher-astfalk.de/use-pouchdb/docs/introduction/quick_start).
 
 - [`usePouch`](https://christopher-astfalk.de/use-pouchdb/docs/api/use-pouch) - Access the database
-  provided by `<Provider />`
+  provided by `<Provider />`.
 - [`useDoc`](https://christopher-astfalk.de/use-pouchdb/docs/api/use-doc) - Access a single document
   and subscribe to its changes. The hook version of [`db.get`](https://pouchdb.com/api.html#fetch_document).
 - [`useAllDocs`](https://christopher-astfalk.de/use-pouchdb/docs/api/use-all-docs) - Load multiple documents

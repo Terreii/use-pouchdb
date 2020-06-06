@@ -4,6 +4,8 @@
 [![dependencies Status](https://david-dm.org/Terreii/use-pouchdb/status.svg)](https://david-dm.org/Terreii/use-pouchdb)
 [![devDependencies Status](https://david-dm.org/Terreii/use-pouchdb/dev-status.svg)](https://david-dm.org/Terreii/use-pouchdb?type=dev)
 [![peerDependencies Status](https://david-dm.org/Terreii/use-pouchdb/peer-status.svg)](https://david-dm.org/Terreii/use-pouchdb?type=peer)
+[![Known Vulnerabilities](https://snyk.io/test/github/Terreii/use-pouchdb/badge.svg?targetFile=package.json)](https://snyk.io/test/github/Terreii/use-pouchdb?targetFile=package.json)
+[![npm](https://img.shields.io/npm/v/use-pouchdb)](https://www.npmjs.com/package/use-pouchdb)
 
 [React Hooks](https://reactjs.org/) for [PouchDB](https://pouchdb.com/).
 
@@ -77,7 +79,9 @@ ReactDOM.render(
 
 ### Example
 
-Load a single document and display it.
+Load a single document and display it. [`useDoc`](https://christopher-astfalk.de/use-pouchdb/docs/api/use-doc)
+is the hook version of [`db.get`](https://pouchdb.com/api.html#fetch_document), but it also
+subscribes to updates of that document and automatically loads the new version.
 
 ```jsx
 import React from 'react'

@@ -77,6 +77,16 @@ ReactDOM.render(
 
 [All hooks are listed here](https://christopher-astfalk.de/use-pouchdb/docs/introduction/quick_start).
 
+- [`usePouch`](https://christopher-astfalk.de/use-pouchdb/docs/api/use-pouch) - Access the database
+  provided by `<Provider />`
+- [`useDoc`](https://christopher-astfalk.de/use-pouchdb/docs/api/use-doc) - Access a single document
+  and subscribe to its changes. The hook version of [`db.get`](https://pouchdb.com/api.html#fetch_document).
+- [`useAllDocs`](https://christopher-astfalk.de/use-pouchdb/docs/api/use-all-docs) - Load multiple documents
+  and subscribe to their changes. Or a range of docs by their ids. The hook version of
+  [`db.allDocs`](https://pouchdb.com/api.html#batch_fetch).
+- [`useView`](https://christopher-astfalk.de/use-pouchdb/docs/api/use-view) - Access a view and subscribe
+  to its changes. The hook version of [`db.query`](https://pouchdb.com/api.html#query_database).
+
 ### Example
 
 Load a single document and display it. [`useDoc`](https://christopher-astfalk.de/use-pouchdb/docs/api/use-doc)

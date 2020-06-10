@@ -59,6 +59,7 @@
     "husky": "^4.2.5",
     "jest": "^26.0.1",
     "pouchdb-adapter-memory": "^7.2.1",
+    "pouchdb-find": "^7.2.1",
     "pouchdb-mapreduce": "^7.2.1",
     "prettier": "2.0.5",
     "pretty-quick": "^2.0.1",
@@ -72,6 +73,7 @@
   },
   "dependencies": {
     "@types/pouchdb-core": "^7.0.6",
+    "@types/pouchdb-find": "^6.3.5",
     "@types/pouchdb-mapreduce": "^6.1.4",
     "@types/react": "^16.9.36",
     "pouchdb-core": "^7.2.1",
@@ -81,6 +83,7 @@
     "underscore": "^1.10.2"
   },
   "peerDependencies": {
+    "pouchdb-find": "^7.2.1",
     "pouchdb-mapreduce": "^7.2.1"
   },
   "husky": {

@@ -1,4 +1,11 @@
-import { Provider, usePouch, useDoc, useAllDocs, useView } from './index'
+import {
+  Provider,
+  usePouch,
+  useDoc,
+  useAllDocs,
+  useFind,
+  useView,
+} from './index'
 
 test('should export the provider', () => {
   expect(Provider).toBeTruthy()
@@ -18,6 +25,11 @@ test('should export useDoc', () => {
 test('should export useAllDocs', () => {
   expect(useAllDocs).toBeTruthy()
   expect(typeof useAllDocs).toBe('function')
+})
+
+test('should export useFind', () => {
+  expect(useFind).toBeTruthy()
+  expect(typeof useFind).toBe('function')
 })
 
 test('should export useView', () => {

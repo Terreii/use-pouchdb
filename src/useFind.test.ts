@@ -294,7 +294,7 @@ describe('index', () => {
     ])
   })
 
-  test('should warn if not index exist', async () => {
+  test('should warn if no index exist', async () => {
     await createDocs()
 
     const { result, waitForNextUpdate } = renderHook(
@@ -389,188 +389,6 @@ describe('index', () => {
     )
   })
 
-  test('should create an index with the provided use_index as a string', async () => {
-    await createDocs()
-
-    const { result, waitForNextUpdate } = renderHook(
-      () =>
-        useFind({
-          index: {
-            fields: ['captain'],
-          },
-          selector: {
-            captain: { $gt: null },
-          },
-          sort: ['captain'],
-          use_index: 'star_trek',
-        }),
-      {
-        pouchdb: myPouch,
-      }
-    )
-
-    expect(result.current.loading).toBeTruthy()
-
-    await waitForNextUpdate()
-
-    expect(result.current.warning).toBeFalsy()
-    expect(result.current.docs).toHaveLength(5)
-
-    const ddoc = await myPouch.get<Record<string, unknown>>('_design/star_trek')
-    expect(ddoc).toBeTruthy()
-    expect(ddoc.language).toBe('query')
-    expect(typeof ddoc.views).toBe('object')
-  })
-
-  test('should create an index with the provided use_index', async () => {
-    await createDocs()
-
-    const { result, waitForNextUpdate } = renderHook(
-      () =>
-        useFind({
-          index: {
-            fields: ['captain'],
-          },
-          selector: {
-            captain: { $gt: null },
-          },
-          sort: ['captain'],
-          use_index: ['star_trek', 'captains'],
-        }),
-      {
-        pouchdb: myPouch,
-      }
-    )
-
-    expect(result.current.loading).toBeTruthy()
-
-    await waitForNextUpdate()
-
-    expect(result.current.warning).toBeFalsy()
-    expect(result.current.docs).toHaveLength(5)
-
-    const ddoc = await myPouch.get<Record<string, unknown>>('_design/star_trek')
-    expect(ddoc).toBeTruthy()
-    expect(ddoc.language).toBe('query')
-    expect(typeof ddoc.views).toBe('object')
-    expect(typeof (ddoc.views as Record<string, unknown>).captains).toBe(
-      'object'
-    )
-  })
-
-  test('should create an index with the provided use_index, name and ddoc', async () => {
-    await createDocs()
-
-    const { result, waitForNextUpdate } = renderHook(
-      () =>
-        useFind({
-          index: {
-            fields: ['captain'],
-            ddoc: 'star_trek',
-            name: 'captains',
-          },
-          selector: {
-            captain: { $gt: null },
-          },
-          sort: ['captain'],
-          use_index: ['star_trek', 'captains'],
-        }),
-      {
-        pouchdb: myPouch,
-      }
-    )
-
-    expect(result.current.loading).toBeTruthy()
-
-    await waitForNextUpdate()
-
-    expect(result.current.warning).toBeFalsy()
-    expect(result.current.docs).toHaveLength(5)
-
-    const ddoc = await myPouch.get<Record<string, unknown>>('_design/star_trek')
-    expect(ddoc).toBeTruthy()
-    expect(ddoc.language).toBe('query')
-    expect(typeof ddoc.views).toBe('object')
-    expect(typeof (ddoc.views as Record<string, unknown>).captains).toBe(
-      'object'
-    )
-  })
-
-  test('should create an index with the provided single use_index, name and ddoc', async () => {
-    await createDocs()
-
-    const { result, waitForNextUpdate } = renderHook(
-      () =>
-        useFind({
-          index: {
-            fields: ['captain'],
-            ddoc: 'star_trek',
-            name: 'captains',
-          },
-          selector: {
-            captain: { $gt: null },
-          },
-          sort: ['captain'],
-          use_index: 'star_trek',
-        }),
-      {
-        pouchdb: myPouch,
-      }
-    )
-
-    expect(result.current.loading).toBeTruthy()
-
-    await waitForNextUpdate()
-
-    expect(result.current.warning).toBeFalsy()
-    expect(result.current.docs).toHaveLength(5)
-
-    const ddoc = await myPouch.get<Record<string, unknown>>('_design/star_trek')
-    expect(ddoc).toBeTruthy()
-    expect(ddoc.language).toBe('query')
-    expect(typeof ddoc.views).toBe('object')
-    expect(typeof (ddoc.views as Record<string, unknown>).captains).toBe(
-      'object'
-    )
-  })
-
-  test("should return an warning if use_index and name + ddoc don't match", async () => {
-    await createDocs()
-
-    const { result, waitForNextUpdate } = renderHook(
-      () =>
-        useFind({
-          index: {
-            fields: ['captain'],
-            ddoc: 'star_trek',
-            name: 'captains',
-          },
-          selector: {
-            captain: { $gt: null },
-          },
-          sort: ['captain'],
-          use_index: ['star_trek', 'other'],
-        }),
-      {
-        pouchdb: myPouch,
-      }
-    )
-
-    expect(result.current.loading).toBeTruthy()
-    expect(result.current.warning).toBe(
-      'use_index does not match ddoc + name of index, no index created. ' +
-        'Remove one or match them to optimize query time'
-    )
-
-    await waitForNextUpdate()
-
-    expect(result.current.warning).toBe(
-      'use_index does not match ddoc + name of index, no index created. ' +
-        'Remove one or match them to optimize query time'
-    )
-    expect(result.current.docs).toHaveLength(5)
-  })
-
   test('should create a new index if fields change', async () => {
     await createDocs()
 
@@ -639,12 +457,7 @@ describe('index', () => {
       },
     ])
 
-    const ddocs = await myPouch.find({
-      selector: { _id: { $gte: '_design/', $lt: '_design/\uffff' } },
-      sort: ['_id'],
-    })
-
-    expect(ddocs.docs).toHaveLength(2)
+    expect((await myPouch.getIndexes()).indexes).toHaveLength(3)
   })
 
   test('should create a new index if name or ddoc change', async () => {
@@ -662,7 +475,6 @@ describe('index', () => {
             captain: { $gt: null },
           },
           sort: ['captain'],
-          use_index: [ddoc, name],
         }),
       {
         initialProps: { ddoc: 'star_trak', name: 'captains' },

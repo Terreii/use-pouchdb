@@ -2,7 +2,7 @@ import PouchDB from 'pouchdb-core'
 import memory from 'pouchdb-adapter-memory'
 import find from 'pouchdb-find'
 
-import { renderHook } from './test-utils'
+import { renderHook, act } from './test-utils'
 import useFind from './useFind'
 
 PouchDB.plugin(memory)
@@ -105,7 +105,7 @@ test('should return docs sorted by _id', async () => {
   const { result, waitForNextUpdate } = renderHook(
     () =>
       useFind({
-        selector: { _id: { $gte: 'Episode 1' } },
+        selector: { _id: { $gte: 'DS9' } },
         sort: ['_id'],
       }),
     {
@@ -162,6 +162,116 @@ test('should return docs sorted by _id', async () => {
   expect(result.current.loading).toBeFalsy()
   expect(result.current.state).toBe('done')
   expect(result.current.error).toBeNull()
+})
+
+test('should subscribe to changes', async () => {
+  await createDocs()
+
+  const { result, waitForNextUpdate } = renderHook(
+    () =>
+      useFind({
+        selector: { _id: { $gte: 'DS9' } },
+        sort: ['_id'],
+      }),
+    {
+      pouchdb: myPouch,
+    }
+  )
+
+  await waitForNextUpdate()
+
+  expect(result.current.docs).toHaveLength(5)
+  expect(result.current.loading).toBeFalsy()
+
+  act(() => {
+    myPouch.put({
+      _id: 'aa',
+      other: 'value',
+    })
+  })
+
+  await new Promise(resolve => {
+    setTimeout(resolve, 10)
+  })
+  expect(result.current.loading).toBeFalsy()
+  expect(result.current.docs).toHaveLength(5)
+
+  act(() => {
+    myPouch.put({
+      _id: 'zzz',
+      moar: 42,
+    })
+  })
+
+  expect(result.current.loading).toBeTruthy()
+
+  await waitForNextUpdate()
+
+  expect(result.current.docs).toHaveLength(6)
+})
+
+test('should re-query when the selector changes', async () => {
+  await createDocs()
+
+  const { result, waitForNextUpdate, rerender } = renderHook(
+    (id: string) =>
+      useFind({
+        selector: { _id: { $gte: id } },
+        sort: ['_id'],
+      }),
+    {
+      initialProps: 'DS9',
+      pouchdb: myPouch,
+    }
+  )
+
+  await waitForNextUpdate()
+
+  expect(result.current.docs).toHaveLength(5)
+
+  rerender('ENT')
+
+  await waitForNextUpdate()
+
+  expect(result.current.loading).toBeTruthy()
+
+  await waitForNextUpdate()
+
+  expect(result.current.docs).toHaveLength(4)
+})
+
+test("shouldn't re-query when the selector changes, but not it's value", async () => {
+  await createDocs()
+
+  const {
+    result,
+    waitForNextUpdate,
+    waitForValueToChange,
+    rerender,
+  } = renderHook(
+    (selector: PouchDB.Find.Selector) =>
+      useFind({
+        selector,
+        sort: ['_id'],
+      }),
+    {
+      initialProps: { _id: { $gte: 'DS9' } },
+      pouchdb: myPouch,
+    }
+  )
+
+  await waitForNextUpdate()
+
+  expect(result.current.docs).toHaveLength(5)
+
+  const waiting = waitForValueToChange(() => result.current.loading, {
+    timeout: 20,
+  })
+
+  rerender({ _id: { $gte: 'DS9' } })
+
+  await expect(waiting).rejects.toThrowError()
+  expect(result.current.docs).toHaveLength(5)
 })
 
 describe('index', () => {
@@ -510,5 +620,129 @@ describe('index', () => {
 
     const starDDoc = await myPouch.get<Record<string, unknown>>('_design/star')
     expect(Object.keys(starDDoc.views)).toEqual(['other'])
+  })
+
+  test('should subscribe to changes', async () => {
+    await createDocs()
+
+    const { result, waitForNextUpdate } = renderHook(
+      () =>
+        useFind({
+          index: {
+            fields: ['captain'],
+          },
+          selector: {
+            captain: { $gt: null },
+          },
+          sort: ['captain'],
+        }),
+      {
+        pouchdb: myPouch,
+      }
+    )
+
+    await waitForNextUpdate()
+
+    expect(result.current.docs).toHaveLength(5)
+    expect(result.current.loading).toBeFalsy()
+
+    act(() => {
+      myPouch.put({
+        _id: 'aa',
+        other: 'value',
+      })
+    })
+
+    await new Promise(resolve => {
+      setTimeout(resolve, 10)
+    })
+    expect(result.current.loading).toBeFalsy()
+    expect(result.current.docs).toHaveLength(5)
+
+    act(() => {
+      myPouch.put({
+        _id: 'zzz',
+        captain: 'Captain Hook',
+      })
+    })
+
+    expect(result.current.loading).toBeTruthy()
+
+    await waitForNextUpdate()
+
+    expect(result.current.docs).toHaveLength(6)
+  })
+
+  test('should re-query when the selector changes', async () => {
+    await createDocs()
+
+    const { result, waitForNextUpdate, rerender } = renderHook(
+      (name: string | null) =>
+        useFind({
+          index: {
+            fields: ['captain'],
+          },
+          selector: {
+            captain: { $gt: name },
+          },
+          sort: ['captain'],
+        }),
+      {
+        initialProps: null,
+        pouchdb: myPouch,
+      }
+    )
+
+    await waitForNextUpdate()
+
+    expect(result.current.docs).toHaveLength(5)
+
+    rerender('Jonathan Archer')
+
+    await waitForNextUpdate()
+
+    expect(result.current.loading).toBeTruthy()
+
+    await waitForNextUpdate()
+
+    expect(result.current.docs).toHaveLength(1)
+  })
+
+  test("shouldn't re-query when the selector changes, but not it's value", async () => {
+    await createDocs()
+
+    const {
+      result,
+      waitForNextUpdate,
+      waitForValueToChange,
+      rerender,
+    } = renderHook(
+      (selector: PouchDB.Find.Selector) =>
+        useFind({
+          selector,
+          sort: ['captain'],
+        }),
+      {
+        initialProps: {
+          captain: { $gt: name },
+        },
+        pouchdb: myPouch,
+      }
+    )
+
+    await waitForNextUpdate()
+
+    expect(result.current.docs).toHaveLength(5)
+
+    const waiting = waitForValueToChange(() => result.current.loading, {
+      timeout: 20,
+    })
+
+    rerender({
+      captain: { $gt: name },
+    })
+
+    await expect(waiting).rejects.toThrowError()
+    expect(result.current.docs).toHaveLength(5)
   })
 })

@@ -138,7 +138,29 @@ export default function useFind<Content>(
       }
     }
 
-    query()
+    dispatch({ type: 'loading_started' })
+    getIndex(pouch, index, selector)
+      .then(result => {
+        if (result[0] && result[0].length > 0) {
+          ddoc = result[0]
+        }
+        if (result[1] && result[1].length > 0) {
+          name = result[1]
+        }
+
+        if (isActive) {
+          query()
+        }
+      })
+      .catch(error => {
+        if (isActive) {
+          dispatch({
+            type: 'loading_error',
+            payload: { error, setResult: false },
+          })
+          query()
+        }
+      })
 
     return () => {
       isActive = false
@@ -156,4 +178,67 @@ export default function useFind<Content>(
   ])
 
   return state
+}
+
+function getIndex(
+  db: PouchDB.Database,
+  index: FindHookIndexOption | undefined,
+  selector: PouchDB.Find.Selector
+): Promise<[string | null, string]> {
+  if (index && typeof index === 'string') {
+    return explainIndex(db, selector)
+  } else if (index && Array.isArray(index)) {
+    return Promise.resolve(index)
+  } else if (index && typeof index === 'object') {
+    return createIndex(db, { index })
+  } else {
+    return explainIndex(db, selector)
+  }
+}
+
+async function createIndex(
+  db: PouchDB.Database,
+  index: PouchDB.Find.CreateIndexOptions
+): Promise<[string, string]> {
+  const result = (await db.createIndex(
+    index
+  )) as PouchDB.Find.CreateIndexResponse<Record<string, unknown>> & {
+    id: PouchDB.Core.DocumentId
+    name: string
+  }
+  return [result.id, result.name]
+}
+
+async function explainIndex(
+  db: PouchDB.Database,
+  selector: PouchDB.Find.Selector
+): Promise<[string | null, string]> {
+  const database = db as PouchDB.Database & {
+    explain: (selector: PouchDB.Find.Selector) => Promise<ExplainResult>
+  }
+  const result = await database.explain(selector)
+  return [result.index.ddoc, result.index.name]
+}
+
+interface ExplainResult {
+  dbname: string
+  index: PouchDB.Find.Index & { defaultUsed?: true }
+  selector: PouchDB.Find.Selector
+  opts: {
+    use_index: string[]
+    bookmark: string
+    limit: number | undefined
+    skip: number | undefined
+    sort: { [propName: string]: 'asc' | 'desc' }
+    fields: string[] | undefined
+    r: number[]
+    conflicts: boolean
+  }
+  limit: number | undefined
+  skip: number
+  fields: string[] | undefined
+  range: {
+    start_key: unknown[] | null
+    end_key: unknown[] | undefined
+  }
 }

@@ -102,7 +102,7 @@ test('should return an error if the PouchDB database as no find', () => {
 test('should return docs sorted by _id', async () => {
   await createDocs()
 
-  const { result, waitForNextUpdate } = renderHook(
+  const { result, waitForValueToChange } = renderHook(
     () =>
       useFind({
         selector: { _id: { $gte: 'DS9' } },
@@ -119,7 +119,7 @@ test('should return docs sorted by _id', async () => {
   expect(result.current.state).toBe('loading')
   expect(result.current.error).toBeNull()
 
-  await waitForNextUpdate()
+  await waitForValueToChange(() => result.current.loading)
 
   expect(result.current.docs).toEqual([
     {
@@ -167,7 +167,7 @@ test('should return docs sorted by _id', async () => {
 test('should subscribe to changes', async () => {
   await createDocs()
 
-  const { result, waitForNextUpdate } = renderHook(
+  const { result, waitForNextUpdate, waitForValueToChange } = renderHook(
     () =>
       useFind({
         selector: { _id: { $gte: 'DS9' } },
@@ -178,7 +178,7 @@ test('should subscribe to changes', async () => {
     }
   )
 
-  await waitForNextUpdate()
+  await waitForValueToChange(() => result.current.loading)
 
   expect(result.current.docs).toHaveLength(5)
   expect(result.current.loading).toBeFalsy()
@@ -213,7 +213,7 @@ test('should subscribe to changes', async () => {
 test('should re-query when the selector changes', async () => {
   await createDocs()
 
-  const { result, waitForNextUpdate, rerender } = renderHook(
+  const { result, waitForValueToChange, rerender } = renderHook(
     (id: string) =>
       useFind({
         selector: { _id: { $gte: id } },
@@ -225,7 +225,7 @@ test('should re-query when the selector changes', async () => {
     }
   )
 
-  await waitForNextUpdate()
+  await waitForValueToChange(() => result.current.loading)
 
   expect(result.current.docs).toHaveLength(5)
 
@@ -233,7 +233,7 @@ test('should re-query when the selector changes', async () => {
 
   expect(result.current.loading).toBeTruthy()
 
-  await waitForNextUpdate()
+  await waitForValueToChange(() => result.current.loading)
 
   expect(result.current.docs).toHaveLength(4)
 })
@@ -241,12 +241,7 @@ test('should re-query when the selector changes', async () => {
 test("shouldn't re-query when the selector changes, but not it's value", async () => {
   await createDocs()
 
-  const {
-    result,
-    waitForNextUpdate,
-    waitForValueToChange,
-    rerender,
-  } = renderHook(
+  const { result, waitForValueToChange, rerender } = renderHook(
     (selector: PouchDB.Find.Selector) =>
       useFind({
         selector,
@@ -258,7 +253,7 @@ test("shouldn't re-query when the selector changes, but not it's value", async (
     }
   )
 
-  await waitForNextUpdate()
+  await waitForValueToChange(() => result.current.loading)
 
   expect(result.current.docs).toHaveLength(5)
 
@@ -282,7 +277,7 @@ describe('index', () => {
       },
     })
 
-    const { result, waitForNextUpdate } = renderHook(
+    const { result, waitForValueToChange } = renderHook(
       () =>
         useFind({
           selector: {
@@ -297,7 +292,7 @@ describe('index', () => {
 
     expect(result.current.loading).toBeTruthy()
 
-    await waitForNextUpdate()
+    await waitForValueToChange(() => result.current.loading)
 
     expect(result.current.warning).toBeFalsy()
     expect(result.current.docs).toEqual([
@@ -342,7 +337,7 @@ describe('index', () => {
   test('should create an index and use it', async () => {
     await createDocs()
 
-    const { result, waitForNextUpdate } = renderHook(
+    const { result, waitForValueToChange } = renderHook(
       () =>
         useFind({
           index: {
@@ -360,8 +355,9 @@ describe('index', () => {
 
     expect(result.current.loading).toBeTruthy()
 
-    await waitForNextUpdate()
+    await waitForValueToChange(() => result.current.loading)
 
+    expect(result.current.loading).toBeFalsy()
     expect(result.current.warning).toBeFalsy()
     expect(result.current.docs).toEqual([
       {
@@ -405,7 +401,7 @@ describe('index', () => {
   test('should warn if no index exist', async () => {
     await createDocs()
 
-    const { result, waitForNextUpdate } = renderHook(
+    const { result, waitForValueToChange } = renderHook(
       () =>
         useFind({
           selector: {
@@ -419,7 +415,7 @@ describe('index', () => {
 
     expect(result.current.loading).toBeTruthy()
 
-    await waitForNextUpdate()
+    await waitForValueToChange(() => result.current.loading)
 
     expect(typeof result.current.warning).toBe('string')
     expect(result.current.warning.length).toBeGreaterThan(0)
@@ -435,7 +431,7 @@ describe('index', () => {
       },
     })
 
-    const { result, waitForNextUpdate } = renderHook(
+    const { result, waitForValueToChange } = renderHook(
       () =>
         useFind({
           index: {
@@ -452,7 +448,7 @@ describe('index', () => {
 
     expect(result.current.loading).toBeTruthy()
 
-    await waitForNextUpdate()
+    await waitForValueToChange(() => result.current.loading)
 
     expect(result.current.warning).toBeFalsy()
     expect(result.current.docs).toHaveLength(5)
@@ -461,7 +457,7 @@ describe('index', () => {
   test('should create an index with the provided name and ddoc', async () => {
     await createDocs()
 
-    const { result, waitForNextUpdate } = renderHook(
+    const { result, waitForValueToChange } = renderHook(
       () =>
         useFind({
           index: {
@@ -481,7 +477,7 @@ describe('index', () => {
 
     expect(result.current.loading).toBeTruthy()
 
-    await waitForNextUpdate()
+    await waitForValueToChange(() => result.current.loading)
 
     expect(result.current.warning).toBeFalsy()
     expect(result.current.docs).toHaveLength(5)
@@ -498,7 +494,7 @@ describe('index', () => {
   test('should create a new index if fields change', async () => {
     await createDocs()
 
-    const { result, waitForNextUpdate, rerender } = renderHook(
+    const { result, waitForValueToChange, rerender } = renderHook(
       (fields: string[]) =>
         useFind({
           index: {
@@ -515,14 +511,14 @@ describe('index', () => {
       }
     )
 
-    await waitForNextUpdate()
+    await waitForValueToChange(() => result.current.loading)
     expect(result.current.loading).toBeFalsy()
 
     rerender(['name'])
 
     expect(result.current.loading).toBeTruthy()
 
-    await waitForNextUpdate()
+    await waitForValueToChange(() => result.current.loading)
 
     expect(result.current.loading).toBeFalsy()
     expect(result.current.docs).toEqual([
@@ -569,7 +565,7 @@ describe('index', () => {
   test('should create a new index if name or ddoc change', async () => {
     await createDocs()
 
-    const { result, waitForNextUpdate, rerender } = renderHook(
+    const { result, waitForValueToChange, rerender } = renderHook(
       ({ name, ddoc }: { name: string; ddoc: string }) =>
         useFind({
           index: {
@@ -588,14 +584,15 @@ describe('index', () => {
       }
     )
 
-    await waitForNextUpdate()
+    await waitForValueToChange(() => result.current.loading)
+
     expect(result.current.loading).toBeFalsy()
 
     rerender({ ddoc: 'star_trak', name: 'other' })
 
     expect(result.current.loading).toBeTruthy()
 
-    await waitForNextUpdate()
+    await waitForValueToChange(() => result.current.loading)
 
     expect(result.current.loading).toBeFalsy()
     expect(result.current.docs).toHaveLength(5)
@@ -604,7 +601,7 @@ describe('index', () => {
 
     expect(result.current.loading).toBeTruthy()
 
-    await waitForNextUpdate()
+    await waitForValueToChange(() => result.current.loading)
 
     expect(result.current.loading).toBeFalsy()
     expect(result.current.docs).toHaveLength(5)
@@ -621,7 +618,7 @@ describe('index', () => {
   test('should subscribe to changes', async () => {
     await createDocs()
 
-    const { result, waitForNextUpdate } = renderHook(
+    const { result, waitForNextUpdate, waitForValueToChange } = renderHook(
       () =>
         useFind({
           index: {
@@ -637,7 +634,7 @@ describe('index', () => {
       }
     )
 
-    await waitForNextUpdate()
+    await waitForValueToChange(() => result.current.loading)
 
     expect(result.current.docs).toHaveLength(5)
     expect(result.current.loading).toBeFalsy()
@@ -672,7 +669,7 @@ describe('index', () => {
   test('should re-query when the selector changes', async () => {
     await createDocs()
 
-    const { result, waitForNextUpdate, rerender } = renderHook(
+    const { result, waitForValueToChange, rerender } = renderHook(
       (name: string | null) =>
         useFind({
           index: {
@@ -689,7 +686,7 @@ describe('index', () => {
       }
     )
 
-    await waitForNextUpdate()
+    await waitForValueToChange(() => result.current.loading)
 
     expect(result.current.docs).toHaveLength(5)
 
@@ -697,35 +694,36 @@ describe('index', () => {
 
     expect(result.current.loading).toBeTruthy()
 
-    await waitForNextUpdate()
+    await waitForValueToChange(() => result.current.loading)
 
     expect(result.current.docs).toHaveLength(1)
   })
 
-  test("shouldn't re-query when the selector changes, but not it's value", async () => {
+  test("shouldn't re-query when the index changes, but not it's value", async () => {
     await createDocs()
 
-    const {
-      result,
-      waitForNextUpdate,
-      waitForValueToChange,
-      rerender,
-    } = renderHook(
-      (selector: PouchDB.Find.Selector) =>
+    const { result, waitForValueToChange, rerender } = renderHook(
+      (options: PouchDB.Find.CreateIndexOptions) =>
         useFind({
-          selector,
+          index: options.index,
+          selector: {
+            captain: { $gt: null },
+          },
           sort: ['captain'],
         }),
       {
         initialProps: {
-          captain: { $gt: name },
+          index: {
+            fields: ['captain'],
+          },
         },
         pouchdb: myPouch,
       }
     )
 
-    await waitForNextUpdate()
+    await waitForValueToChange(() => result.current.loading)
 
+    expect(result.current.loading).toBeFalsy()
     expect(result.current.docs).toHaveLength(5)
 
     const waiting = waitForValueToChange(() => result.current.loading, {
@@ -733,7 +731,46 @@ describe('index', () => {
     })
 
     rerender({
-      captain: { $gt: name },
+      index: {
+        fields: ['captain'],
+      },
+    })
+
+    await expect(waiting).rejects.toThrowError()
+    expect(result.current.docs).toHaveLength(5)
+  })
+
+  test("shouldn't re-query when the selector changes, but not it's value", async () => {
+    await createDocs()
+
+    const { result, waitForValueToChange, rerender } = renderHook(
+      (selector: PouchDB.Find.Selector) =>
+        useFind({
+          index: {
+            fields: ['captain'],
+          },
+          selector,
+          sort: ['captain'],
+        }),
+      {
+        initialProps: {
+          captain: { $gt: null },
+        },
+        pouchdb: myPouch,
+      }
+    )
+
+    await waitForValueToChange(() => result.current.loading)
+
+    expect(result.current.loading).toBeFalsy()
+    expect(result.current.docs).toHaveLength(5)
+
+    const waiting = waitForValueToChange(() => result.current.loading, {
+      timeout: 20,
+    })
+
+    rerender({
+      captain: { $gt: null },
     })
 
     await expect(waiting).rejects.toThrowError()

@@ -167,7 +167,7 @@ test('should return docs sorted by _id', async () => {
 test('should subscribe to changes', async () => {
   await createDocs()
 
-  const { result, waitForNextUpdate, waitForValueToChange } = renderHook(
+  const { result, waitForValueToChange } = renderHook(
     () =>
       useFind({
         selector: { _id: { $gte: 'DS9' } },
@@ -185,7 +185,7 @@ test('should subscribe to changes', async () => {
 
   act(() => {
     myPouch.put({
-      _id: 'aa',
+      _id: 'AA',
       other: 'value',
     })
   })
@@ -203,9 +203,8 @@ test('should subscribe to changes', async () => {
     })
   })
 
-  expect(result.current.loading).toBeTruthy()
-
-  await waitForNextUpdate()
+  await waitForValueToChange(() => result.current.loading)
+  await waitForValueToChange(() => result.current.loading)
 
   expect(result.current.docs).toHaveLength(6)
 })
@@ -618,14 +617,14 @@ describe('index', () => {
   test('should subscribe to changes', async () => {
     await createDocs()
 
-    const { result, waitForNextUpdate, waitForValueToChange } = renderHook(
+    const { result, waitForValueToChange } = renderHook(
       () =>
         useFind({
           index: {
             fields: ['captain'],
           },
           selector: {
-            captain: { $gt: null },
+            captain: { $gt: '' },
           },
           sort: ['captain'],
         }),
@@ -636,6 +635,7 @@ describe('index', () => {
 
     await waitForValueToChange(() => result.current.loading)
 
+    expect(result.current.error).toBeFalsy()
     expect(result.current.docs).toHaveLength(5)
     expect(result.current.loading).toBeFalsy()
 
@@ -647,8 +647,9 @@ describe('index', () => {
     })
 
     await new Promise(resolve => {
-      setTimeout(resolve, 10)
+      setTimeout(resolve, 20)
     })
+    expect(result.current.error).toBeFalsy()
     expect(result.current.loading).toBeFalsy()
     expect(result.current.docs).toHaveLength(5)
 
@@ -659,10 +660,13 @@ describe('index', () => {
       })
     })
 
+    await waitForValueToChange(() => result.current.loading)
+
     expect(result.current.loading).toBeTruthy()
 
-    await waitForNextUpdate()
+    await waitForValueToChange(() => result.current.loading)
 
+    expect(result.current.error).toBeFalsy()
     expect(result.current.docs).toHaveLength(6)
   })
 

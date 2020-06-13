@@ -1,6 +1,8 @@
 import { useEffect } from 'react'
+import { matchesSelector } from 'pouchdb-selector-core'
 
 import { useContext } from './context'
+import type SubscriptionManager from './subscription'
 import useStateMachine, { ResultType } from './state-machine'
 import { useDeepMemo } from './utils'
 
@@ -138,19 +140,21 @@ export default function useFind<Content>(
       }
     }
 
-    dispatch({ type: 'loading_started' })
-    getIndex(pouch, index, selector)
-      .then(result => {
-        if (result[0] && result[0].length > 0) {
-          ddoc = result[0]
-        }
-        if (result[1] && result[1].length > 0) {
-          name = result[1]
-        }
+    let unsubscribe: (() => void) | undefined = undefined
 
-        if (isActive) {
-          query()
+    dispatch({ type: 'loading_started' })
+    getIndex(pouch, index, { selector })
+      .then(([ddocId, indexName]) => {
+        if (!isActive) return
+
+        if (ddocId) {
+          ddoc = ddocId
         }
+        name = indexName
+
+        query()
+
+        unsubscribe = subscribe(subscriptionManager, selector, query, ddocId)
       })
       .catch(error => {
         if (isActive) {
@@ -159,11 +163,16 @@ export default function useFind<Content>(
             payload: { error, setResult: false },
           })
           query()
+
+          unsubscribe = subscribe(subscriptionManager, selector, query, null)
         }
       })
 
     return () => {
       isActive = false
+      if (unsubscribe) {
+        unsubscribe()
+      }
     }
   }, [
     pouch,
@@ -183,7 +192,7 @@ export default function useFind<Content>(
 function getIndex(
   db: PouchDB.Database,
   index: FindHookIndexOption | undefined,
-  selector: PouchDB.Find.Selector
+  selector: PouchDB.Find.FindRequest<Record<string, unknown>>
 ): Promise<[string | null, string]> {
   if (index && typeof index === 'string') {
     return explainIndex(db, selector)
@@ -211,13 +220,39 @@ async function createIndex(
 
 async function explainIndex(
   db: PouchDB.Database,
-  selector: PouchDB.Find.Selector
+  selector: PouchDB.Find.FindRequest<Record<string, unknown>>
 ): Promise<[string | null, string]> {
   const database = db as PouchDB.Database & {
     explain: (selector: PouchDB.Find.Selector) => Promise<ExplainResult>
   }
   const result = await database.explain(selector)
   return [result.index.ddoc, result.index.name]
+}
+
+function subscribe(
+  subscriptionManager: SubscriptionManager,
+  selector: PouchDB.Find.Selector,
+  query: () => void,
+  id: PouchDB.Core.DocumentId | null
+): () => void {
+  const ddocName = id
+    ? '_design/' + id.replace(/^_design\//, '') // normalize, user can add a ddoc name
+    : undefined
+
+  return subscriptionManager.subscribeToDocs<Record<string, unknown>>(
+    null,
+    (_del, id, doc) => {
+      if (id === ddocName) {
+        query()
+      } else if (doc && typeof matchesSelector !== 'function') {
+        // because pouchdb-selector-core is semver-free zone
+        // If matchesSelector doesn't exist, just query every time
+        query()
+      } else if (doc && matchesSelector(doc, selector)) {
+        query()
+      }
+    }
+  )
 }
 
 interface ExplainResult {

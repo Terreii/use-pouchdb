@@ -1,4 +1,8 @@
-import { ResultType } from './state-machine'
+import { useEffect } from 'react'
+
+import { useContext } from './context'
+import useStateMachine, { ResultType } from './state-machine'
+import { useDeepMemo } from './utils'
 
 /**
  * Set which index to use for the query. Or create one and use it. It can be:
@@ -70,12 +74,86 @@ export interface FindHookOptions {
 }
 
 export default function useFind<Content>(
-  _opt: FindHookOptions
+  options: FindHookOptions
 ): ResultType<PouchDB.Find.FindResponse<Content>> {
-  return {
-    docs: [],
-    loading: false,
-    state: 'loading',
-    error: null,
+  const { pouchdb: pouch, subscriptionManager } = useContext()
+
+  if (
+    typeof pouch?.createIndex !== 'function' ||
+    typeof pouch?.find !== 'function'
+  ) {
+    throw new TypeError(
+      'db.createIndex() or/and db.find() are not defined. Please install "pouchdb-find"'
+    )
   }
+
+  const index = useDeepMemo(options.index)
+  const selector = useDeepMemo(options.selector)
+  const fields = useDeepMemo(options.fields)
+  const sort = useDeepMemo(options.sort)
+  const limit = options.limit
+  const skip = options.skip
+
+  const [state, dispatch] = useStateMachine<PouchDB.Find.FindResponse<Content>>(
+    () => ({
+      docs: [],
+    })
+  )
+
+  useEffect(() => {
+    let isActive = true
+    let name: string | undefined = undefined
+    let ddoc: string | undefined = undefined
+
+    const query = async () => {
+      dispatch({ type: 'loading_started' })
+
+      try {
+        let indexToUse: string | [string, string] | undefined = undefined
+        if (ddoc && name) {
+          indexToUse = [ddoc, name]
+        } else if (ddoc) {
+          indexToUse = ddoc
+        }
+
+        const result = (await pouch.find({
+          selector,
+          fields,
+          sort,
+          limit,
+          skip,
+          use_index: indexToUse,
+        })) as PouchDB.Find.FindResponse<Content>
+
+        if (isActive) {
+          dispatch({ type: 'loading_finished', payload: result })
+        }
+      } catch (error) {
+        if (isActive) {
+          dispatch({
+            type: 'loading_error',
+            payload: { error, setResult: false },
+          })
+        }
+      }
+    }
+
+    query()
+
+    return () => {
+      isActive = false
+    }
+  }, [
+    pouch,
+    subscriptionManager,
+    dispatch,
+    index,
+    selector,
+    fields,
+    sort,
+    limit,
+    skip,
+  ])
+
+  return state
 }

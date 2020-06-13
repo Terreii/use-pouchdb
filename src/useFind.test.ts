@@ -231,8 +231,6 @@ test('should re-query when the selector changes', async () => {
 
   rerender('ENT')
 
-  await waitForNextUpdate()
-
   expect(result.current.loading).toBeTruthy()
 
   await waitForNextUpdate()
@@ -413,7 +411,6 @@ describe('index', () => {
           selector: {
             captain: { $gt: null },
           },
-          sort: ['captain'],
         }),
       {
         pouchdb: myPouch,
@@ -447,7 +444,6 @@ describe('index', () => {
           selector: {
             captain: { $gt: null },
           },
-          sort: ['captain'],
         }),
       {
         pouchdb: myPouch,
@@ -698,8 +694,6 @@ describe('index', () => {
     expect(result.current.docs).toHaveLength(5)
 
     rerender('Jonathan Archer')
-
-    await waitForNextUpdate()
 
     expect(result.current.loading).toBeTruthy()
 

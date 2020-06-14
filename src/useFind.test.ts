@@ -209,6 +209,86 @@ test('should subscribe to changes', async () => {
   expect(result.current.docs).toHaveLength(6)
 })
 
+test('should re-query if a change did happen while a query is underway', async () => {
+  await createDocs()
+
+  const { result, waitForNextUpdate, waitForValueToChange } = renderHook(
+    () =>
+      useFind({
+        selector: { _id: { $gte: 'DS9' } },
+        sort: ['_id'],
+      }),
+    {
+      pouchdb: myPouch,
+    }
+  )
+
+  await waitForValueToChange(() => result.current.loading)
+
+  expect(result.current.docs).toHaveLength(5)
+  expect(result.current.loading).toBeFalsy()
+
+  act(() => {
+    myPouch.put({
+      _id: 'Jolly Roger',
+      captain: 'Hook',
+    })
+  })
+
+  await waitForValueToChange(() => result.current.loading)
+  expect(result.current.loading).toBeTruthy()
+
+  act(() => {
+    myPouch.put({ _id: 'test', captain: 'Ching Shih (石陽)' })
+  })
+
+  await waitForValueToChange(() => result.current.loading)
+
+  expect(result.current.loading).toBeFalsy()
+  expect(result.current.docs).toHaveLength(7)
+
+  await waitForNextUpdate()
+
+  expect(result.current.loading).toBeTruthy()
+
+  await waitForValueToChange(() => result.current.loading)
+
+  expect(result.current.loading).toBeFalsy()
+  expect(result.current.docs).toHaveLength(7)
+})
+
+test('should handle the deletion of docs in the result', async () => {
+  await createDocs()
+
+  const { result, waitForValueToChange } = renderHook(
+    () =>
+      useFind({
+        selector: { _id: { $gte: 'DS9' } },
+        sort: ['_id'],
+      }),
+    {
+      pouchdb: myPouch,
+    }
+  )
+
+  await waitForValueToChange(() => result.current.loading)
+
+  expect(result.current.docs).toHaveLength(5)
+  expect(result.current.loading).toBeFalsy()
+
+  const doc = await myPouch.get('TOS')
+  act(() => {
+    myPouch.remove(doc._id, doc._rev)
+  })
+
+  await waitForValueToChange(() => result.current.loading)
+  expect(result.current.loading).toBeTruthy()
+
+  await waitForValueToChange(() => result.current.loading)
+  expect(result.current.docs).toHaveLength(4)
+  expect(result.current.loading).toBeFalsy()
+})
+
 test('should re-query when the selector changes', async () => {
   await createDocs()
 
@@ -666,8 +746,95 @@ describe('index', () => {
 
     await waitForValueToChange(() => result.current.loading)
 
+    expect(result.current.loading).toBeFalsy()
     expect(result.current.error).toBeFalsy()
     expect(result.current.docs).toHaveLength(6)
+  })
+
+  test('should re-query if a change did happen while a query is underway', async () => {
+    await createDocs()
+
+    const { result, waitForNextUpdate, waitForValueToChange } = renderHook(
+      () =>
+        useFind({
+          index: {
+            fields: ['captain'],
+          },
+          selector: {
+            captain: { $gt: '' },
+          },
+          sort: ['captain'],
+        }),
+      {
+        pouchdb: myPouch,
+      }
+    )
+
+    await waitForValueToChange(() => result.current.loading)
+
+    expect(result.current.docs).toHaveLength(5)
+    expect(result.current.loading).toBeFalsy()
+
+    act(() => {
+      myPouch.put({
+        _id: 'Jolly Roger',
+        captain: 'Hook',
+      })
+    })
+
+    await waitForValueToChange(() => result.current.loading)
+    expect(result.current.loading).toBeTruthy()
+
+    act(() => {
+      myPouch.put({ _id: 'test', captain: 'Ching Shih (石陽)' })
+    })
+
+    await waitForNextUpdate()
+
+    expect(result.current.loading).toBeTruthy()
+    expect(result.current.docs).toHaveLength(7)
+
+    await waitForNextUpdate()
+
+    expect(result.current.loading).toBeFalsy()
+    expect(result.current.docs).toHaveLength(7)
+  })
+
+  test('should handle the deletion of docs in the result', async () => {
+    await createDocs()
+
+    const { result, waitForValueToChange } = renderHook(
+      () =>
+        useFind({
+          index: {
+            fields: ['captain'],
+          },
+          selector: {
+            captain: { $gt: '' },
+          },
+          sort: ['captain'],
+        }),
+      {
+        pouchdb: myPouch,
+      }
+    )
+
+    await waitForValueToChange(() => result.current.loading)
+
+    expect(result.current.docs).toHaveLength(5)
+    expect(result.current.loading).toBeFalsy()
+
+    const doc = await myPouch.get('TOS')
+    act(() => {
+      myPouch.remove(doc._id, doc._rev)
+    })
+
+    await waitForValueToChange(() => result.current.loading)
+    expect(result.current.loading).toBeTruthy()
+
+    await waitForValueToChange(() => result.current.loading)
+    expect(result.current.docs).toHaveLength(4)
+    expect(result.current.loading).toBeFalsy()
   })
 
   test('should re-query when the selector changes', async () => {

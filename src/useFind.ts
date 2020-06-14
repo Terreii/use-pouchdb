@@ -28,7 +28,8 @@ export type FindHookIndexOption =
       name?: string
 
       /**
-       * Design document name (i.e. the part after '_design/', auto-generated if you don't include it
+       * Design document name (i.e. the part after '_design/',
+       * auto-generated if you don't include it.
        */
       ddoc?: string
 
@@ -104,10 +105,20 @@ export default function useFind<Content>(
 
   useEffect(() => {
     let isActive = true
+    let isFetching = false
+    let shouldUpdateAfter = false
+
     let name: string | undefined = undefined
     let ddoc: string | undefined = undefined
 
+    // Query a mango query and update the state.
     const query = async () => {
+      if (isFetching) {
+        shouldUpdateAfter = true
+        return
+      }
+      isFetching = true
+
       dispatch({ type: 'loading_started' })
 
       try {
@@ -137,12 +148,21 @@ export default function useFind<Content>(
             payload: { error, setResult: false },
           })
         }
+      } finally {
+        isFetching = false
+
+        if (isActive && shouldUpdateAfter) {
+          shouldUpdateAfter = false
+          query()
+        }
       }
     }
 
     let unsubscribe: (() => void) | undefined = undefined
 
     dispatch({ type: 'loading_started' })
+
+    // Create an index or get the index that will be used.
     getIndex(pouch, index, { selector })
       .then(([ddocId, indexName]) => {
         if (!isActive) return
@@ -170,9 +190,7 @@ export default function useFind<Content>(
 
     return () => {
       isActive = false
-      if (unsubscribe) {
-        unsubscribe()
-      }
+      unsubscribe?.()
     }
   }, [
     pouch,
@@ -189,22 +207,33 @@ export default function useFind<Content>(
   return state
 }
 
+/**
+ * Get the ddoc & name of an index. Create it if the index doesn't exist.
+ * @param db        - The PouchDB database.
+ * @param index     - Name or Create Index options.
+ * @param selector  - The selector used.
+ */
 function getIndex(
   db: PouchDB.Database,
   index: FindHookIndexOption | undefined,
   selector: PouchDB.Find.FindRequest<Record<string, unknown>>
 ): Promise<[string | null, string]> {
   if (index && typeof index === 'string') {
-    return explainIndex(db, selector)
+    return findIndex(db, selector)
   } else if (index && Array.isArray(index)) {
     return Promise.resolve(index)
   } else if (index && typeof index === 'object') {
     return createIndex(db, { index })
   } else {
-    return explainIndex(db, selector)
+    return findIndex(db, selector)
   }
 }
 
+/**
+ * Create an index. Returns the ddoc & name.
+ * @param db - The PouchDB database.
+ * @param index - Options for db.createIndex
+ */
 async function createIndex(
   db: PouchDB.Database,
   index: PouchDB.Find.CreateIndexOptions
@@ -218,7 +247,12 @@ async function createIndex(
   return [result.id, result.name]
 }
 
-async function explainIndex(
+/**
+ * Find a index for the given selector. Returns ddoc & name.
+ * @param db - The PouchDB database.
+ * @param selector - The selector used.
+ */
+async function findIndex(
   db: PouchDB.Database,
   selector: PouchDB.Find.FindRequest<Record<string, unknown>>
 ): Promise<[string | null, string]> {
@@ -229,6 +263,14 @@ async function explainIndex(
   return [result.index.ddoc, result.index.name]
 }
 
+/**
+ * Subscribes to updates in the database and re-query
+ * when a document did change that matches the selector.
+ * @param subscriptionManager - The current subscription manager.
+ * @param selector - Selector, to filter out changes.
+ * @param query - Function to run a query.
+ * @param id - Id of the ddoc where the index is stored.
+ */
 function subscribe(
   subscriptionManager: SubscriptionManager,
   selector: PouchDB.Find.Selector,
@@ -241,8 +283,10 @@ function subscribe(
 
   return subscriptionManager.subscribeToDocs<Record<string, unknown>>(
     null,
-    (_del, id, doc) => {
-      if (id === ddocName) {
+    (deleted, id, doc) => {
+      if (deleted) {
+        query()
+      } else if (id === ddocName) {
         query()
       } else if (doc && typeof matchesSelector !== 'function') {
         // because pouchdb-selector-core is semver-free zone

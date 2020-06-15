@@ -108,6 +108,15 @@ export default function useFind<Content>(
     let isFetching = false
     let shouldUpdateAfter = false
 
+    // if _id isn't in the fields array it will be added internally
+    const didAddIdToFields =
+      Array.isArray(fields) && fields.length > 0 && !fields.includes('_id')
+    // internal fields-array. Ensure to always fetch _id
+    const fieldsToFetch = didAddIdToFields ? fields?.concat(['_id']) : fields
+    // Container for the ids in the result. It is in a object to be used as a ref.
+    const idsInResult: { ids: Set<PouchDB.Core.DocumentId> } = {
+      ids: new Set(),
+    }
     let name: string | undefined = undefined
     let ddoc: string | undefined = undefined
 
@@ -131,7 +140,7 @@ export default function useFind<Content>(
 
         const result = (await pouch.find({
           selector,
-          fields,
+          fields: fieldsToFetch,
           sort,
           limit,
           skip,
@@ -139,6 +148,18 @@ export default function useFind<Content>(
         })) as PouchDB.Find.FindResponse<Content>
 
         if (isActive) {
+          idsInResult.ids = new Set()
+
+          for (const doc of result.docs) {
+            idsInResult.ids.add(doc._id)
+
+            // if _id was added to the fields array, remove it,
+            // so that the user only gets what they want.
+            if (didAddIdToFields) {
+              delete doc._id
+            }
+          }
+
           dispatch({ type: 'loading_finished', payload: result })
         }
       } catch (error) {
@@ -151,6 +172,7 @@ export default function useFind<Content>(
       } finally {
         isFetching = false
 
+        // Re-query if a change did happen while querying
         if (isActive && shouldUpdateAfter) {
           shouldUpdateAfter = false
           query()
@@ -174,7 +196,13 @@ export default function useFind<Content>(
 
         query()
 
-        unsubscribe = subscribe(subscriptionManager, selector, query, ddocId)
+        unsubscribe = subscribe(
+          subscriptionManager,
+          selector,
+          query,
+          ddocId,
+          idsInResult
+        )
       })
       .catch(error => {
         if (isActive) {
@@ -184,7 +212,13 @@ export default function useFind<Content>(
           })
           query()
 
-          unsubscribe = subscribe(subscriptionManager, selector, query, null)
+          unsubscribe = subscribe(
+            subscriptionManager,
+            selector,
+            query,
+            null,
+            idsInResult
+          )
         }
       })
 
@@ -275,7 +309,8 @@ function subscribe(
   subscriptionManager: SubscriptionManager,
   selector: PouchDB.Find.Selector,
   query: () => void,
-  id: PouchDB.Core.DocumentId | null
+  id: PouchDB.Core.DocumentId | null,
+  idsInResult: { ids: Set<PouchDB.Core.DocumentId> }
 ): () => void {
   const ddocName = id
     ? '_design/' + id.replace(/^_design\//, '') // normalize, user can add a ddoc name
@@ -284,7 +319,7 @@ function subscribe(
   return subscriptionManager.subscribeToDocs<Record<string, unknown>>(
     null,
     (deleted, id, doc) => {
-      if (deleted) {
+      if (deleted && idsInResult.ids.has(id)) {
         query()
       } else if (id === ddocName) {
         query()

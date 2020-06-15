@@ -290,6 +290,39 @@ describe('by id', () => {
     expect(result.current.loading).toBeFalsy()
   })
 
+  test("shouldn't re-query if a document not in the result gets deleted", async () => {
+    await createDocs()
+
+    const docToDelete = await myPouch.put({ _id: 'AA', other: 42 })
+
+    const { result, waitForValueToChange } = renderHook(
+      () =>
+        useFind({
+          selector: { _id: { $gte: 'DS9' } },
+          sort: ['_id'],
+        }),
+      {
+        pouchdb: myPouch,
+      }
+    )
+
+    await waitForValueToChange(() => result.current.loading)
+
+    expect(result.current.docs).toHaveLength(5)
+    expect(result.current.loading).toBeFalsy()
+
+    const waiting = waitForValueToChange(() => result.current.loading, {
+      timeout: 20,
+    })
+
+    act(() => {
+      myPouch.remove(docToDelete.id, docToDelete.rev)
+    })
+
+    await expect(waiting).rejects.toThrowError()
+    expect(result.current.docs).toHaveLength(5)
+  })
+
   test('should re-query when the selector changes', async () => {
     await createDocs()
 
@@ -837,6 +870,44 @@ describe('index', () => {
     await waitForValueToChange(() => result.current.loading)
     expect(result.current.docs).toHaveLength(4)
     expect(result.current.loading).toBeFalsy()
+  })
+
+  test("shouldn't re-query if a document not in the result gets deleted", async () => {
+    await createDocs()
+
+    const docToDelete = await myPouch.post({ other: 42 })
+
+    const { result, waitForValueToChange } = renderHook(
+      () =>
+        useFind({
+          index: {
+            fields: ['captain'],
+          },
+          selector: {
+            captain: { $gt: '' },
+          },
+          sort: ['captain'],
+        }),
+      {
+        pouchdb: myPouch,
+      }
+    )
+
+    await waitForValueToChange(() => result.current.loading)
+
+    expect(result.current.docs).toHaveLength(5)
+    expect(result.current.loading).toBeFalsy()
+
+    const waiting = waitForValueToChange(() => result.current.loading, {
+      timeout: 20,
+    })
+
+    act(() => {
+      myPouch.remove(docToDelete.id, docToDelete.rev)
+    })
+
+    await expect(waiting).rejects.toThrowError()
+    expect(result.current.docs).toHaveLength(5)
   })
 
   test('should re-query when the selector changes', async () => {

@@ -3,7 +3,7 @@ import memory from 'pouchdb-adapter-memory'
 import find from 'pouchdb-find'
 
 import { renderHook, act } from './test-utils'
-import useFind from './useFind'
+import useFind, { FindHookIndexOption } from './useFind'
 
 PouchDB.plugin(memory)
 PouchDB.plugin(find)
@@ -565,6 +565,40 @@ describe('index', () => {
     await waitForValueToChange(() => result.current.loading)
 
     expect(result.current.warning).toBeFalsy()
+    expect(result.current.docs).toHaveLength(5)
+  })
+
+  test('should remove warn if an index gets created', async () => {
+    await createDocs()
+
+    const { result, waitForValueToChange, rerender } = renderHook(
+      (index?: FindHookIndexOption) =>
+        useFind({
+          index,
+          selector: {
+            captain: { $gt: null },
+          },
+        }),
+      {
+        initialProps: undefined,
+        pouchdb: myPouch,
+      }
+    )
+
+    expect(result.current.loading).toBeTruthy()
+
+    await waitForValueToChange(() => result.current.loading)
+
+    expect(result.current.warning).toBeTruthy()
+    expect(result.current.docs).toHaveLength(5)
+
+    rerender({
+      fields: ['captain'],
+    })
+
+    await waitForValueToChange(() => result.current.loading)
+
+    expect(result.current.warning).toBeUndefined()
     expect(result.current.docs).toHaveLength(5)
   })
 

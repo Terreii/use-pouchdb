@@ -76,6 +76,10 @@ export interface FindHookOptions {
   skip?: number
 }
 
+/**
+ * Query, and optionally create, a Mango index and subscribe to its updates.
+ * @param {object} [opts] A combination of PouchDB's find options and create index options.
+ */
 export default function useFind<Content>(
   options: FindHookOptions
 ): ResultType<PouchDB.Find.FindResponse<Content>> {

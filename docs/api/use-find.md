@@ -13,6 +13,9 @@ the documents in the [result](#result). If you update or delete a document in a 
 remove it from the index, than it will be removed from the result of this hook. Even if `_id` is
 not included in `fields`.
 
+The hook is a combination of `db.createIndex()` and `db.find()`. With the right arguments (`options.index`),
+it will ensure that an index exist, using `db.createIndex()`, and use that index with `db.find()`.
+
 `useFind` can only be invoked from a component nested inside of a `<Provider />`.
 
 > `useFind` requires [`pouchdb-find`](https://www.npmjs.com/package/pouchdb-find) to be
@@ -31,7 +34,7 @@ Options descriptions are copied from the PouchDB API page.
        [`db.find()`'s `use_index`](https://pouchdb.com/api.html#query_index).
      - `[string, string]` - Select the design-doc and index name. It is like
        [`db.find()`'s `use_index`](https://pouchdb.com/api.html#query_index).
-     - `object` - Ensure that that index exist, create it if not.
+     - `object` - Ensure that this index exist, create it if not.
        The hook will then use that index. It is the `index` field, passed into
        [`db.createIndex()`](https://pouchdb.com/api.html#create_index).
        - `options.index.fields: string[]` - A list of fields to index.
@@ -131,7 +134,7 @@ import { useFind } from 'use-pouchdb'
 
 export default function StoryList() {
   const { docs, loading, error } = useFind({
-    // Index is here like use_index in db.find()
+    // index is here like use_index in db.find()
     index: ['ddoc_name', 'index_name'],
     selector: {
       type: 'story',

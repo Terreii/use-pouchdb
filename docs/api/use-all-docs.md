@@ -82,7 +82,7 @@ at the [12 pro tips](https://pouchdb.com/2014/06/17/12-pro-tips-for-better-code-
 
 The `'\ufff0'` is a special high Unicode character, that is sorted after most others.
 
-If a document, that fall into this range, gets added, updated or deleted, then the `rows` will be updates
+If a document, that fall into this range, gets added, updated or deleted, then the `rows` will be updated
 accordingly.
 
 ```jsx

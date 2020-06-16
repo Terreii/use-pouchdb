@@ -54,7 +54,7 @@ First we get a reference to the database with `usePouch()`. It is the database w
 last section.
 
 The next instruction is the [`useState`](https://reactjs.org/docs/hooks-reference.html#usestate) hook, to store
-what the user did input.
+what the user did enter.
 
 We'll jump over the `handleAddTodo` callback. And go to the JSX return:
 
@@ -107,6 +107,27 @@ If `put()` fails, the todo will not be added and the `<input />` not reset. The 
 > Normally you should _always_ catch and handle an write/update error. PouchDB is a _distributed_ system after all.
 >
 > Displaying an error message or trying again (with a different id) would be enough for this use case.
+
+Add `AddTodo.js` to `App.js`:
+
+```jsx
+import React, { useState, useEffect } from 'react'
+import './App.css'
+
+import PouchDB from 'pouchdb-browser'
+import { Provider } from 'use-pouchdb'
+
+import AddTodo from './AddTodo'
+
+...
+  return (
+    <Provider pouchdb={db}>
+      <div className="App">
+        <AddTodo />
+      </div>
+    </Provider>
+  )
+```
 
 That's it! We can now add Todos to the database! 🎉
 

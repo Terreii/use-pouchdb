@@ -75,6 +75,29 @@ export default function Todo({ todo }) {
 }
 ```
 
+And add `TodoList.js` to `App.js`:
+
+```jsx
+import React, { useState, useEffect } from 'react'
+import './App.css'
+
+import PouchDB from 'pouchdb-browser'
+import { Provider } from 'use-pouchdb'
+
+import AddTodo from './AddTodo'
+import TodoList from './TodoList'
+
+...
+  return (
+    <Provider pouchdb={db}>
+      <div className="App">
+        <TodoList />
+        <AddTodo />
+      </div>
+    </Provider>
+  )
+```
+
 And with that we have a Todo List! And, whenever you add a new Todo the list will update!
 
 Next we will learn how to update a document!

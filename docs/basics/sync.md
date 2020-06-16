@@ -226,6 +226,8 @@ try {
 const response = await remote.getSession()
 if (!response.userCtx.name) {
   // nobody's logged in
+} else {
+  // logged in as response.userCtx.name
 }
 
 await remote.logOut()
@@ -249,8 +251,8 @@ will be rejected in the future. Or if you are from the future, login doesn't wor
 
 In Apache CouchDB you can set the config
 [`[couch_httpd_auth] same_site`](https://docs.couchdb.org/en/3.1.0/config/auth.html#couch_httpd_auth/same_site) to
-`strict`. This will fix this message. To validate you must restart your browser (just that the notice appears
-again).
+`strict`. This will fix this message. To validate you must restart your browser (just to check if the notice
+still appears, it is a server setting after all. P.S.: CouchDB configs don't need a restart!).
 
 PouchDB-Server version 4.2 doesn't support it, yet. What you can do is Proxy every request to PouchDB-Server
 through Create-react-app's dev server. Docs about proxy can be found
@@ -282,7 +284,7 @@ module.exports = function (app) {
   app.use(
     '/db',
     createProxyMiddleware({
-      target: 'http://localhost:5984',
+      target: 'http://localhost:5984', // the port of your PouchDB-Server
       changeOrigin: true,
       pathRewrite: {
         '^/db': '/', // remove /db from the requests path
@@ -338,7 +340,13 @@ export async function logIn(username, password) {
 
   if (result.ok && result.name != null && result.name.length > 0) {
     // connect to the user database
+
+    // Close the old one first!
     await remote.close()
+
+    // Create the new remote DB.
+    // Because we have no { skip_setup: true }, it will create the DB on the server.
+    // In CouchDB you should add skip_setup.
     remote = new PouchDB(
       `http://localhost:5984/${getUserDatabaseName(username)}`
     )
@@ -566,6 +574,31 @@ the local database was destroyed, we did create a new one. This was for logging 
 > [PouchDB Authentication's API](https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/api.md)
 > and [CouchDB's Session API](https://docs.couchdb.org/en/3.1.0/api/server/authn.html#cookie-authentication) to learn
 > the error responses.
+
+Finally add `Session.js` to `App.js`:
+
+```jsx
+import React, { useState, useEffect } from 'react'
+import './App.css'
+
+import PouchDB from 'pouchdb-browser'
+import { Provider } from 'use-pouchdb'
+
+import AddTodo from './AddTodo'
+import Session from './Session'
+import TodoList from './TodoList'
+
+...
+  return (
+    <Provider pouchdb={db}>
+      <div className="App">
+        <Session />
+        <TodoList />
+        <AddTodo />
+      </div>
+    </Provider>
+  )
+```
 
 If you now open a different browser, you will be able to sync your Todos between them. They should also be listed
 in Fauxton (http://127.0.0.1:5984/_utils/#/_all_dbs).

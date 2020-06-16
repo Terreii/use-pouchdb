@@ -161,7 +161,7 @@ import { useView } from 'use-pouchdb'
 
 export default function Comments({ id }) {
   const { rows, offset, total_rows, state, loading, error } = useView(
-    'blog/comments', // use the view 'comments' in '_design/blog' document
+    'blog/comments', // use the view 'comments' in '_design/blog' design document
     {
       startkey: [id],
       endkey: [id, {}],

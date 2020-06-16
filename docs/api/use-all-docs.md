@@ -47,6 +47,9 @@ page.
    - `options.update_seq?: boolean` - Include an `update_seq` value indicating which sequence id of the underlying
      database the view reflects.
 
+> `keys` is check for equality with a deep equal algorithm.
+> And only if it differentiate by _value_ will it cause new query be made.
+
 ## Result
 
 `useAllDocs` results an object with those fields:

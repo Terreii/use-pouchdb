@@ -54,7 +54,7 @@ Options descriptions are copied from the PouchDB API page.
    - `options.skip?: number` - Number of docs to skip before returning.
 
 > `index`, `selector`, `fields` and `sort` are check for equality with a deep equal algorithm.
-> And only if they differentiate by _value_ will a new query be made.
+> And only if they differentiate by _value_ will they cause a new query be made.
 
 > Note: `useFind` will call `db.createIndex` every time the `index` object's values changed!
 > It will happily create a new index on every render!

@@ -14,6 +14,7 @@
     "test-ci": "jest --ci",
     "lint": "eslint ./src --ext .js,.jsx,.ts,.tsx",
     "textlint": "textlint README.md docs/*",
+    "semantic-release": "semantic-release",
     "update-coc": "weallbehave -o . && git add CODE_OF_CONDUCT.md && git commit -m 'docs(coc): updated CODE_OF_CONDUCT.md'",
     "update-contrib": "weallcontribute -o . && git add CONTRIBUTING.md && git commit -m 'docs(contributing): updated CONTRIBUTING.md'"
   },
@@ -88,6 +89,11 @@
     "hooks": {
       "pre-commit": "pretty-quick --staged"
     }
+  },
+  "release": {
+    "branches": [
+      "latest"
+    ]
   },
   "prettier": {
     "arrowParens": "avoid",

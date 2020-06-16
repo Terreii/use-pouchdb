@@ -798,6 +798,33 @@ describe('options', () => {
     ])
   })
 
+  test("shouldn't query if keys content didn't change", async () => {
+    const [{ rev: revA }] = await myPouch.bulkDocs([
+      { _id: 'a', test: 'value' },
+      { _id: 'b', test: 'other' },
+      { _id: 'c', test: 'moar' },
+    ])
+
+    const { result, waitForNextUpdate, rerender } = renderHook(
+      (keys: string[]) => useAllDocs({ keys }),
+      {
+        initialProps: ['a'],
+        pouchdb: myPouch,
+      }
+    )
+
+    await waitForNextUpdate()
+
+    expect(result.current.state).toBe('done')
+    expect(result.current.rows).toEqual([
+      { id: 'a', key: 'a', value: { rev: revA } },
+    ])
+
+    rerender(['a'])
+
+    expect(result.current.loading).toBe(false)
+  })
+
   test('should handle the update_seq option', async () => {
     await myPouch.bulkDocs([
       { _id: 'a', test: 'value' },

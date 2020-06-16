@@ -15,6 +15,9 @@
       "api/use-doc": {
         "title": "useDoc"
       },
+      "api/use-find": {
+        "title": "useFind"
+      },
       "api/use-pouch": {
         "title": "usePouch"
       },

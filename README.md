@@ -92,6 +92,8 @@ ReactDOM.render(
 - [`useAllDocs`](https://christopher-astfalk.de/use-pouchdb/docs/api/use-all-docs) - Load multiple documents
   and subscribe to their changes. Or a range of docs by their ids. The hook version of
   [`db.allDocs`](https://pouchdb.com/api.html#batch_fetch).
+- [`useFind`](https://christopher-astfalk.de/use-pouchdb/docs/api/use-find) - Access a mango index and
+  subscribe to it. Optionally create the index, if it doesn't exist.
 - [`useView`](https://christopher-astfalk.de/use-pouchdb/docs/api/use-view) - Access a view and subscribe
   to its changes. The hook version of [`db.query`](https://pouchdb.com/api.html#query_database).
 

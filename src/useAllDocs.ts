@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 
 import { useContext } from './context'
 import useStateMachine, { ResultType } from './state-machine'
+import { useDeepMemo } from './utils'
 
 /**
  * Get all docs or a slice of all docs and subscribe to their updates.
@@ -29,7 +30,9 @@ export default function useAllDocs<Content>(
   const { startkey, endkey, inclusive_end } =
     (options as PouchDB.Core.AllDocsWithinRangeOptions) || {}
   const { key } = (options as PouchDB.Core.AllDocsWithKeyOptions) || {}
-  const { keys } = (options as PouchDB.Core.AllDocsWithKeysOptions) || {}
+  const keys: string[] | undefined = useDeepMemo(
+    (options as PouchDB.Core.AllDocsWithKeysOptions)?.keys
+  )
 
   const [state, dispatch, replace] = useStateMachine<
     PouchDB.Core.AllDocsResponse<Content>

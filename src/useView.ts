@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect } from 'react'
 import { MISSING_DOC } from 'pouchdb-errors'
-import { isEqual } from 'underscore'
 
 import { useContext } from './context'
 import type SubscriptionManager from './subscription'
 import useStateMachine, { ResultType, Dispatch } from './state-machine'
+import { useDeepMemo } from './utils'
 
 type ViewResponseBase<Result> = PouchDB.Query.Response<Result> & {
   /**
@@ -355,20 +355,4 @@ function doTemporaryQuery<Model, Result>(
     isMounted = false
     unsubscribe()
   }
-}
-
-/**
- * Memorize a value. Only invalidate if the value in it did change. Does a deep equal.
- * @param option Options to memorize.
- */
-function useDeepMemo<T>(option: T): T {
-  const last = useRef(option)
-  return useMemo(() => {
-    if (isEqual(last.current, option)) {
-      return last.current
-    } else {
-      last.current = option
-      return option
-    }
-  }, [option])
 }

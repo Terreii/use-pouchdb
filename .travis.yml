@@ -21,10 +21,11 @@ jobs:
       node_js: lts/*
       script:
         - npm run lint
-    - stage: docs
+    - stage: docs-lint
       node_js: lts/*
       script:
         - npm run textlint
+    # Define the documentation site update stage
     - stage: page
       node_js: lts/*
       script:
@@ -32,10 +33,25 @@ jobs:
         - git config --global user.email "${GH_EMAIL}"
         - echo "machine github.com login ${GH_NAME} password ${GH_TOKEN}" > ~/.netrc
         - cd website && npm install && GIT_USER="${GH_NAME}" npm run publish-gh-pages
+    # Define the release stage that runs semantic-release
+    - stage: release
+      node_js: lts/*
+      # Advanced: overwriting default `script` step to skip the tests
+      script: skip
+      deploy:
+        provider: script
+        skip_cleanup: true
+        on:
+          branch: latest
+        script:
+          - npm run build
+          - npx semantic-release
 
 stages:
   - test
   - lint
-  - docs
+  - docs-lint
   - name: page
+    if: branch = latest AND type != pull_request
+  - name: release
     if: branch = latest AND type != pull_request

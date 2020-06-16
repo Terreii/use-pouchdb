@@ -79,10 +79,10 @@ visit your app open <a href="http://localhost:3000/">http://localhost:3000/</a>.
 </span></div></div></div></div>
 <h2><a class="anchor" aria-hidden="true" id="couchdb-backend"></a><a href="#couchdb-backend" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>CouchDB backend</h2>
 <p>Now which to use? <strong>CouchDB</strong> or <strong>PouchDB-Server</strong>? Well, normally both. PouchDB-Server is local to the project.
-It is installable with <strong>npm</strong>, you can define where it should store its data. While CouchDB is the one you will be
+It is installable with <strong>npm</strong>, you can configure it with a JSON file. While CouchDB is the one you will be
 using in production. It is more powerful. So I normally recommend that you install both. PouchDB-Server for your
-development. And CouchDB to verify and test if everything works. But to only get started, PouchDB-Server is enough.
-And that is why we are going to be using PouchDB-Server for this guide.</p>
+day to day development. And CouchDB to verify and test if everything works. But to only get started,
+PouchDB-Server is enough. And that is why we are going to be using PouchDB-Server for this guide.</p>
 <p>There are some incompatibilities though.</p>
 <p>While PouchDB-Server is intended as a drop-in replacement of CouchDB, the later moves faster. At the time of
 writing, <time datetime="2020-05-23">2020-05-23</time>, CouchDB did release
@@ -95,8 +95,8 @@ You need to implement them yourself. With
 strate forward. But you won't be able to use every method of
 <a href="https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/api.md#dbsignupusername-password--options--callback"><strong>PouchDB Authentication</strong></a>.
 Log in/out didn't change.</p>
-<p>In this tutorial we will be using the old sign up method, where everyone can create an account and no verification
-mail is send. If in your app you need more, please visit
+<p>In this tutorial we will be using the old sign up method, where everyone can create an account.
+If in your app you need more, please visit
 <a href="https://docs.couchdb.org/en/stable/intro/security.html">CouchDBs Security section</a>.</p>
 <blockquote>
 <p>You don't need CouchDB installed for this tutorial!</p>
@@ -116,8 +116,8 @@ CouchDB.</p>
 <p>Now it would be good if we could start the create-react-app dev-server and pouchdb-server with only one command!
 <br />First install <a href="https://www.npmjs.com/package/npm-run-all">npm-run-all</a>. It allows us to run multiple commands
 in parallel or sequential.</p>
-<div class="tabs"><div class="nav-tabs"><div id="tab-group-10-tab-11" class="nav-link active" data-group="group_10" data-tab="tab-group-10-content-11">npm</div><div id="tab-group-10-tab-12" class="nav-link" data-group="group_10" data-tab="tab-group-10-content-12">yarn</div></div><div class="tab-content"><div id="tab-group-10-content-11" class="tab-pane active" data-group="group_10" tabindex="-1"><div><span><pre><code class="hljs css language-sh">npm i -D npm-run-all<br /></code></pre>
-</span></div></div><div id="tab-group-10-content-12" class="tab-pane" data-group="group_10" tabindex="-1"><div><span><pre><code class="hljs css language-sh">yarn add -D npm-run-all<br /></code></pre>
+<div class="tabs"><div class="nav-tabs"><div id="tab-group-10-tab-11" class="nav-link active" data-group="group_10" data-tab="tab-group-10-content-11">npm</div><div id="tab-group-10-tab-12" class="nav-link" data-group="group_10" data-tab="tab-group-10-content-12">yarn</div></div><div class="tab-content"><div id="tab-group-10-content-11" class="tab-pane active" data-group="group_10" tabindex="-1"><div><span><pre><code class="hljs css language-sh">npm i npm-run-all<br /></code></pre>
+</span></div></div><div id="tab-group-10-content-12" class="tab-pane" data-group="group_10" tabindex="-1"><div><span><pre><code class="hljs css language-sh">yarn add npm-run-all<br /></code></pre>
 </span></div></div></div></div>
 <p>Now open <code>package.json</code> and change your scripts:</p>
 <pre><code class="hljs css language-json">{

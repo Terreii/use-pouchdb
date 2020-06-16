@@ -171,7 +171,7 @@ query</a>) is accomplished using the hook
 
 <span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Comments</span>(<span class="hljs-params">{ id }</span>) </span>{
   <span class="hljs-keyword">const</span> { rows, offset, total_rows, state, loading, error } = useView(
-    <span class="hljs-string">'blog/comments'</span>, <span class="hljs-comment">// use the view 'comments' in '_design/blog' document</span>
+    <span class="hljs-string">'blog/comments'</span>, <span class="hljs-comment">// use the view 'comments' in '_design/blog' design document</span>
     {
       <span class="hljs-attr">startkey</span>: [id],
       <span class="hljs-attr">endkey</span>: [id, {}],

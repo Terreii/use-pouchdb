@@ -64,13 +64,16 @@ you can deepen your knowledge.</p>
 <p>To deepen your knowledge use <a href="https://docs.couchdb.org/en/stable/">CouchDBs extensive documentation</a>. It will go
 from setting it up, all through user management, views, to tips to write effective views. But most importantly, it
 teaches you how to think in CouchDB (and PouchDB).</p>
+<p>If you like to learn from videos: <a href="https://www.ibm.com/cloud/cloudant">IBM Cloudant</a>
+(CouchDB as a Service Provider) has a great course:</p>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/videoseries?list=PLJa_sXrJUZb-Y4Q_5y3yPC8m5RxS5q-_J" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 <h2><a class="anchor" aria-hidden="true" id="why-couchdb-and-pouchdb"></a><a href="#why-couchdb-and-pouchdb" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Why CouchDB and PouchDB?</h2>
-<p>There are multiple answers to this question. But without doubt the most prominent one is <strong>synchronization</strong>.
-CouchDB and PouchDB are build around the idea of syncing your data.</p>
+<p>There are multiple answers to this question. But without doubt the most prominent one is <strong>synchronization</strong>,
+or <strong>replication</strong> as CouchDB calls it. CouchDB and PouchDB are build around the idea of syncing your data.</p>
 <p>But not only live sync, but losing the connection, and continuing accessing and changing your data. And once your
 back online, sync it. With PouchDB on the clients browser and CouchDB on the backend your web app can become
 <em>offline capable</em>.</p>
-<p>Then there is also the <strong>changes feed</strong>, which lists what did change in the order they did. Or that everything is
+<p>Then there is also the <strong>changes feed</strong>, which lists what did change in the order it did. Or that everything is
 stored as <strong>JSON Objects</strong>, or the <strong>HTTP API</strong> of CouchDB, or integrated user authentication and
 authorization, and more.</p>
 <h2><a class="anchor" aria-hidden="true" id="basics"></a><a href="#basics" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Basics</h2>
@@ -79,7 +82,7 @@ aim is in allowing you to sync your data between different instances of a databa
 HTTP. And yes it is save to expose your CouchDB instance to the web, because it has user authentication and
 authorization integrated!</p>
 <p>If CouchDB is the big sibling, than <strong>PouchDB</strong> is its little sibling. PouchDB is a clone of CouchDB in JavaScript.
-It syncs with CouchDB. And you can use it in the browser, or your node app. It also has an
+It can sync with CouchDB. And you can use it in the browser, or your node app. It also has an
 <a href="https://pouchdb.com/external.html">extensive plugin ecosystem</a>.</p>
 <p>Because PouchDB and CouchDB are so alike, and this package uses PouchDB, I will use PouchDB synonymously for
 PouchDB and CouchDB. If I explicitly mean CouchDB, then I will write CouchDB. If PouchDB is explicitly meant, then
@@ -98,10 +101,10 @@ multiple? Are they like SQL tables? And are <strong>documents</strong> like rows
 <p>The longer answer: A <strong>database</strong> (db) stores multiple <strong>documents</strong> (doc), and docs are a single data container.
 Documents have a unique ID (<code>_id</code>) per db. But there stops the similarities.</p>
 <p>While tables require you to create a schema, which all rows must confirm to. A database is schemaless. Every doc
-could have a different structure. It is Recommended to add a <code>type</code> field on every document. Just like in
+could have a different structure. It is recommended to add a <code>type</code> field on every document. Just like in
 <a href="https://redux.js.org/basics/actions">Redux Actions</a>.</p>
 <p>In CouchDB access control is handled on a per database level. There is a common setup that gives every user their
-own db, to which only they have access (think of a note app).</p>
+own db, to which only they have access (think of a note or todo app).</p>
 <p>It might be better to view databases as a collection of data, that should be synchronized together*, and have
 access control* on them. Fewer databases are better.</p>
 <blockquote>
@@ -109,9 +112,9 @@ access control* on them. Fewer databases are better.</p>
 control on a per doc basis to CouchDB.</p>
 </blockquote>
 <h3><a class="anchor" aria-hidden="true" id="about-documents"></a><a href="#about-documents" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>About Documents</h3>
-<p>Now what about documents? Documents (doc) are also not like SQL rows. View them more like, well, documents. While
-it is possible in modern office applications to link to external resources, it becomes difficult to share. And
-because PouchDB is all about sync, you don't have something like <em>foreign keys</em>. All data should life in the
+<p>Now what about documents? Documents (doc) are also not like SQL rows. View them more like, well, text documents.
+While it is possible in modern office applications to link to external resources, it becomes difficult to share.
+And because PouchDB is all about sync, you don't have something like <em>foreign keys</em>. All data should life in the
 document.</p>
 <p>Let's give you an example: Tags.</p>
 <p>Normally you would store tags in SQL in their own table. Then create a table that links the tags to your to be
@@ -135,7 +138,7 @@ just the id to the tag, the tag <em>itself</em>. This way there will never be a 
   <span class="hljs-attr">"release"</span>: <span class="hljs-number">1999</span>
 }
 </code></pre>
-<p>But don't store <em>everything</em> in a single document. The more a document incorporates, the more likely it becomes to
+<p>But don't store <em>everything</em> in a single document! The more a document incorporates, the more likely it becomes to
 cause conflicts.</p>
 <p>Another example: <a href="https://hospitalrun.io/">HospitalRun</a>.</p>
 <p>In HospitalRun they store patient data in 2 different documents types. In one they store the general data of a
@@ -190,7 +193,7 @@ only ships with stuff for the browser.</p>
 </code></pre>
 <p><code>db</code> is the database instance.</p>
 <p>If you want to access a remote database, then change the name to the url of the remote database. But not the URL
-object.</p>
+object, a string:</p>
 <pre><code class="hljs css language-javascript"><span class="hljs-keyword">const</span> remote = <span class="hljs-keyword">new</span> PouchDB(<span class="hljs-string">'https://example.com/myDB/'</span>)
 
 <span class="hljs-comment">// or with username and password:</span>
@@ -250,8 +253,8 @@ are named after HTTP methods, because that's what CouchDB uses.</p>
   <span class="hljs-attr">"rev"</span>: <span class="hljs-string">"1-e78451c157971875ec76860d33e7da93"</span>
 }
 </code></pre>
-<p><code>&quot;ok&quot;: true</code> indicates that it did succeed. <code>&quot;id&quot;: &quot;myDoc&quot;</code> is the documents <code>_id</code> (useful for <code>post</code>). And what is
-<code>rev</code>?</p>
+<p><code>&quot;ok&quot;: true</code> indicates that it did succeed. <code>&quot;id&quot;: &quot;myDoc&quot;</code> is the documents <code>_id</code> (useful for <code>post</code>).
+And what is that <code>rev</code>?</p>
 <blockquote>
 <p>If you <strong>update</strong> a document you must supply the <em>complete</em> document! <em>Not</em> a diff. That version you supply will
 replace the old document.</p>
@@ -262,9 +265,11 @@ replace the old document.</p>
 <li><code>_id</code> (string) is a for the database unique identifier.</li>
 <li><code>_rev</code> (string) is a version &quot;number&quot;.</li>
 </ul>
-<p>The rev consists out of two parts: a <strong>number</strong> and a <strong>hash</strong>. On every update the <strong>number</strong> will
-be increased by 1. And a new <strong>hash</strong> calculated. If you update a document you must include the
-<code>_rev</code> from the last version.</p>
+<pre><code class="hljs css language-javascript"><span class="hljs-string">'1-e78451c157971875ec76860d33e7da93'</span>
+</code></pre>
+<p>The rev consists out of two parts: a <strong>number</strong> and a <strong>hash</strong>, separated by <code>-</code>.
+On every update the <strong>number</strong> will be increased by 1. And a new <strong>hash</strong> calculated.
+If you update a document you must include the old <code>_rev</code>. You don't change the <code>_rev</code></p>
 <p>But why do we need <code>rev</code> in the first place?</p>
 <p>It is all about <strong>sync</strong>. Or: PouchDB is a <em>distributed</em> system. While you where updating a
 document, someone else could have changed the doc, too!</p>

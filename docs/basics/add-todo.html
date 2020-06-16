@@ -100,7 +100,7 @@ database. We are going to use the <code>usePouch</code> hook for this.</p>
 <p>First we get a reference to the database with <code>usePouch()</code>. It is the database we provided to <code>&lt;Provider /&gt;</code> in the
 last section.</p>
 <p>The next instruction is the <a href="https://reactjs.org/docs/hooks-reference.html#usestate"><code>useState</code></a> hook, to store
-what the user did input.</p>
+what the user did enter.</p>
 <p>We'll jump over the <code>handleAddTodo</code> callback. And go to the JSX return:</p>
 <p>We use a <code>&lt;form&gt;</code> element with an onSubmit event listener to add the todo, whenever the user presses
 enter/return/submit or the <code>&lt;button&gt;</code>. It will also only submit when the input has a length of 1 or more
@@ -137,6 +137,24 @@ with an <code>_id</code> that is the current time with milliseconds, it is unlik
 <p>Normally you should <em>always</em> catch and handle an write/update error. PouchDB is a <em>distributed</em> system after all.</p>
 <p>Displaying an error message or trying again (with a different id) would be enough for this use case.</p>
 </blockquote>
+<p>Add <code>AddTodo.js</code> to <code>App.js</code>:</p>
+<pre><code class="hljs css language-jsx"><span class="hljs-keyword">import</span> React, { useState, useEffect } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<span class="hljs-keyword">import</span> <span class="hljs-string">'./App.css'</span>
+
+<span class="hljs-keyword">import</span> PouchDB <span class="hljs-keyword">from</span> <span class="hljs-string">'pouchdb-browser'</span>
+<span class="hljs-keyword">import</span> { Provider } <span class="hljs-keyword">from</span> <span class="hljs-string">'use-pouchdb'</span>
+
+<span class="hljs-keyword">import</span> AddTodo <span class="hljs-keyword">from</span> <span class="hljs-string">'./AddTodo'</span>
+
+...
+  return (
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Provider</span> <span class="hljs-attr">pouchdb</span>=<span class="hljs-string">{db}</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">"App"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">AddTodo</span> /&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">Provider</span>&gt;</span></span>
+  )
+</code></pre>
 <p>That's it! We can now add Todos to the database! 🎉</p>
 <p>Next up: list them!</p>
 </span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/use-pouchdb/docs/basics/provider"><span class="arrow-prev">← </span><span>Add the Provider</span></a><a class="docs-next button" href="/use-pouchdb/docs/basics/list-all"><span>List all Todos</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/use-pouchdb/" class="nav-home"><img src="/use-pouchdb/img/favicon.ico" alt="usePouchDB" width="66" height="58"/></a><div><h5>Docs</h5><a href="/use-pouchdb/docs/introduction/quick_start">Getting Started</a><a href="/use-pouchdb/docs/api/provider">API Reference</a></div><div><h5>Contact</h5><a href="https://christopher-astfalk.de/">Blog</a><a href="https://github.com/Terreii/use-pouchdb" rel="noreferrer noopener">GitHub</a><a class="github-button" href="https://github.com/Terreii/use-pouchdb" data-icon="octicon-star" data-count-href="/Terreii/use-pouchdb/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a><div class="social"><a href="../impressum.html">Impressum</a></div></div></section><section class="copyright">Copyright © 2020 Christopher Astfalk</section></footer></div></body></html>

@@ -131,7 +131,7 @@ to <code>null</code> once a fetch was successful.</li>
 <p>If you sort your documents by <code>_id</code>, then you can use <code>useAllDocs</code> to load all documents with a prefix. Read more
 at the <a href="https://pouchdb.com/2014/06/17/12-pro-tips-for-better-code-with-pouchdb.html">12 pro tips</a> section 7.</p>
 <p>The <code>'\ufff0'</code> is a special high Unicode character, that is sorted after most others.</p>
-<p>If a document, that fall into this range, gets added, updated or deleted, then the <code>rows</code> will be updates
+<p>If a document, that fall into this range, gets added, updated or deleted, then the <code>rows</code> will be updated
 accordingly.</p>
 <pre><code class="hljs css language-jsx"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
 <span class="hljs-keyword">import</span> { useAllDocs } <span class="hljs-keyword">from</span> <span class="hljs-string">'use-pouchdb'</span>

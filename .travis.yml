@@ -45,7 +45,7 @@ jobs:
           branch: latest
         script:
           - npm run build
-          - npm run semantic-release
+          - npx semantic-release
 
 stages:
   - test

@@ -21,7 +21,7 @@ jobs:
       node_js: lts/*
       script:
         - npm run lint
-    - stage: docs
+    - stage: docs-lint
       node_js: lts/*
       script:
         - npm run textlint
@@ -50,7 +50,7 @@ jobs:
 stages:
   - test
   - lint
-  - docs
+  - docs-lint
   - name: page
     if: branch = latest AND type != pull_request
   - name: release

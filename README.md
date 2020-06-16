@@ -5,6 +5,8 @@
 [![devDependencies Status](https://david-dm.org/Terreii/use-pouchdb/dev-status.svg)](https://david-dm.org/Terreii/use-pouchdb?type=dev)
 [![peerDependencies Status](https://david-dm.org/Terreii/use-pouchdb/peer-status.svg)](https://david-dm.org/Terreii/use-pouchdb?type=peer)
 [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
+[![Known Vulnerabilities](https://snyk.io/test/github/Terreii/use-pouchdb/badge.svg?targetFile=package.json)](https://snyk.io/test/github/Terreii/use-pouchdb?targetFile=package.json)
+[![npm](https://img.shields.io/npm/v/use-pouchdb)](https://www.npmjs.com/package/use-pouchdb)
 
 [React Hooks](https://reactjs.org/) for [PouchDB](https://pouchdb.com/).
 
@@ -32,8 +34,6 @@ just want to quick start, read on...
 
 usePouchDB requires **React 16.8.3 or later**.
 
-To use usePouchDB with your React app:
-
 ```sh
 npm install use-pouchdb
 # or
@@ -47,6 +47,16 @@ There is also a special [browser version](https://www.npmjs.com/package/pouchdb-
 npm install pouchdb-browser
 # or
 yarn add pouchdb-browser
+```
+
+To use the `useView` hook [`pouchdb-mapreduce`](https://www.npmjs.com/package/pouchdb-mapreduce)
+must be installed and setup. If you use the [`pouchdb`](https://www.npmjs.com/package/pouchdb) or
+[`pouchdb-browser`](https://www.npmjs.com/package/pouchdb-browser) packages, it is already setup.
+
+```sh
+npm install pouchdb-mapreduce
+# or
+yarn add pouchdb-mapreduce
 ```
 
 ### Bind usePouchDB
@@ -76,9 +86,23 @@ ReactDOM.render(
 
 [All hooks are listed here](https://christopher-astfalk.de/use-pouchdb/docs/introduction/quick_start).
 
+- [`usePouch`](https://christopher-astfalk.de/use-pouchdb/docs/api/use-pouch) - Access the database
+  provided by `<Provider />`.
+- [`useDoc`](https://christopher-astfalk.de/use-pouchdb/docs/api/use-doc) - Access a single document
+  and subscribe to its changes. The hook version of [`db.get`](https://pouchdb.com/api.html#fetch_document).
+- [`useAllDocs`](https://christopher-astfalk.de/use-pouchdb/docs/api/use-all-docs) - Load multiple documents
+  and subscribe to their changes. Or a range of docs by their ids. The hook version of
+  [`db.allDocs`](https://pouchdb.com/api.html#batch_fetch).
+- [`useFind`](https://christopher-astfalk.de/use-pouchdb/docs/api/use-find) - Access a mango index and
+  subscribe to it. Optionally create the index, if it doesn't exist.
+- [`useView`](https://christopher-astfalk.de/use-pouchdb/docs/api/use-view) - Access a view and subscribe
+  to its changes. The hook version of [`db.query`](https://pouchdb.com/api.html#query_database).
+
 ### Example
 
-Load a single document and display it.
+Load a single document and display it. [`useDoc`](https://christopher-astfalk.de/use-pouchdb/docs/api/use-doc)
+is the hook version of [`db.get`](https://pouchdb.com/api.html#fetch_document), but it also
+subscribes to updates of that document and automatically loads the new version.
 
 ```jsx
 import React from 'react'

@@ -153,7 +153,7 @@ test('Test Component', async () => {
 
 ### Hooks
 
-To test hooks that depends on one of `usePouchDB`'s hooks, you also must warp it in `<Provider />`.
+To test hooks that depend on one of `usePouchDB`'s hooks, you also must warp it in `<Provider />`.
 
 **react-hooks-testing-library**'s `renderHook` function can receive in the second argument a warper
 ([documented here](https://react-hooks-testing-library.com/usage/advanced-hooks#context)).

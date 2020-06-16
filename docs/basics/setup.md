@@ -65,10 +65,10 @@ yarn add -D pouchdb-authentication
 ## CouchDB backend
 
 Now which to use? **CouchDB** or **PouchDB-Server**? Well, normally both. PouchDB-Server is local to the project.
-It is installable with **npm**, you can define where it should store its data. While CouchDB is the one you will be
+It is installable with **npm**, you can configure it with a JSON file. While CouchDB is the one you will be
 using in production. It is more powerful. So I normally recommend that you install both. PouchDB-Server for your
-development. And CouchDB to verify and test if everything works. But to only get started, PouchDB-Server is enough.
-And that is why we are going to be using PouchDB-Server for this guide.
+day to day development. And CouchDB to verify and test if everything works. But to only get started,
+PouchDB-Server is enough. And that is why we are going to be using PouchDB-Server for this guide.
 
 There are some incompatibilities though.
 
@@ -86,8 +86,8 @@ strate forward. But you won't be able to use every method of
 [**PouchDB Authentication**](https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/api.md#dbsignupusername-password--options--callback).
 Log in/out didn't change.
 
-In this tutorial we will be using the old sign up method, where everyone can create an account and no verification
-mail is send. If in your app you need more, please visit
+In this tutorial we will be using the old sign up method, where everyone can create an account.
+If in your app you need more, please visit
 [CouchDBs Security section](https://docs.couchdb.org/en/stable/intro/security.html).
 
 > You don't need CouchDB installed for this tutorial!
@@ -131,13 +131,13 @@ in parallel or sequential.
 <!--npm-->
 
 ```sh
-npm i -D npm-run-all
+npm i npm-run-all
 ```
 
 <!--yarn-->
 
 ```sh
-yarn add -D npm-run-all
+yarn add npm-run-all
 ```
 
 <!--END_DOCUSAURUS_CODE_TABS-->

@@ -71,7 +71,7 @@ descriptions are copied from the PouchDB API page.
      database the view reflects.
 
 > `startkey`, `endkey`, `key` and `keys` are check for equality with a deep equal algorithm.
-> And only if they differentiate by _value_ will a new query be made.
+> And only if they differentiate by _value_ will they cause a new query be made.
 
 ## Result
 
@@ -104,7 +104,7 @@ descriptions are copied from the PouchDB API page.
 
 ### Find by tags
 
-If you use a tag system and want to list all documents with this tag, then use `useView`.
+If you use a tag system and want to list all documents with a tag, then use `useView`.
 
 ```javascript
 var designDoc = {
@@ -147,7 +147,7 @@ export function ListAllOfTag({ tag }) {
   return (
     <ul>
       {rows.map(row => ( // row.key is the tag and row.id is the _id of the document.
-        <li key={row.key + ' ' + row.id}>{row.value}</li>
+        <li key={`${row.key} ${row.id}`}>{row.value}</li>
       ))}
     </ul>
   )

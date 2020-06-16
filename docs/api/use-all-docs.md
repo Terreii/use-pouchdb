@@ -47,6 +47,9 @@ page.
    - `options.update_seq?: boolean` - Include an `update_seq` value indicating which sequence id of the underlying
      database the view reflects.
 
+> `keys` is check for equality with a deep equal algorithm.
+> And only if it differentiate by _value_ will it cause new query be made.
+
 ## Result
 
 `useAllDocs` results an object with those fields:
@@ -82,7 +85,7 @@ at the [12 pro tips](https://pouchdb.com/2014/06/17/12-pro-tips-for-better-code-
 
 The `'\ufff0'` is a special high Unicode character, that is sorted after most others.
 
-If a document, that fall into this range, gets added, updated or deleted, then the `rows` will be updates
+If a document, that fall into this range, gets added, updated or deleted, then the `rows` will be updated
 accordingly.
 
 ```jsx

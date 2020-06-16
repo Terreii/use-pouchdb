@@ -148,6 +148,52 @@ export default function AllPosts() {
 }
 ```
 
+## useFind
+
+Access a [Mango query](https://pouchdb.com/guides/mango-queries.html), and if it doesn't exist, create it.
+`useFind` also subscribes to updates to that index.
+
+```jsx
+import React from 'react'
+import { useFind } from 'use-pouchdb'
+
+export default function StoryList() {
+  const { docs, warning, loading, state, error } = useFind({
+    // Ensure that this index exist, create it if not. And use it.
+    index: {
+      fields: ['type', 'title'],
+    },
+    selector: {
+      type: 'story',
+      title: { $exists: true },
+    },
+    sort: ['title'],
+    fields: ['_id', 'title'],
+  })
+
+  return (
+    <main>
+      <h1>Stories</h1>
+
+      {error && (
+        <p>
+          Error: {error.status} - {error.name}
+        </p>
+      )}
+      {loading && docs.length === 0 && <p>loading...</p>}
+
+      <ul>
+        {docs.map(doc => (
+          <li key={doc._id}>
+            <a href={`./${doc._id}`}>{doc.title}</a>
+          </li>
+        ))}
+      </ul>
+    </main>
+  )
+}
+```
+
 ## useView
 
 Accessing a [view](https://docs.couchdb.org/en/stable/ddocs/views/index.html 'CouchDBs Guide to Views') ([PouchDBs
@@ -161,7 +207,7 @@ import { useView } from 'use-pouchdb'
 
 export default function Comments({ id }) {
   const { rows, offset, total_rows, state, loading, error } = useView(
-    'blog/comments', // use the view 'comments' in '_design/blog' document
+    'blog/comments', // use the view 'comments' in '_design/blog' design document
     {
       startkey: [id],
       endkey: [id, {}],

@@ -82,7 +82,7 @@ practice of PouchDB.
 > In this example we know what the desired state of a doc should be: The last user interaction. There is also
 > almost no data lost if that assumption is wrong.
 >
-> But you should generally follow the role: **"Last write wins" means losing your users data!**
+> But you should generally follow the role: **"Last write wins" means _losing_ your users data!**
 
 > There are two types of conflicts: **immediate conflicts** and **eventual conflicts**. You can read more about
 > them in the [PouchDB Conflicts guide](https://pouchdb.com/guides/conflicts.html).

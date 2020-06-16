@@ -126,7 +126,6 @@ function reducer<Result>(
 
     case 'loading_finished':
       return {
-        ...state,
         ...action.payload,
         error: null,
         state: 'done',

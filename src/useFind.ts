@@ -308,6 +308,7 @@ async function findIndex(
  * @param selector - Selector, to filter out changes.
  * @param query - Function to run a query.
  * @param id - Id of the ddoc where the index is stored.
+ * @param idsInResult - Object containing a Set of ids in the last result.
  */
 function subscribe(
   subscriptionManager: SubscriptionManager,
@@ -322,8 +323,8 @@ function subscribe(
 
   return subscriptionManager.subscribeToDocs<Record<string, unknown>>(
     null,
-    (deleted, id, doc) => {
-      if (deleted && idsInResult.ids.has(id)) {
+    (_del, id, doc) => {
+      if (idsInResult.ids.has(id)) {
         query()
       } else if (id === ddocName) {
         query()

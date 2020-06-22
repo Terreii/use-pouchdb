@@ -7,6 +7,15 @@ import { Provider, useContext } from './context'
 
 PouchDB.plugin(memory)
 
+test('should throw an error if there is no pouchdb context', () => {
+  const { result } = renderHook(() => useContext())
+
+  expect(result.error).toBeInstanceOf(Error)
+  expect(result.error.message).toBe(
+    'could not find PouchDB context value; please ensure the component is wrapped in a <Provider>'
+  )
+})
+
 test('should render a Provider which provide the passed pouchdb database', async () => {
   const myPouch = new PouchDB('test', { adapter: 'memory' })
 
@@ -91,6 +100,9 @@ test('should throw an error if a wrong name is passed to useContext', async () =
   rerender('not-existing')
 
   expect(result.error).toBeInstanceOf(Error)
+  expect(result.error.message).toBe(
+    'could not find a PouchDB database with name of "not-existing"'
+  )
 
   rerender('default')
 

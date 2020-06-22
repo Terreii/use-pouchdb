@@ -8,7 +8,7 @@ import React, {
 
 import SubscriptionManager from './subscription'
 
-export const PouchContext = createContext<{
+const PouchContext = createContext<{
   pouchdb: PouchDB.Database
   subscriptionManager: SubscriptionManager
 } | null>(null)
@@ -16,12 +16,21 @@ export const PouchContext = createContext<{
 export interface ProviderArguments {
   children: JSX.Element | ReactNode
   pouchdb: PouchDB.Database
+  name?: string
 }
 
-export function Provider({
-  children,
-  pouchdb,
-}: ProviderArguments): React.ReactElement {
+export interface MultiDBProviderArguments {
+  children: JSX.Element | ReactNode
+  databases: { [key: string]: PouchDB.Database }
+  default: string
+}
+
+export function Provider(
+  args: ProviderArguments | MultiDBProviderArguments
+): React.ReactElement {
+  const children = args.children
+  const pouchdb = (args as ProviderArguments).pouchdb
+
   const context = useMemo(() => {
     const subscriptionManager = new SubscriptionManager(pouchdb)
 
@@ -47,7 +56,9 @@ export function Provider({
   )
 }
 
-export function useContext(): {
+export function useContext(
+  _name: string = 'default'
+): {
   pouchdb: PouchDB.Database<Record<string, unknown>>
   subscriptionManager: SubscriptionManager
 } {

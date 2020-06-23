@@ -18,5 +18,12 @@ export function useDeepMemo<T>(option: T): T {
 }
 
 export interface CommonOptions {
+  /**
+   * Select the database to be used. Use the key/name used at the <Provider>.
+   * "_default" is the spacial key for using the default database.
+   * The default database is the database of the closest <Provider> with a single db or
+   * the default-property in the closest multi-db <Provider>
+   * Defaults to "_default".
+   */
   db?: string
 }

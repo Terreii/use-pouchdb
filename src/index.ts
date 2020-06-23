@@ -12,3 +12,4 @@ export type {
 export type { QueryState, ResultType } from './state-machine'
 export type { FindHookOptions, FindHookIndexOption } from './useFind'
 export type { ViewResponse } from './useView'
+export type { CommonOptions } from './utils'

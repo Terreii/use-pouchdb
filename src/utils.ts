@@ -16,3 +16,7 @@ export function useDeepMemo<T>(option: T): T {
     }
   }, [option])
 }
+
+export interface CommonOptions {
+  db?: string
+}

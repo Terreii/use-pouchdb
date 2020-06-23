@@ -4,7 +4,7 @@ import { MISSING_DOC } from 'pouchdb-errors'
 import { useContext } from './context'
 import type SubscriptionManager from './subscription'
 import useStateMachine, { ResultType, Dispatch } from './state-machine'
-import { useDeepMemo } from './utils'
+import { useDeepMemo, CommonOptions } from './utils'
 
 type ViewResponseBase<Result> = PouchDB.Query.Response<Result> & {
   /**
@@ -23,9 +23,11 @@ export type ViewResponse<T> = ResultType<ViewResponseBase<T>>
  */
 export default function useView<Content, Result, Model = Content>(
   fun: string | PouchDB.Map<Model, Result> | PouchDB.Filter<Model, Result>,
-  opts?: PouchDB.Query.Options<Model, Result> & { update_seq?: boolean }
+  opts?: PouchDB.Query.Options<Model, Result> & {
+    update_seq?: boolean
+  } & CommonOptions
 ): ViewResponse<Result> {
-  const { pouchdb: pouch, subscriptionManager } = useContext()
+  const { pouchdb: pouch, subscriptionManager } = useContext(opts?.db)
 
   if (typeof pouch?.query !== 'function') {
     throw new TypeError(

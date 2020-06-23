@@ -104,7 +104,7 @@ test('should throw an error if a wrong name is passed to useContext', async () =
     'could not find a PouchDB database with name of "not-existing"'
   )
 
-  rerender('default')
+  rerender('_default')
 
   expect(result.error).toBeUndefined()
 
@@ -201,11 +201,102 @@ test('should combine a parent context into its context', async () => {
   expect(result.current.pouchdb).toBe(child)
   expect(result.current.subscriptionManager).toBe(childSubscriptionManager)
 
-  rerender('default')
+  rerender('_default')
 
   expect(result.current.pouchdb).toBe(child)
   expect(result.current.subscriptionManager).toBe(childSubscriptionManager)
 
   await parent.destroy()
   await child.destroy()
+})
+
+test('should combine a parent context into its context if the child is multi db', async () => {
+  const parent = new PouchDB('test', { adapter: 'memory' })
+  const child = new PouchDB('other', { adapter: 'memory' })
+
+  const { result, rerender } = renderHook((name?: string) => useContext(name), {
+    initialProps: undefined,
+    wrapper: function Wrapper({ children }: { children: React.ReactChildren }) {
+      return (
+        <Provider pouchdb={parent}>
+          <Provider databases={{ other: child }} default="other">
+            {children}
+          </Provider>
+        </Provider>
+      )
+    },
+  })
+
+  expect(result.current.pouchdb).toBe(child)
+  const childSubscriptionManager = result.current.subscriptionManager
+
+  rerender('test')
+
+  expect(result.current.pouchdb).toBe(parent)
+  expect(result.current.subscriptionManager).not.toBe(childSubscriptionManager)
+
+  rerender('other')
+
+  expect(result.current.pouchdb).toBe(child)
+  expect(result.current.subscriptionManager).toBe(childSubscriptionManager)
+
+  rerender('_default')
+
+  expect(result.current.pouchdb).toBe(child)
+  expect(result.current.subscriptionManager).toBe(childSubscriptionManager)
+
+  await parent.destroy()
+  await child.destroy()
+})
+
+test('should allow the use of a parent context database name in default', async () => {
+  const parent = new PouchDB('test', { adapter: 'memory' })
+  const child = new PouchDB('other', { adapter: 'memory' })
+
+  const { result } = renderHook((name?: string) => useContext(name), {
+    initialProps: undefined,
+    wrapper: function Wrapper({ children }: { children: React.ReactChildren }) {
+      return (
+        <Provider pouchdb={parent}>
+          <Provider databases={{ other: child }} default="test">
+            {children}
+          </Provider>
+        </Provider>
+      )
+    },
+  })
+
+  expect(result.current.pouchdb).toBe(parent)
+
+  await parent.destroy()
+  await child.destroy()
+})
+
+test('should handle a database name of default', async () => {
+  const myPouch = new PouchDB('default', { adapter: 'memory' })
+  const other = new PouchDB('other', { adapter: 'memory' })
+
+  const { result, rerender } = renderHook((name?: string) => useContext(name), {
+    initialProps: undefined,
+    wrapper: function Wrapper({ children }: { children: React.ReactChildren }) {
+      return (
+        <Provider databases={{ default: myPouch, other }} default="other">
+          {children}
+        </Provider>
+      )
+    },
+  })
+
+  expect(result.current.pouchdb).toBe(other)
+
+  rerender('default')
+
+  expect(result.current.pouchdb).toBe(myPouch)
+
+  rerender('_default')
+
+  expect(result.current.pouchdb).toBe(other)
+
+  await myPouch.destroy()
+  await other.destroy()
 })

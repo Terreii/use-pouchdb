@@ -16,7 +16,13 @@ export interface PouchContextObject {
 
 type ContextObject = { [key: string]: PouchContextObject }
 
-const PouchContext = createContext<ContextObject>({})
+const PouchContext = createContext<{
+  defaultKey: string
+  databases: ContextObject
+}>({
+  defaultKey: '',
+  databases: {},
+})
 
 /**
  * Provide access to a database.
@@ -60,9 +66,9 @@ export function Provider(args: ProviderArguments): React.ReactElement {
   // normalize the two argument types into one
   if (dbsArg != null && defaultArg != null) {
     databases = dbsArg
-    defaultKey = defaultArg
+    defaultKey = defaultArg.toString()
   } else if (pouchdb != null) {
-    defaultKey = name ?? pouchdb.name
+    defaultKey = name?.toString() || pouchdb.name
     databases = { [defaultKey]: pouchdb }
   } else {
     throw new TypeError(
@@ -72,16 +78,18 @@ export function Provider(args: ProviderArguments): React.ReactElement {
 
   const contextObjects = useAddSubscriptionManager(databases)
 
-  const parentContext = useReactContext(PouchContext)
+  const parentDatabases = useReactContext(PouchContext).databases
 
   // merge the contextObjects into the parent context and set the "default" key
   const context = useMemo(() => {
     return {
-      ...parentContext,
-      ...contextObjects,
-      default: contextObjects[defaultKey],
+      defaultKey,
+      databases: {
+        ...parentDatabases,
+        ...contextObjects,
+      },
     }
-  }, [contextObjects, defaultKey, parentContext])
+  }, [contextObjects, defaultKey, parentDatabases])
 
   return (
     <PouchContext.Provider value={context}>
@@ -112,11 +120,10 @@ function useAddSubscriptionManager(databases: {
     []
   )
 
-  const allLastKeys = Object.keys(lastContextObject.current)
   // Keys of last lastContextObject
   // All databases that didn't change will be reused and their keys deleted from this Set.
   // All keys left, the database did change and the SubscriptionManager will be unsubscribed.
-  const lastKeys = new Set(allLastKeys)
+  const lastKeys = new Set(Object.keys(lastContextObject.current))
 
   const contextObjects: ContextObject = {}
   let didAddNewDatabase = false
@@ -152,18 +159,24 @@ function useAddSubscriptionManager(databases: {
  * Provides access to the Database & SubscriptionManager pair in the usePouchDB-Context.
  * @param name Name of the Database or its overwritten name. Defaults to "default".
  */
-export function useContext(name = 'default'): PouchContextObject {
-  const context = useReactContext(PouchContext)
+export function useContext(name?: string): PouchContextObject {
+  const { defaultKey, databases } = useReactContext(PouchContext)
 
-  if (context.default == null && Object.keys(context).length === 0) {
+  if (
+    defaultKey === '' &&
+    databases[defaultKey] == null &&
+    Object.keys(databases).length === 0
+  ) {
     throw new Error(
       'could not find PouchDB context value; please ensure the component is wrapped in a <Provider>'
     )
   }
 
-  if (!(name in context)) {
+  const key = name === '_default' ? defaultKey : name ?? defaultKey
+
+  if (!(key in databases)) {
     throw new Error(`could not find a PouchDB database with name of "${name}"`)
   }
 
-  return context[name]
+  return databases[key]
 }

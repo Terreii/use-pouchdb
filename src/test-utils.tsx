@@ -13,6 +13,12 @@ export interface Options<P> {
   pouchdb: PouchDB.Database
 }
 
+export interface MultiDbOptions<P> {
+  initialProps?: P
+  main: PouchDB.Database
+  other: PouchDB.Database
+}
+
 export function renderHook<P, R>(
   callback: (props: P) => R,
   options?: Options<P>
@@ -30,6 +36,32 @@ export function renderHook<P, R>(
           },
         }
       : undefined
+
+  return testingLibraryRenderHook(callback, optionsObject)
+}
+
+export function renderHookWithMultiDbContext<P, R>(
+  callback: (props: P) => R,
+  options: MultiDbOptions<P>
+): RenderHookResult<P, R> {
+  const wrapper = function Wrapper({
+    children,
+  }: {
+    children: React.ReactChildren
+  }) {
+    return (
+      <Provider
+        databases={{ main: options.main, other: options.other }}
+        default="main"
+      >
+        {children}
+      </Provider>
+    )
+  }
+  const optionsObject = {
+    initialProps: options.initialProps,
+    wrapper,
+  }
 
   return testingLibraryRenderHook(callback, optionsObject)
 }

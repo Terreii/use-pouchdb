@@ -1,7 +1,7 @@
 import PouchDB from 'pouchdb-core'
 import memory from 'pouchdb-adapter-memory'
 
-import { renderHook } from './test-utils'
+import { renderHook, renderHookWithMultiDbContext } from './test-utils'
 import usePouch from './usePouch'
 
 PouchDB.plugin(memory)
@@ -31,4 +31,37 @@ test('should return the pouchdb from the provider', () => {
   })
 
   expect(result.current).toBe(myPouch)
+})
+
+test('should support the selection of a database in the context to be used', async () => {
+  const other = new PouchDB('other', { adapter: 'memory' })
+
+  const { result, rerender } = renderHookWithMultiDbContext(
+    (name?: string) => usePouch(name),
+    {
+      initialProps: undefined,
+      main: myPouch,
+      other,
+    }
+  )
+
+  // No db selection
+  expect(result.current).toBe(myPouch)
+
+  // selecting a database that is not the default
+  rerender('other')
+  expect(result.current).toBe(other)
+
+  // selecting the default db by it's name
+  rerender('main')
+  expect(result.current).toBe(myPouch)
+
+  // reset to other db
+  rerender('other')
+
+  // selecting by special _default key
+  rerender('_default')
+  expect(result.current).toBe(myPouch)
+
+  await other.destroy()
 })

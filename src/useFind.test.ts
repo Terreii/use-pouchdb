@@ -2,7 +2,7 @@ import PouchDB from 'pouchdb-core'
 import memory from 'pouchdb-adapter-memory'
 import find from 'pouchdb-find'
 
-import { renderHook, act } from './test-utils'
+import { renderHook, renderHookWithMultiDbContext, act } from './test-utils'
 import useFind, { FindHookIndexOption } from './useFind'
 
 PouchDB.plugin(memory)
@@ -1224,5 +1224,100 @@ describe('options', () => {
       captain: 'Jean-Luc Picard',
       name: 'The Next Generation',
     })
+  })
+
+  test('should support the selection of a database in the context to be used', async () => {
+    const other = new PouchDB('other', { adapter: 'memory' })
+
+    await myPouch.put({
+      _id: 'test',
+      value: 'myPouch',
+    })
+
+    await other.put({
+      _id: 'test',
+      value: 'other',
+    })
+
+    const {
+      result,
+      waitForValueToChange,
+      rerender,
+    } = renderHookWithMultiDbContext(
+      (name?: string) =>
+        useFind({
+          index: {
+            fields: ['value'],
+          },
+          selector: {
+            value: { $gt: null },
+          },
+          db: name,
+        }),
+      {
+        initialProps: undefined,
+        main: myPouch,
+        other: other,
+      }
+    )
+
+    await waitForValueToChange(() => result.current.loading)
+
+    // No db selection
+    expect(result.current.loading).toBeFalsy()
+    expect(result.current.docs).toEqual([
+      {
+        _id: 'test',
+        _rev: expect.anything(),
+        value: 'myPouch',
+      },
+    ])
+
+    // selecting a database that is not the default
+    rerender('other')
+    expect(result.current.loading).toBeTruthy()
+    await waitForValueToChange(() => result.current.loading)
+
+    expect(result.current.loading).toBeFalsy()
+    expect(result.current.docs).toEqual([
+      {
+        _id: 'test',
+        _rev: expect.anything(),
+        value: 'other',
+      },
+    ])
+
+    // selecting the default db by it's name
+    rerender('main')
+    expect(result.current.loading).toBeTruthy()
+    await waitForValueToChange(() => result.current.loading)
+
+    expect(result.current.loading).toBeFalsy()
+    expect(result.current.docs).toEqual([
+      {
+        _id: 'test',
+        _rev: expect.anything(),
+        value: 'myPouch',
+      },
+    ])
+
+    // reset to other db
+    rerender('other')
+    expect(result.current.loading).toBeTruthy()
+    await waitForValueToChange(() => result.current.loading)
+
+    // selecting by special _default key
+    rerender('_default')
+    await waitForValueToChange(() => result.current.loading)
+
+    expect(result.current.docs).toEqual([
+      {
+        _id: 'test',
+        _rev: expect.anything(),
+        value: 'myPouch',
+      },
+    ])
+
+    await other.destroy()
   })
 })

@@ -2,20 +2,22 @@ import { useEffect } from 'react'
 
 import { useContext } from './context'
 import useStateMachine, { ResultType } from './state-machine'
-import { useDeepMemo } from './utils'
+import { useDeepMemo, CommonOptions } from './utils'
 
 /**
  * Get all docs or a slice of all docs and subscribe to their updates.
  * @param options PouchDB's allDocs options.
  */
 export default function useAllDocs<Content>(
-  options?:
-    | PouchDB.Core.AllDocsWithKeyOptions
-    | PouchDB.Core.AllDocsWithKeysOptions
-    | PouchDB.Core.AllDocsWithinRangeOptions
-    | PouchDB.Core.AllDocsOptions
+  options?: CommonOptions &
+    (
+      | PouchDB.Core.AllDocsWithKeyOptions
+      | PouchDB.Core.AllDocsWithKeysOptions
+      | PouchDB.Core.AllDocsWithinRangeOptions
+      | PouchDB.Core.AllDocsOptions
+    )
 ): ResultType<PouchDB.Core.AllDocsResponse<Content>> {
-  const { pouchdb: pouch, subscriptionManager } = useContext()
+  const { pouchdb: pouch, subscriptionManager } = useContext(options?.db)
 
   const {
     include_docs,

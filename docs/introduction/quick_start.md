@@ -43,20 +43,17 @@ yarn add use-pouchdb
 You'll also need to [install PouchDB](https://pouchdb.com/guides/setup-pouchdb.html 'PouchDBs installation guide').
 There is also a special [browser version](https://www.npmjs.com/package/pouchdb-browser).
 
-[PouchDB Authentication](https://github.com/pouchdb-community/pouchdb-authentication) is a PouchDB
-plugin for the sign up, log in and log out flow.
-
 <!--DOCUSAURUS_CODE_TABS-->
 <!--npm-->
 
 ```sh
-npm i -D pouchdb-browser pouchdb-authentication
+npm i -D pouchdb-browser
 ```
 
 <!--yarn-->
 
 ```sh
-yarn add -D pouchdb-browser pouchdb-authentication
+yarn add -D pouchdb-browser
 ```
 
 <!--END_DOCUSAURUS_CODE_TABS-->
@@ -66,6 +63,7 @@ yarn add -D pouchdb-browser pouchdb-authentication
 usePouchDB provides a `<Provider />`, to make a PouchDB database available to it's child components.
 
 ```jsx
+// Single database
 import React from 'react'
 import ReactDOM from 'react-dom'
 import PouchDB from 'pouchdb-browser'
@@ -78,6 +76,33 @@ const db = new PouchDB('local')
 
 ReactDOM.render(
   <Provider pouchdb={db}>
+    <App />
+  </Provider>,
+  document.getElementById('root')
+)
+```
+
+```jsx
+// Multiple databases
+import React from 'react'
+import ReactDOM from 'react-dom'
+import PouchDB from 'pouchdb-browser'
+
+import { Provider } from 'use-pouchdb'
+
+import App from './App'
+
+const db = new PouchDB('local')
+const remoteDb = new PouchDB('https://example.com/db')
+
+ReactDOM.render(
+  <Provider
+    default="local"
+    databases={{
+      local: db,
+      remote: remoteDb,
+    }}
+  >
     <App />
   </Provider>,
   document.getElementById('root')

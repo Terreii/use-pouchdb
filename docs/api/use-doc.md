@@ -27,6 +27,8 @@ of `options.open_revs`. Options descriptions are copied from the PouchDB API pag
    - `options.binary?: boolean` - Only evaluated when `attachments` is `true`. Return attachment data as
      Blobs/Buffers, instead of as base64-encoded strings.
    - `options.latest?: boolean` - Forces retrieving latest "leaf" revision, no matter what rev was requested.
+   - `options.db?: string` - Selects the database to be used. The database is selected by it's name/key.
+     The special key `"_default"` selects the _default database_. Defaults to `"_default"`.
 3. `initialValue?: Object | function` - Optional initial value of `doc` result. Has the same behavior as
    `useState`'s initialValue. If used then the `options` object must be set.
 
@@ -153,3 +155,42 @@ export function PostViewer({ id }) {
 
 The `initialValue` can also be used for a blue print of documents. If no doc was fount, use the
 initial value and edit it. Once it is saved, the `useDoc` will re-fetch the doc.
+
+### Select a database
+
+```jsx
+import React from 'react'
+import ReactMarkdown from 'react-markdown'
+import { useDoc } from 'use-pouchdb'
+import { ErrorMessage } from './ErrorMessage'
+
+export function PostViewer({ id, isLocalReady }) {
+  const { doc, loading, state, error } = useDoc(id, {
+    db: isLocalReady ? 'local' : 'remote',
+  })
+
+  if (state === 'error') {
+    return <ErrorMessage error={error} />
+  }
+
+  if (loading && doc == null) {
+    return (
+      <article>
+        <hgroup>
+          <h1>loading ...</h1>
+        </hgroup>
+      </article>
+    )
+  }
+
+  return (
+    <article>
+      <hgroup>
+        <h1>{doc.title}</h1>
+        <h2>by {doc.author}</h2>
+      </hgroup>
+      <ReactMarkdown source={doc.text} />
+    </article>
+  )
+}
+```

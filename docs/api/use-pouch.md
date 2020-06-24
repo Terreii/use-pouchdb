@@ -12,7 +12,8 @@ It can only be invoked from a component nested inside of a `<Provider />`.
 
 ## Parameters
 
-`usePouch` doesn't have any parameters, yet.
+1. `databaseName?: string` - Select the database by it's name/key. The special key `"_default"` selects
+   the _default database_. Defaults to `"_default"`.
 
 ## Result
 
@@ -160,5 +161,30 @@ export function NewBooking() {
       <button>add</button>
     </form>
   )
+}
+```
+
+### Select a database
+
+```javascript
+import { useEffect } from 'react'
+import { usePouch } from 'use-pouchdb'
+
+function useSync(shouldSync) {
+  const localDb = usePouch('local')
+  const remoteDb = usePouch('remote')
+
+  useEffect(() => {
+    if (shouldSync) {
+      const sync = localDb.sync(remoteDb, {
+        live: true,
+        retry: true,
+      })
+
+      return () => {
+        sync.cancel()
+      }
+    }
+  }, [localDb, remoteDb, shouldSync])
 }
 ```

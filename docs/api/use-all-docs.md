@@ -46,6 +46,8 @@ page.
        [CouchDB query options documentation](https://docs.couchdb.org/en/stable/api/ddoc/views.html#db-design-design-doc-view-view-name).
    - `options.update_seq?: boolean` - Include an `update_seq` value indicating which sequence id of the underlying
      database the view reflects.
+   - `options.db?: string` - Selects the database to be used. The database is selected by it's name/key.
+     The special key `"_default"` selects the _default database_. Defaults to `"_default"`.
 
 > `keys` is check for equality with a deep equal algorithm.
 > And only if it differentiate by _value_ will it cause new query be made.
@@ -207,6 +209,49 @@ export function LastBookings() {
           </li>
         ))}
       </ul>
+    </div>
+  )
+}
+```
+
+### Select a database
+
+```jsx
+import React from 'react'
+import { useAllDocs } from 'use-pouchdb'
+import { ErrorMessage } from './ErrorMessage'
+
+export function Comments({ id, isLocalReady }) {
+  const commentsPrefix = `comments_${id}`
+  const { rows, loading, state, error } = useAllDocs({
+    startkey: commentsPrefix,
+    endkey: commentsPrefix + '\ufff0',
+    include_docs: true,
+    // Select the database used
+    db: isLocalReady ? 'local' : 'remote',
+  })
+
+  if (state === 'error') {
+    return <ErrorMessage error={error} />
+  }
+
+  if (loading && rows.length === 0) {
+    return null
+  }
+
+  return (
+    <div>
+      <h4>Comments</h4>
+
+      <div>
+        {rows.map(row => (
+          <section key={row.id}>
+            <h5>{row.doc.username} commented</h5>
+            {!row.value.rev.startsWith('1-') && <span>Edited</span>}
+            <p>{row.doc.comment}</p>
+          </section>
+        ))}
+      </div>
     </div>
   )
 }

@@ -59,9 +59,19 @@ npm install pouchdb-mapreduce
 yarn add pouchdb-mapreduce
 ```
 
+For using the `useFind` hook [`pouchdb-find`](https://www.npmjs.com/package/pouchdb-find)
+must be installed and setup.
+
+```sh
+npm install pouchdb-find
+# or
+yarn add pouchdb-find
+```
+
 ### Bind usePouchDB
 
-usePouchDB exports a `<Provider />` to make a PouchDB database available to its components sub-tree.
+usePouchDB exports a `<Provider />` to make one or multiple PouchDB databases available to its
+components sub-tree.
 
 ```jsx
 import React from 'react'
@@ -94,7 +104,9 @@ ReactDOM.render(
   and subscribe to their changes. Or a range of docs by their ids. The hook version of
   [`db.allDocs`](https://pouchdb.com/api.html#batch_fetch).
 - [`useFind`](https://christopher-astfalk.de/use-pouchdb/docs/api/use-find) - Access a mango index and
-  subscribe to it. Optionally create the index, if it doesn't exist.
+  subscribe to it. Optionally create the index, if it doesn't exist. The hook version of
+  [`db.createIndex`](https://pouchdb.com/api.html#create_index) and
+  [`db.find`](https://pouchdb.com/api.html#query_index) combined.
 - [`useView`](https://christopher-astfalk.de/use-pouchdb/docs/api/use-view) - Access a view and subscribe
   to its changes. The hook version of [`db.query`](https://pouchdb.com/api.html#query_database).
 

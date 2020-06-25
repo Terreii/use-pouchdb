@@ -29,6 +29,7 @@ export type subscribeToDocs = <T>(
 
 export default class SubscriptionManager {
   #pouch: PouchDB.Database
+  #destroyListener: () => void
 
   #docsSubscription: DocsSubscription | null = null
   #viewsSubscription = new Map<string, SubscriptionToAView>()
@@ -37,6 +38,10 @@ export default class SubscriptionManager {
 
   constructor(pouch: PouchDB.Database) {
     this.#pouch = pouch
+    this.#destroyListener = () => {
+      this.unsubscribeAll()
+    }
+    pouch.once('destroyed', this.#destroyListener)
   }
 
   subscribeToDocs<T>(
@@ -138,6 +143,8 @@ export default class SubscriptionManager {
   unsubscribeAll(): void {
     if (this.#didUnsubscribeAll) return
     this.#didUnsubscribeAll = true
+
+    this.#pouch.removeListener('destroyed', this.#destroyListener)
 
     if (this.#docsSubscription) {
       this.#docsSubscription.changesFeed.cancel()

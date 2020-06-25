@@ -1,7 +1,7 @@
 import PouchDB from 'pouchdb-core'
 import memory from 'pouchdb-adapter-memory'
 
-import { renderHook, act } from './test-utils'
+import { renderHook, renderHookWithMultiDbContext, act } from './test-utils'
 import useDoc from './useDoc'
 
 PouchDB.plugin(memory)
@@ -855,5 +855,83 @@ describe('pouchdb get options', () => {
     await waitForNextUpdate()
 
     expect(result.current.doc._rev).toBe(secondUpdateResult.rev)
+  })
+
+  test('should support the selection of a database in the context to be used', async () => {
+    const other = new PouchDB('other', { adapter: 'memory' })
+
+    await myPouch.put({
+      _id: 'test',
+      value: 'myPouch',
+    })
+
+    await other.put({
+      _id: 'test',
+      value: 'other',
+    })
+
+    const {
+      result,
+      waitForNextUpdate,
+      rerender,
+    } = renderHookWithMultiDbContext(
+      (name?: string) => useDoc('test', { db: name }),
+      {
+        initialProps: undefined,
+        main: myPouch,
+        other: other,
+      }
+    )
+
+    await waitForNextUpdate()
+
+    // No db selection
+    expect(result.current.loading).toBeFalsy()
+    expect(result.current.doc).toEqual({
+      _id: 'test',
+      _rev: expect.anything(),
+      value: 'myPouch',
+    })
+
+    // selecting a database that is not the default
+    rerender('other')
+    expect(result.current.loading).toBeTruthy()
+    await waitForNextUpdate()
+
+    expect(result.current.loading).toBeFalsy()
+    expect(result.current.doc).toEqual({
+      _id: 'test',
+      _rev: expect.anything(),
+      value: 'other',
+    })
+
+    // selecting the default db by it's name
+    rerender('main')
+    expect(result.current.loading).toBeTruthy()
+    await waitForNextUpdate()
+
+    expect(result.current.loading).toBeFalsy()
+    expect(result.current.doc).toEqual({
+      _id: 'test',
+      _rev: expect.anything(),
+      value: 'myPouch',
+    })
+
+    // reset to other db
+    rerender('other')
+    expect(result.current.loading).toBeTruthy()
+    await waitForNextUpdate()
+
+    // selecting by special _default key
+    rerender('_default')
+    await waitForNextUpdate()
+
+    expect(result.current.doc).toEqual({
+      _id: 'test',
+      _rev: expect.anything(),
+      value: 'myPouch',
+    })
+
+    await other.destroy()
   })
 })

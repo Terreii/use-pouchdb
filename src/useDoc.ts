@@ -2,6 +2,7 @@ import { useEffect, useRef, useCallback } from 'react'
 
 import { useContext } from './context'
 import useStateMachine, { ResultType } from './state-machine'
+import type { CommonOptions } from './utils'
 
 type DocResultType<T> = ResultType<{
   doc: (PouchDB.Core.Document<T> & PouchDB.Core.GetMeta) | null
@@ -15,12 +16,12 @@ type DocResultType<T> = ResultType<{
  */
 export default function useDoc<Content>(
   id: PouchDB.Core.DocumentId,
-  options?: PouchDB.Core.GetOptions,
+  options?: PouchDB.Core.GetOptions & CommonOptions,
   initialValue?: (() => Content) | Content
 ): DocResultType<Content> {
   type Document = (PouchDB.Core.Document<Content> & PouchDB.Core.GetMeta) | null
 
-  const { pouchdb: pouch, subscriptionManager } = useContext()
+  const { pouchdb: pouch, subscriptionManager } = useContext(options?.db)
 
   const { rev, revs, revs_info, conflicts, attachments, binary, latest } =
     options || {}

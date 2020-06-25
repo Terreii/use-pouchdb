@@ -52,6 +52,8 @@ Options descriptions are copied from the PouchDB API page.
      Note that sorted fields also have to be selected in the `options.selector`.
    - `options.limit?: number` - Maximum number of documents to return.
    - `options.skip?: number` - Number of docs to skip before returning.
+   - `options.db?: string` - Selects the database to be used. The database is selected by it's name/key.
+     The special key `"_default"` selects the _default database_. Defaults to `"_default"`.
 
 > `index`, `selector`, `fields` and `sort` are check for equality with a deep equal algorithm.
 > And only if they differentiate by _value_ will they cause a new query be made.
@@ -142,6 +144,49 @@ export default function StoryList() {
     },
     sort: ['title'],
     fields: ['_id', 'title'],
+  })
+
+  return (
+    <main>
+      <h1>Stories</h1>
+
+      {error && (
+        <p>
+          Error: {error.status} - {error.name}
+        </p>
+      )}
+      {loading && docs.length === 0 && <p>loading...</p>}
+
+      <ul>
+        {docs.map(doc => (
+          <li key={doc._id}>
+            <a href={`./${doc._id}`}>{doc.title}</a>
+          </li>
+        ))}
+      </ul>
+    </main>
+  )
+}
+```
+
+### Select a database
+
+```jsx
+import React from 'react'
+import { useFind } from 'use-pouchdb'
+
+export default function StoryList({ isLocalReady }) {
+  const { docs, loading, error } = useFind({
+    // index is here like use_index in db.find()
+    index: ['ddoc_name', 'index_name'],
+    selector: {
+      type: 'story',
+      title: { $exists: true },
+    },
+    sort: ['title'],
+    fields: ['_id', 'title'],
+    // Select the database used
+    db: isLocalReady ? 'local' : 'remote',
   })
 
   return (

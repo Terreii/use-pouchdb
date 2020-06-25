@@ -4,7 +4,7 @@ import { matchesSelector } from 'pouchdb-selector-core'
 import { useContext } from './context'
 import type SubscriptionManager from './subscription'
 import useStateMachine, { ResultType } from './state-machine'
-import { useDeepMemo } from './utils'
+import { useDeepMemo, CommonOptions } from './utils'
 
 /**
  * Set which index to use for the query. Or create one and use it. It can be:
@@ -39,7 +39,7 @@ export type FindHookIndexOption =
       type?: string
     }
 
-export interface FindHookOptions {
+export interface FindHookOptions extends CommonOptions {
   /**
    * Set which index to use for the query. Or create one and use it. It can be:
    *
@@ -83,7 +83,7 @@ export interface FindHookOptions {
 export default function useFind<Content>(
   options: FindHookOptions
 ): ResultType<PouchDB.Find.FindResponse<Content>> {
-  const { pouchdb: pouch, subscriptionManager } = useContext()
+  const { pouchdb: pouch, subscriptionManager } = useContext(options.db)
 
   if (
     typeof pouch?.createIndex !== 'function' ||

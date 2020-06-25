@@ -69,6 +69,8 @@ descriptions are copied from the PouchDB API page.
      Defaults to the full length of the array.
    - `options.update_seq?: boolean` - Include an `update_seq` value indicating which sequence id of the underlying
      database the view reflects.
+   - `options.db?: string` - Selects the database to be used. The database is selected by it's name/key.
+     The special key `"_default"` selects the _default database_. Defaults to `"_default"`.
 
 > `startkey`, `endkey`, `key` and `keys` are check for equality with a deep equal algorithm.
 > And only if they differentiate by _value_ will they cause a new query be made.
@@ -273,6 +275,58 @@ export function BankAccountChange({ year }) {
     <p>
       Your account did change {rows[0].value}€ in {year}.
     </p>
+  )
+}
+```
+
+### Select a database
+
+```javascript
+var designDoc = {
+  _id: '_design/app',
+  views: {
+    tags: {
+      map: function tagsMap(doc) {
+        if (isArray(doc.tags)) {
+          doc.tags.forEach(function (tag) {
+            // emit tag as the key and the doc title as the value
+            emit(tag, doc.title)
+          })
+        }
+      }.toString(),
+      reduce: '_count',
+    },
+  },
+}
+```
+
+```jsx
+import React from 'react'
+import { useView } from 'use-pouchdb'
+import { ErrorMessage } from './ErrorMessage'
+
+export function ListAllOfTag({ tag, isLocalReady }) {
+  const { rows, loading, error } = useView('app/tags', {
+    key: tag,
+    reduce: false, // don't reduce
+    // Select the database used
+    db: isLocalReady ? 'local' : 'remote'
+  })
+
+  if (loading && rows.length === 0) {
+    return <div>loading ...</div>
+  }
+
+  if (error) {
+    return <ErrorMessage error={error}>
+  }
+
+  return (
+    <ul>
+      {rows.map(row => ( // row.key is the tag and row.id is the _id of the document.
+        <li key={`${row.key} ${row.id}`}>{row.value}</li>
+      ))}
+    </ul>
   )
 }
 ```

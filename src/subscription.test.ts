@@ -309,6 +309,20 @@ test('should have a unsubscribeAll method', async () => {
   unsubscribeView()
 })
 
+test('should subscribe to destroy events', async () => {
+  const db = new PouchDB('other', { adapter: 'memory' })
+  const subscriptionManager = new SubscriptionManager(db)
+
+  const unsubscribeAll = subscriptionManager.unsubscribeAll
+  subscriptionManager.unsubscribeAll = jest.fn((...args) =>
+    unsubscribeAll.call(subscriptionManager, args)
+  )
+
+  await db.destroy()
+
+  expect(subscriptionManager.unsubscribeAll).toHaveBeenCalled()
+})
+
 test('should clone the documents that are passed to document callbacks', async () => {
   const docs = []
 

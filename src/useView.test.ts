@@ -2,7 +2,7 @@ import PouchDB from 'pouchdb-core'
 import memory from 'pouchdb-adapter-memory'
 import mapReduce from 'pouchdb-mapreduce'
 
-import { renderHook, act } from './test-utils'
+import { renderHook, renderHookWithMultiDbContext, act } from './test-utils'
 import useView from './useView'
 
 PouchDB.plugin(memory)
@@ -1031,6 +1031,103 @@ describe('temporary function only views', () => {
 
       expect(result.current.state).toBe('done')
       expect(result.current.update_seq).not.toBeUndefined()
+    })
+
+    test('should support the selection of a database in the context to be used', async () => {
+      const other = new PouchDB('other', { adapter: 'memory' })
+
+      await myPouch.put({
+        _id: 'test',
+        type: 'tester',
+        value: 'myPouch',
+      })
+
+      await other.put({
+        _id: 'test',
+        type: 'tester',
+        value: 'other',
+      })
+
+      const view = (
+        doc: PouchDB.Core.Document<Record<string, unknown>>,
+        emit: (key: unknown, value?: unknown) => void
+      ) => {
+        if (doc.type === 'tester') {
+          emit(doc.type, doc.value)
+        }
+      }
+
+      const {
+        result,
+        waitForNextUpdate,
+        rerender,
+      } = renderHookWithMultiDbContext(
+        (name?: string) => useView(view, { db: name }),
+        {
+          initialProps: undefined,
+          main: myPouch,
+          other: other,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      // No db selection
+      expect(result.current.loading).toBeFalsy()
+      expect(result.current.rows).toEqual([
+        {
+          id: 'test',
+          key: 'tester',
+          value: 'myPouch',
+        },
+      ])
+
+      // selecting a database that is not the default
+      rerender('other')
+      expect(result.current.loading).toBeTruthy()
+      await waitForNextUpdate()
+
+      expect(result.current.loading).toBeFalsy()
+      expect(result.current.rows).toEqual([
+        {
+          id: 'test',
+          key: 'tester',
+          value: 'other',
+        },
+      ])
+
+      // selecting the default db by it's name
+      rerender('main')
+      expect(result.current.loading).toBeTruthy()
+      await waitForNextUpdate()
+
+      expect(result.current.loading).toBeFalsy()
+      expect(result.current.rows).toEqual([
+        {
+          id: 'test',
+          key: 'tester',
+          value: 'myPouch',
+        },
+      ])
+
+      // reset to other db
+      rerender('other')
+      expect(result.current.loading).toBeTruthy()
+      await waitForNextUpdate()
+
+      // selecting by special _default key
+      rerender('_default')
+      await waitForNextUpdate()
+
+      expect(result.current.rows).toEqual([
+        {
+          id: 'test',
+          key: 'tester',
+          value: 'myPouch',
+        },
+      ])
+
+      await other.destroy()
     })
   })
 })
@@ -2186,6 +2283,105 @@ describe('temporary views objects', () => {
 
       expect(result.current.state).toBe('done')
       expect(result.current.update_seq).not.toBeUndefined()
+    })
+
+    test('should support the selection of a database in the context to be used', async () => {
+      const other = new PouchDB('other', { adapter: 'memory' })
+
+      await myPouch.put({
+        _id: 'test',
+        type: 'tester',
+        value: 'myPouch',
+      })
+
+      await other.put({
+        _id: 'test',
+        type: 'tester',
+        value: 'other',
+      })
+
+      const view = {
+        map: (
+          doc: PouchDB.Core.Document<Record<string, unknown>>,
+          emit: (key: unknown, value?: unknown) => void
+        ) => {
+          if (doc.type === 'tester') {
+            emit(doc.type, doc.value)
+          }
+        },
+      }
+
+      const {
+        result,
+        waitForNextUpdate,
+        rerender,
+      } = renderHookWithMultiDbContext(
+        (name?: string) => useView(view, { db: name }),
+        {
+          initialProps: undefined,
+          main: myPouch,
+          other: other,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      // No db selection
+      expect(result.current.loading).toBeFalsy()
+      expect(result.current.rows).toEqual([
+        {
+          id: 'test',
+          key: 'tester',
+          value: 'myPouch',
+        },
+      ])
+
+      // selecting a database that is not the default
+      rerender('other')
+      expect(result.current.loading).toBeTruthy()
+      await waitForNextUpdate()
+
+      expect(result.current.loading).toBeFalsy()
+      expect(result.current.rows).toEqual([
+        {
+          id: 'test',
+          key: 'tester',
+          value: 'other',
+        },
+      ])
+
+      // selecting the default db by it's name
+      rerender('main')
+      expect(result.current.loading).toBeTruthy()
+      await waitForNextUpdate()
+
+      expect(result.current.loading).toBeFalsy()
+      expect(result.current.rows).toEqual([
+        {
+          id: 'test',
+          key: 'tester',
+          value: 'myPouch',
+        },
+      ])
+
+      // reset to other db
+      rerender('other')
+      expect(result.current.loading).toBeTruthy()
+      await waitForNextUpdate()
+
+      // selecting by special _default key
+      rerender('_default')
+      await waitForNextUpdate()
+
+      expect(result.current.rows).toEqual([
+        {
+          id: 'test',
+          key: 'tester',
+          value: 'myPouch',
+        },
+      ])
+
+      await other.destroy()
     })
   })
 })
@@ -3588,6 +3784,115 @@ describe('design documents', () => {
 
       expect(result.current.state).toBe('done')
       expect(result.current.update_seq).not.toBeUndefined()
+    })
+
+    test('should support the selection of a database in the context to be used', async () => {
+      const other = new PouchDB('other', { adapter: 'memory' })
+
+      const ddoc = {
+        _id: '_design/ddoc',
+        views: {
+          test: {
+            map: function (
+              doc: PouchDB.Core.Document<Record<string, unknown>>
+            ) {
+              if (doc.type === 'tester') {
+                emit(doc.type, doc.value)
+              }
+            }.toString(),
+          },
+        },
+      }
+
+      await myPouch.bulkDocs([
+        ddoc,
+        {
+          _id: 'test',
+          type: 'tester',
+          value: 'myPouch',
+        },
+      ])
+
+      await other.bulkDocs([
+        ddoc,
+        {
+          _id: 'test',
+          type: 'tester',
+          value: 'other',
+        },
+      ])
+
+      const {
+        result,
+        waitForNextUpdate,
+        rerender,
+      } = renderHookWithMultiDbContext(
+        (name?: string) => useView('ddoc/test', { db: name }),
+        {
+          initialProps: undefined,
+          main: myPouch,
+          other: other,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      // No db selection
+      expect(result.current.loading).toBeFalsy()
+      expect(result.current.rows).toEqual([
+        {
+          id: 'test',
+          key: 'tester',
+          value: 'myPouch',
+        },
+      ])
+
+      // selecting a database that is not the default
+      rerender('other')
+      expect(result.current.loading).toBeTruthy()
+      await waitForNextUpdate()
+
+      expect(result.current.loading).toBeFalsy()
+      expect(result.current.rows).toEqual([
+        {
+          id: 'test',
+          key: 'tester',
+          value: 'other',
+        },
+      ])
+
+      // selecting the default db by it's name
+      rerender('main')
+      expect(result.current.loading).toBeTruthy()
+      await waitForNextUpdate()
+
+      expect(result.current.loading).toBeFalsy()
+      expect(result.current.rows).toEqual([
+        {
+          id: 'test',
+          key: 'tester',
+          value: 'myPouch',
+        },
+      ])
+
+      // reset to other db
+      rerender('other')
+      expect(result.current.loading).toBeTruthy()
+      await waitForNextUpdate()
+
+      // selecting by special _default key
+      rerender('_default')
+      await waitForNextUpdate()
+
+      expect(result.current.rows).toEqual([
+        {
+          id: 'test',
+          key: 'tester',
+          value: 'myPouch',
+        },
+      ])
+
+      await other.destroy()
     })
   })
 })

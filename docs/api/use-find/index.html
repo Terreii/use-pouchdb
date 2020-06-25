@@ -103,6 +103,8 @@ If omitted, you get the full documents.</li>
 Note that sorted fields also have to be selected in the <code>options.selector</code>.</li>
 <li><code>options.limit?: number</code> - Maximum number of documents to return.</li>
 <li><code>options.skip?: number</code> - Number of docs to skip before returning.</li>
+<li><code>options.db?: string</code> - Selects the database to be used. The database is selected by it's name/key.
+The special key <code>&quot;_default&quot;</code> selects the <em>default database</em>. Defaults to <code>&quot;_default&quot;</code>.</li>
 </ul></li>
 </ol>
 <blockquote>
@@ -213,4 +215,44 @@ If the index doesn't exist, it will be created.</p>
   )
 }
 </code></pre>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/use-pouchdb/docs/api/use-all-docs"><span class="arrow-prev">← </span><span class="function-name-prevnext">useAllDocs</span></a><a class="docs-next button" href="/use-pouchdb/docs/api/use-view"><span class="function-name-prevnext">useView</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#overview">Overview</a></li><li><a href="#parameters">Parameters</a></li><li><a href="#result">Result</a></li><li><a href="#example-usage">Example Usage</a><ul class="toc-headings"><li><a href="#ensure-that-an-index-exist">Ensure that an index exist</a></li><li><a href="#use-existing-index">Use existing index</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/use-pouchdb/" class="nav-home"><img src="/use-pouchdb/img/favicon.ico" alt="usePouchDB" width="66" height="58"/></a><div><h5>Docs</h5><a href="/use-pouchdb/docs/introduction/quick_start">Getting Started</a><a href="/use-pouchdb/docs/api/provider">API Reference</a></div><div><h5>Contact</h5><a href="https://christopher-astfalk.de/">Blog</a><a href="https://github.com/Terreii/use-pouchdb" rel="noreferrer noopener">GitHub</a><a class="github-button" href="https://github.com/Terreii/use-pouchdb" data-icon="octicon-star" data-count-href="/Terreii/use-pouchdb/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a><div class="social"><a href="../impressum.html">Impressum</a></div></div></section><section class="copyright">Copyright © 2020 Christopher Astfalk</section></footer></div></body></html>
+<h3><a class="anchor" aria-hidden="true" id="select-a-database"></a><a href="#select-a-database" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Select a database</h3>
+<pre><code class="hljs css language-jsx"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<span class="hljs-keyword">import</span> { useFind } <span class="hljs-keyword">from</span> <span class="hljs-string">'use-pouchdb'</span>
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">StoryList</span>(<span class="hljs-params">{ isLocalReady }</span>) </span>{
+  <span class="hljs-keyword">const</span> { docs, loading, error } = useFind({
+    <span class="hljs-comment">// index is here like use_index in db.find()</span>
+    <span class="hljs-attr">index</span>: [<span class="hljs-string">'ddoc_name'</span>, <span class="hljs-string">'index_name'</span>],
+    <span class="hljs-attr">selector</span>: {
+      <span class="hljs-attr">type</span>: <span class="hljs-string">'story'</span>,
+      <span class="hljs-attr">title</span>: { <span class="hljs-attr">$exists</span>: <span class="hljs-literal">true</span> },
+    },
+    <span class="hljs-attr">sort</span>: [<span class="hljs-string">'title'</span>],
+    <span class="hljs-attr">fields</span>: [<span class="hljs-string">'_id'</span>, <span class="hljs-string">'title'</span>],
+    <span class="hljs-comment">// Select the database used</span>
+    <span class="hljs-attr">db</span>: isLocalReady ? <span class="hljs-string">'local'</span> : <span class="hljs-string">'remote'</span>,
+  })
+
+  <span class="hljs-keyword">return</span> (
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">main</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>Stories<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
+
+      {error &amp;&amp; (
+        <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>
+          Error: {error.status} - {error.name}
+        <span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+      )}
+      {loading &amp;&amp; docs.length === 0 &amp;&amp; <span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>loading...<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>}
+
+      <span class="hljs-tag">&lt;<span class="hljs-name">ul</span>&gt;</span>
+        {docs.map(doc =&gt; (
+          <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">{doc._id}</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">{</span>`<span class="hljs-attr">.</span>/${<span class="hljs-attr">doc._id</span>}`}&gt;</span>{doc.title}<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
+          <span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+        ))}
+      <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">main</span>&gt;</span></span>
+  )
+}
+</code></pre>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/use-pouchdb/docs/api/use-all-docs"><span class="arrow-prev">← </span><span class="function-name-prevnext">useAllDocs</span></a><a class="docs-next button" href="/use-pouchdb/docs/api/use-view"><span class="function-name-prevnext">useView</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#overview">Overview</a></li><li><a href="#parameters">Parameters</a></li><li><a href="#result">Result</a></li><li><a href="#example-usage">Example Usage</a><ul class="toc-headings"><li><a href="#ensure-that-an-index-exist">Ensure that an index exist</a></li><li><a href="#use-existing-index">Use existing index</a></li><li><a href="#select-a-database">Select a database</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/use-pouchdb/" class="nav-home"><img src="/use-pouchdb/img/favicon.ico" alt="usePouchDB" width="66" height="58"/></a><div><h5>Docs</h5><a href="/use-pouchdb/docs/introduction/quick_start">Getting Started</a><a href="/use-pouchdb/docs/api/provider">API Reference</a></div><div><h5>Contact</h5><a href="https://christopher-astfalk.de/">Blog</a><a href="https://github.com/Terreii/use-pouchdb" rel="noreferrer noopener">GitHub</a><a class="github-button" href="https://github.com/Terreii/use-pouchdb" data-icon="octicon-star" data-count-href="/Terreii/use-pouchdb/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a><div class="social"><a href="../impressum.html">Impressum</a></div></div></section><section class="copyright">Copyright © 2020 Christopher Astfalk</section></footer></div></body></html>

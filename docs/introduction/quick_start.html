@@ -81,14 +81,13 @@ It will still work, but could exceed the 4 concurrent request per domain limit o
 </code></pre>
 <p>You'll also need to <a href="https://pouchdb.com/guides/setup-pouchdb.html" title="PouchDBs installation guide">install PouchDB</a>.
 There is also a special <a href="https://www.npmjs.com/package/pouchdb-browser">browser version</a>.</p>
-<p><a href="https://github.com/pouchdb-community/pouchdb-authentication">PouchDB Authentication</a> is a PouchDB
-plugin for the sign up, log in and log out flow.</p>
-<div class="tabs"><div class="nav-tabs"><div id="tab-group-30-tab-31" class="nav-link active" data-group="group_30" data-tab="tab-group-30-content-31">npm</div><div id="tab-group-30-tab-32" class="nav-link" data-group="group_30" data-tab="tab-group-30-content-32">yarn</div></div><div class="tab-content"><div id="tab-group-30-content-31" class="tab-pane active" data-group="group_30" tabindex="-1"><div><span><pre><code class="hljs css language-sh">npm i -D pouchdb-browser pouchdb-authentication<br /></code></pre>
-</span></div></div><div id="tab-group-30-content-32" class="tab-pane" data-group="group_30" tabindex="-1"><div><span><pre><code class="hljs css language-sh">yarn add -D pouchdb-browser pouchdb-authentication<br /></code></pre>
+<div class="tabs"><div class="nav-tabs"><div id="tab-group-30-tab-31" class="nav-link active" data-group="group_30" data-tab="tab-group-30-content-31">npm</div><div id="tab-group-30-tab-32" class="nav-link" data-group="group_30" data-tab="tab-group-30-content-32">yarn</div></div><div class="tab-content"><div id="tab-group-30-content-31" class="tab-pane active" data-group="group_30" tabindex="-1"><div><span><pre><code class="hljs css language-sh">npm i -D pouchdb-browser<br /></code></pre>
+</span></div></div><div id="tab-group-30-content-32" class="tab-pane" data-group="group_30" tabindex="-1"><div><span><pre><code class="hljs css language-sh">yarn add -D pouchdb-browser<br /></code></pre>
 </span></div></div></div></div>
 <h2><a class="anchor" aria-hidden="true" id="provider"></a><a href="#provider" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Provider</h2>
 <p>usePouchDB provides a <code>&lt;Provider /&gt;</code>, to make a PouchDB database available to it's child components.</p>
-<pre><code class="hljs css language-jsx"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<pre><code class="hljs css language-jsx"><span class="hljs-comment">// Single database</span>
+<span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
 <span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>
 <span class="hljs-keyword">import</span> PouchDB <span class="hljs-keyword">from</span> <span class="hljs-string">'pouchdb-browser'</span>
 
@@ -100,6 +99,31 @@ plugin for the sign up, log in and log out flow.</p>
 
 ReactDOM.render(
   <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Provider</span> <span class="hljs-attr">pouchdb</span>=<span class="hljs-string">{db}</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">App</span> /&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">Provider</span>&gt;</span></span>,
+  <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>)
+)
+</code></pre>
+<pre><code class="hljs css language-jsx"><span class="hljs-comment">// Multiple databases</span>
+<span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>
+<span class="hljs-keyword">import</span> PouchDB <span class="hljs-keyword">from</span> <span class="hljs-string">'pouchdb-browser'</span>
+
+<span class="hljs-keyword">import</span> { Provider } <span class="hljs-keyword">from</span> <span class="hljs-string">'use-pouchdb'</span>
+
+<span class="hljs-keyword">import</span> App <span class="hljs-keyword">from</span> <span class="hljs-string">'./App'</span>
+
+<span class="hljs-keyword">const</span> db = <span class="hljs-keyword">new</span> PouchDB(<span class="hljs-string">'local'</span>)
+<span class="hljs-keyword">const</span> remoteDb = <span class="hljs-keyword">new</span> PouchDB(<span class="hljs-string">'https://example.com/db'</span>)
+
+ReactDOM.render(
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Provider</span>
+    <span class="hljs-attr">default</span>=<span class="hljs-string">"local"</span>
+    <span class="hljs-attr">databases</span>=<span class="hljs-string">{{</span>
+      <span class="hljs-attr">local:</span> <span class="hljs-attr">db</span>,
+      <span class="hljs-attr">remote:</span> <span class="hljs-attr">remoteDb</span>,
+    }}
+  &gt;</span>
     <span class="hljs-tag">&lt;<span class="hljs-name">App</span> /&gt;</span>
   <span class="hljs-tag">&lt;/<span class="hljs-name">Provider</span>&gt;</span></span>,
   <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>)

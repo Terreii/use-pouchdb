@@ -55,13 +55,35 @@
               }
             });
         </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 id="__docusaurus" class="postHeaderTitle">&lt;Provider /&gt;</h1></header><article><div><span><h2><a class="anchor" aria-hidden="true" id="overview"></a><a href="#overview" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Overview</h2>
-<p>The <code>&lt;Provider /&gt;</code> component makes a PouchDB database available to any nested components' hooks.</p>
-<p>Most apps will render the <code>&lt;Provider /&gt;</code> as one of the most top level components, with the entire app's component
-tree inside of it.</p>
+<p>The <code>&lt;Provider /&gt;</code> component makes one or multiple PouchDB databases available to any nested components' hooks.</p>
 <p>You can't use the hooks unless they are invoked from a component nested inside of a <code>&lt;Provider /&gt;</code>.</p>
+<p>Most apps will render the <code>&lt;Provider /&gt;</code> as one of the most top level components, with the entire app's component
+tree inside of it. But they can be nested.</p>
+<p>Every <code>&lt;Provider /&gt;</code> has a <em>default database</em>. The <em>default database</em> is used whenever the <code>db</code>
+options of <strong>hooks</strong> are not used. They select a database. For a single database <code>&lt;Provider /&gt;</code>
+that database is the default. A multi database <code>&lt;Provider /&gt;</code> requires a <code>default</code> prop that
+selects the default database by it's key.</p>
+<p>If a <code>&lt;Provider /&gt;</code> is nested inside of another <code>&lt;Provider /&gt;</code>, the child will merge the databases
+of the parent into it's databases set. But overwrites any database with conflicting keys.
+The default is also overwritten.</p>
+<p>For overwriting databases the child <code>&lt;Provider /&gt;</code> uses <code>Object.assign({}, parentDBs, ownDBs)</code>.
+The child shadows the parent.</p>
 <h2><a class="anchor" aria-hidden="true" id="props"></a><a href="#props" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Props</h2>
+<p><code>&lt;Provider /&gt;</code> has two sets of props:</p>
+<ul>
+<li>single database</li>
+<li>multi databases</li>
+</ul>
+<h3><a class="anchor" aria-hidden="true" id="props-single-database"></a><a href="#props-single-database" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Props single database</h3>
 <p><code>pouchdb</code> (<a href="https://pouchdb.com/api.html#create_database">PouchDB database</a>) The PouchDB database you want to
 provide to the child components.</p>
+<p><code>name</code> (String optional) Name to use when selecting that database with a hook's <code>db</code> option.
+Defaults to the <code>name</code> field of the database.</p>
+<p><code>children</code> (ReactElement) The root of your component hierarchy, which should have access to this database.</p>
+<h3><a class="anchor" aria-hidden="true" id="props-multi-databases"></a><a href="#props-multi-databases" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Props multi databases</h3>
+<p><code>databases</code> (Object) Object of <a href="https://pouchdb.com/api.html#create_database">PouchDB databases</a>.
+The key used, is the key by which a database can be selected at the <code>db</code> options of <strong>hooks</strong>.</p>
+<p><code>default</code> (String) Key of the default database. This can also be the key of a parent database. <em>Required</em>.</p>
 <p><code>children</code> (ReactElement) The root of your component hierarchy, which should have access to this database.</p>
 <h2><a class="anchor" aria-hidden="true" id="example-usage"></a><a href="#example-usage" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Example Usage</h2>
 <p>In the Examples below <code>&lt;App /&gt;</code> is the top most component, that contains all of your app.</p>
@@ -77,6 +99,35 @@ provide to the child components.</p>
 
 ReactDOM.render(
   <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Provider</span> <span class="hljs-attr">pouchdb</span>=<span class="hljs-string">{db}</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">App</span> /&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">Provider</span>&gt;</span></span>,
+  <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>)
+)
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="multiple-databases"></a><a href="#multiple-databases" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Multiple databases</h3>
+<p>Hooks access the <em>local</em> database if <code>undefined</code>, <code>null</code>, <code>&quot;_default&quot;</code> or <code>&quot;local&quot;</code> is passed to
+their <code>db</code> option. To access the <em>remote</em> database you must pass <code>remote</code> to the hook's <code>db</code> option.</p>
+<p>To change this, change the <code>default</code>'s value. All hooks that access the <em>default</em> database will re-query,
+using the new <em>default</em> database.</p>
+<pre><code class="hljs css language-jsx"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>
+<span class="hljs-keyword">import</span> PouchDB <span class="hljs-keyword">from</span> <span class="hljs-string">'pouchdb-browser'</span>
+
+<span class="hljs-keyword">import</span> { Provider } <span class="hljs-keyword">from</span> <span class="hljs-string">'use-pouchdb'</span>
+
+<span class="hljs-keyword">import</span> App <span class="hljs-keyword">from</span> <span class="hljs-string">'./App'</span>
+
+<span class="hljs-keyword">const</span> db = <span class="hljs-keyword">new</span> PouchDB(<span class="hljs-string">'local_data'</span>)
+<span class="hljs-keyword">const</span> remoteDb = <span class="hljs-keyword">new</span> PouchDB(<span class="hljs-string">'https://example.com/db'</span>)
+
+ReactDOM.render(
+  <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Provider</span>
+    <span class="hljs-attr">default</span>=<span class="hljs-string">"local"</span>
+    <span class="hljs-attr">databases</span>=<span class="hljs-string">{{</span>
+      <span class="hljs-attr">local:</span> <span class="hljs-attr">db</span>,
+      <span class="hljs-attr">remote:</span> <span class="hljs-attr">remoteDb</span>,
+    }}
+  &gt;</span>
     <span class="hljs-tag">&lt;<span class="hljs-name">App</span> /&gt;</span>
   <span class="hljs-tag">&lt;/<span class="hljs-name">Provider</span>&gt;</span></span>,
   <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>)
@@ -147,8 +198,8 @@ ReactDOM.render(
   <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'root'</span>)
 )
 </code></pre>
-<h3><a class="anchor" aria-hidden="true" id="overwriting-the-context"></a><a href="#overwriting-the-context" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Overwriting the context</h3>
-<p>The database can be overwritten for a sub-tree.</p>
+<h3><a class="anchor" aria-hidden="true" id="extending-the-context"></a><a href="#extending-the-context" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Extending the context</h3>
+<p>Databases can be made available to a subtree, while still be able to access all other databases.</p>
 <pre><code class="hljs css language-jsx"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
 <span class="hljs-keyword">import</span> ReactDOM <span class="hljs-keyword">from</span> <span class="hljs-string">'react-dom'</span>
 <span class="hljs-keyword">import</span> PouchDB <span class="hljs-keyword">from</span> <span class="hljs-string">'pouchdb-browser'</span>
@@ -181,10 +232,13 @@ ReactDOM.render(
 
 <span class="hljs-keyword">export</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">UserMenu</span>(<span class="hljs-params"></span>) </span>{
   <span class="hljs-keyword">return</span> (
-    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Provider</span> <span class="hljs-attr">pouchdb</span>=<span class="hljs-string">{remote}</span>&gt;</span>
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">Provider</span> <span class="hljs-attr">pouchdb</span>=<span class="hljs-string">{remote}</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"remote"</span>&gt;</span>
       <span class="hljs-tag">&lt;<span class="hljs-name">Menu</span> /&gt;</span>
     <span class="hljs-tag">&lt;/<span class="hljs-name">Provider</span>&gt;</span></span>
   )
 }
 </code></pre>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/use-pouchdb/docs/basics/more"><span class="arrow-prev">← </span><span>More</span></a><a class="docs-next button" href="/use-pouchdb/docs/api/use-pouch"><span class="function-name-prevnext">usePouch</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#overview">Overview</a></li><li><a href="#props">Props</a></li><li><a href="#example-usage">Example Usage</a><ul class="toc-headings"><li><a href="#vanilla-react-example">Vanilla React Example</a></li><li><a href="#usage-with-react-router">Usage with React Router</a></li><li><a href="#with-redux-and-react-redux">With Redux and React-Redux</a></li><li><a href="#overwriting-the-context">Overwriting the context</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/use-pouchdb/" class="nav-home"><img src="/use-pouchdb/img/favicon.ico" alt="usePouchDB" width="66" height="58"/></a><div><h5>Docs</h5><a href="/use-pouchdb/docs/introduction/quick_start">Getting Started</a><a href="/use-pouchdb/docs/api/provider">API Reference</a></div><div><h5>Contact</h5><a href="https://christopher-astfalk.de/">Blog</a><a href="https://github.com/Terreii/use-pouchdb" rel="noreferrer noopener">GitHub</a><a class="github-button" href="https://github.com/Terreii/use-pouchdb" data-icon="octicon-star" data-count-href="/Terreii/use-pouchdb/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a><div class="social"><a href="../impressum.html">Impressum</a></div></div></section><section class="copyright">Copyright © 2020 Christopher Astfalk</section></footer></div></body></html>
+<p>Hooks in <code>&lt;Menu /&gt;</code> access the <em>remote</em> database by default, or if you pass <code>undefined</code>, <code>null</code>,
+<code>&quot;remote&quot;</code> or <code>&quot;_default&quot;</code> to the <code>db</code> option. You can still access the <em>local</em> database if you
+pass <code>&quot;local&quot;</code> into the <code>db</code> option.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/use-pouchdb/docs/basics/more"><span class="arrow-prev">← </span><span>More</span></a><a class="docs-next button" href="/use-pouchdb/docs/api/use-pouch"><span class="function-name-prevnext">usePouch</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#overview">Overview</a></li><li><a href="#props">Props</a><ul class="toc-headings"><li><a href="#props-single-database">Props single database</a></li><li><a href="#props-multi-databases">Props multi databases</a></li></ul></li><li><a href="#example-usage">Example Usage</a><ul class="toc-headings"><li><a href="#vanilla-react-example">Vanilla React Example</a></li><li><a href="#multiple-databases">Multiple databases</a></li><li><a href="#usage-with-react-router">Usage with React Router</a></li><li><a href="#with-redux-and-react-redux">With Redux and React-Redux</a></li><li><a href="#extending-the-context">Extending the context</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/use-pouchdb/" class="nav-home"><img src="/use-pouchdb/img/favicon.ico" alt="usePouchDB" width="66" height="58"/></a><div><h5>Docs</h5><a href="/use-pouchdb/docs/introduction/quick_start">Getting Started</a><a href="/use-pouchdb/docs/api/provider">API Reference</a></div><div><h5>Contact</h5><a href="https://christopher-astfalk.de/">Blog</a><a href="https://github.com/Terreii/use-pouchdb" rel="noreferrer noopener">GitHub</a><a class="github-button" href="https://github.com/Terreii/use-pouchdb" data-icon="octicon-star" data-count-href="/Terreii/use-pouchdb/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a><div class="social"><a href="../impressum.html">Impressum</a></div></div></section><section class="copyright">Copyright © 2020 Christopher Astfalk</section></footer></div></body></html>

@@ -59,7 +59,10 @@
 reference to the <a href="https://pouchdb.com/api.html#create_database">PouchDB database</a> past into <code>&lt;Provider /&gt;</code>.</p>
 <p>It can only be invoked from a component nested inside of a <code>&lt;Provider /&gt;</code>.</p>
 <h2><a class="anchor" aria-hidden="true" id="parameters"></a><a href="#parameters" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Parameters</h2>
-<p><code>usePouch</code> doesn't have any parameters, yet.</p>
+<ol>
+<li><code>databaseName?: string</code> - Select the database by it's name/key. The special key <code>&quot;_default&quot;</code> selects
+the <em>default database</em>. Defaults to <code>&quot;_default&quot;</code>.</li>
+</ol>
 <h2><a class="anchor" aria-hidden="true" id="result"></a><a href="#result" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Result</h2>
 <p><code>usePouch</code> returns a reference to the <a href="https://pouchdb.com/api.html#create_database">PouchDB database</a> past into
 <code>&lt;Provider /&gt;</code>.</p>
@@ -194,4 +197,26 @@ reference to the <a href="https://pouchdb.com/api.html#create_database">PouchDB 
   )
 }
 </code></pre>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/use-pouchdb/docs/api/provider"><span class="arrow-prev">← </span><span>Provider</span></a><a class="docs-next button" href="/use-pouchdb/docs/api/use-doc"><span class="function-name-prevnext">useDoc</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#overview">Overview</a></li><li><a href="#parameters">Parameters</a></li><li><a href="#result">Result</a></li><li><a href="#example-usage">Example Usage</a><ul class="toc-headings"><li><a href="#sync">Sync</a></li><li><a href="#creating-your-own-hooks">Creating your own hooks</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/use-pouchdb/" class="nav-home"><img src="/use-pouchdb/img/favicon.ico" alt="usePouchDB" width="66" height="58"/></a><div><h5>Docs</h5><a href="/use-pouchdb/docs/introduction/quick_start">Getting Started</a><a href="/use-pouchdb/docs/api/provider">API Reference</a></div><div><h5>Contact</h5><a href="https://christopher-astfalk.de/">Blog</a><a href="https://github.com/Terreii/use-pouchdb" rel="noreferrer noopener">GitHub</a><a class="github-button" href="https://github.com/Terreii/use-pouchdb" data-icon="octicon-star" data-count-href="/Terreii/use-pouchdb/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a><div class="social"><a href="../impressum.html">Impressum</a></div></div></section><section class="copyright">Copyright © 2020 Christopher Astfalk</section></footer></div></body></html>
+<h3><a class="anchor" aria-hidden="true" id="select-a-database"></a><a href="#select-a-database" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Select a database</h3>
+<pre><code class="hljs css language-javascript"><span class="hljs-keyword">import</span> { useEffect } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<span class="hljs-keyword">import</span> { usePouch } <span class="hljs-keyword">from</span> <span class="hljs-string">'use-pouchdb'</span>
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">useSync</span>(<span class="hljs-params">shouldSync</span>) </span>{
+  <span class="hljs-keyword">const</span> localDb = usePouch(<span class="hljs-string">'local'</span>)
+  <span class="hljs-keyword">const</span> remoteDb = usePouch(<span class="hljs-string">'remote'</span>)
+
+  useEffect(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-keyword">if</span> (shouldSync) {
+      <span class="hljs-keyword">const</span> sync = localDb.sync(remoteDb, {
+        <span class="hljs-attr">live</span>: <span class="hljs-literal">true</span>,
+        <span class="hljs-attr">retry</span>: <span class="hljs-literal">true</span>,
+      })
+
+      <span class="hljs-keyword">return</span> <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+        sync.cancel()
+      }
+    }
+  }, [localDb, remoteDb, shouldSync])
+}
+</code></pre>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/use-pouchdb/docs/api/provider"><span class="arrow-prev">← </span><span>Provider</span></a><a class="docs-next button" href="/use-pouchdb/docs/api/use-doc"><span class="function-name-prevnext">useDoc</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#overview">Overview</a></li><li><a href="#parameters">Parameters</a></li><li><a href="#result">Result</a></li><li><a href="#example-usage">Example Usage</a><ul class="toc-headings"><li><a href="#sync">Sync</a></li><li><a href="#creating-your-own-hooks">Creating your own hooks</a></li><li><a href="#select-a-database">Select a database</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/use-pouchdb/" class="nav-home"><img src="/use-pouchdb/img/favicon.ico" alt="usePouchDB" width="66" height="58"/></a><div><h5>Docs</h5><a href="/use-pouchdb/docs/introduction/quick_start">Getting Started</a><a href="/use-pouchdb/docs/api/provider">API Reference</a></div><div><h5>Contact</h5><a href="https://christopher-astfalk.de/">Blog</a><a href="https://github.com/Terreii/use-pouchdb" rel="noreferrer noopener">GitHub</a><a class="github-button" href="https://github.com/Terreii/use-pouchdb" data-icon="octicon-star" data-count-href="/Terreii/use-pouchdb/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a><div class="social"><a href="../impressum.html">Impressum</a></div></div></section><section class="copyright">Copyright © 2020 Christopher Astfalk</section></footer></div></body></html>

@@ -77,7 +77,7 @@
     "@types/pouchdb-core": "^7.0.6",
     "@types/pouchdb-find": "^6.3.5",
     "@types/pouchdb-mapreduce": "^6.1.4",
-    "@types/react": "^16.9.38",
+    "@types/react": "^16.9.41",
     "pouchdb-core": "^7.2.1",
     "pouchdb-errors": "^7.2.1",
     "pouchdb-selector-core": "^7.2.1",

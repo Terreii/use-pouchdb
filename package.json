@@ -64,6 +64,7 @@
     "pouchdb-selector-core": "^7.2.1",
     "prettier": "2.0.5",
     "pretty-quick": "^2.0.1",
+    "react-pouchdb": "^2.0.1",
     "react-test-renderer": "^16.13.1",
     "semantic-release": "^17.0.8",
     "textlint": "^11.6.3",
@@ -84,6 +85,9 @@
     "pouchdb-utils": "^7.2.1",
     "react": "^16.13.1",
     "underscore": "^1.10.2"
+  },
+  "peerDependencies": {
+    "react-pouchdb": "^2.0.1"
   },
   "husky": {
     "hooks": {

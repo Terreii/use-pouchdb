@@ -70,3 +70,6 @@ lib/
 
 # Docusaurus & Github pages
 website/build
+
+# tests
+test_pouch_*

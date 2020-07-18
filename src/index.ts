@@ -1,4 +1,5 @@
 export { Provider } from './context'
+export { default as ReactPouchDBContextBridge } from './react-pouch-context-bridge'
 export { default as usePouch } from './usePouch'
 export { default as useDoc } from './useDoc'
 export { default as useAllDocs } from './useAllDocs'
@@ -9,6 +10,7 @@ export type {
   SingleDbProviderArguments,
   MultiDbProviderArguments,
 } from './context'
+export type { ReactPouchContextBridgeArguments } from './react-pouch-context-bridge'
 export type { QueryState, ResultType } from './state-machine'
 export type { FindHookOptions, FindHookIndexOption } from './useFind'
 export type { ViewResponse } from './useView'

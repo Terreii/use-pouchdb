@@ -58,6 +58,7 @@
     "eslint-plugin-react-hooks": "^4.0.4",
     "husky": "^4.2.5",
     "jest": "^26.0.1",
+    "pouchdb": "^7.2.1",
     "pouchdb-adapter-memory": "^7.2.1",
     "pouchdb-find": "^7.2.1",
     "pouchdb-mapreduce": "^7.2.1",
@@ -87,6 +88,7 @@
     "underscore": "^1.10.2"
   },
   "peerDependencies": {
+    "pouchdb": "^7.2.1",
     "react-pouchdb": "^2.0.1"
   },
   "husky": {

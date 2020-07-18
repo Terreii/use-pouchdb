@@ -1,5 +1,6 @@
 import {
   Provider,
+  ReactPouchDBContextBridge,
   usePouch,
   useDoc,
   useAllDocs,
@@ -10,6 +11,11 @@ import {
 test('should export the provider', () => {
   expect(Provider).toBeTruthy()
   expect(typeof Provider).toBe('function')
+})
+
+test('should export ReactPouchDBContextBridge', () => {
+  expect(ReactPouchDBContextBridge).toBeTruthy()
+  expect(typeof ReactPouchDBContextBridge).toBe('function')
 })
 
 test('should export usePouchDB', () => {

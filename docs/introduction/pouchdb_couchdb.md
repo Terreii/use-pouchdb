@@ -349,6 +349,7 @@ There are two fields that every document in PouchDB has.
 
 ```javascript
 '1-e78451c157971875ec76860d33e7da93'
+
 ```
 
 The rev consists out of two parts: a **number** and a **hash**, separated by `-`.

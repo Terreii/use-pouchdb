@@ -1,0 +1,17 @@
+{
+  "extends": "@tsconfig/node10/tsconfig.json",
+  "compilerOptions": {
+    "jsx": "react",
+    "declaration": true,
+    "outDir": "./lib/node",
+    "rootDir": "./src"
+  },
+  "include": ["src/*", "src/**/*"],
+  "exclude": [
+    "node_modules",
+    "src/test-utils.tsx",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.test.js"
+  ]
+}

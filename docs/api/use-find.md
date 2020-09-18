@@ -74,7 +74,7 @@ Options descriptions are copied from the PouchDB API page.
   - `loading` - It is loading the documents. Or it is loading the updated version of them.
   - `done` - The documents are loaded, and no update is being loaded.
   - `error` - There was an error with fetching the documents. Look into the `error` field.
-- `loading: boolean` - It is loading. The state is `loading`. This is just a shorthand.
+- `loading: boolean` - It is loading. The state is `loading`. This is only a shorthand.
 - `error: PouchDB.Error | null` - If there was an error, then this field will contain the error.
   The error is reset to `null` once a fetch was successful.
 

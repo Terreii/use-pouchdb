@@ -27,7 +27,7 @@ _What does that mean for this tutorial?_ This is a beginners guide. We will be u
 [PouchDB-Server](https://github.com/pouchdb/pouchdb-server). At the time of writing, PouchDB-Server (v4.2) allows
 everyone to sign up. And
 [pouchdb-authentication](https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/api.md#dbsignupusername-password--options--callback)
-works fine. This does not mean PouchDB-Server is insecure! It just means that `_users`-database follows the rules
+works fine. This does not mean PouchDB-Server is insecure! It only means that `_users`-database follows the rules
 listed [here](https://docs.couchdb.org/en/3.1.0/intro/security.html#authentication-database).
 
 _What does that mean for CouchDB App developers?_ The future is clear: You have to write a small server (or a bunch
@@ -251,7 +251,7 @@ will be rejected in the future. Or if you are from the future, login doesn't wor
 
 In Apache CouchDB you can set the config
 [`[couch_httpd_auth] same_site`](https://docs.couchdb.org/en/3.1.0/config/auth.html#couch_httpd_auth/same_site) to
-`strict`. This will fix this message. To validate you must restart your browser (just to check if the notice
+`strict`. This will fix this message. To validate you must restart your browser (only to check if the notice
 still appears, it is a server setting after all. P.S.: CouchDB configs don't need a restart!).
 
 PouchDB-Server version 4.2 doesn't support it, yet. What you can do is Proxy every request to PouchDB-Server

@@ -28,7 +28,7 @@ But [PouchDB's Guides](https://pouchdb.com/guides/) are recommended to learn Pou
 [You can find a introduction to React here](https://reactjs.org/tutorial/tutorial.html).
 
 If you know what you're doing and
-just want to quick start, read on...
+only want to quick start, read on...
 
 ### Installation
 

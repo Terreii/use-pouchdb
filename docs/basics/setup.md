@@ -160,7 +160,7 @@ Now open `package.json` and change your scripts:
 The `pouchdb-server --dir db` command configures pouchdb-server to store all databases in the `./db/` directory
 ([more here](https://github.com/pouchdb/pouchdb-server#full-options)).
 
-Now with `npm start` or `yarn start` both your dev-server and pouchdb-server will start! To start just one enter:
+Now with `npm start` or `yarn start` both your dev-server and pouchdb-server will start! To start only one enter:
 
 <!--DOCUSAURUS_CODE_TABS-->
 <!--npm-->

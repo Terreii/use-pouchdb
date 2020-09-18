@@ -70,7 +70,7 @@ The longer answer: A **database** (db) stores multiple **documents** (doc), and 
 Documents have a unique ID (`_id`) per db. But there stops the similarities.
 
 While tables require you to create a schema, which all rows must confirm to. A database is schemaless. Every doc
-could have a different structure. It is recommended to add a `type` field on every document. Just like in
+could have a different structure. It is recommended to add a `type` field on every document. Like in
 [Redux Actions](https://redux.js.org/basics/actions).
 
 In CouchDB access control is handled on a per database level. There is a common setup that gives every user their
@@ -96,7 +96,7 @@ tagged data, using foreign keys.
 
 This could become in a sync environment a hugh problem! What if the linking was changed, but the tagged data didn't
 sync yet? Because _networks fail_. Better store the tags in an array in the document. It is JSON after all. And not
-just the id to the tag, the tag _itself_. This way there will never be a link to something that doesn't exist.
+only the id to the tag, the tag _itself_. This way there will never be a link to something that doesn't exist.
 
 ```json
 {

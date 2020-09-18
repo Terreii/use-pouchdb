@@ -42,7 +42,7 @@ of `options.open_revs`. Options descriptions are copied from the PouchDB API pag
   - `loading` - It is loading the document. Or it is loading the updated version of it.
   - `done` - The document was loaded, and no update is being loaded.
   - `error` - There was an error with fetching the document. Look into the `error` field.
-- `loading: boolean` - It is loading. The state is `loading`. This is just a shorthand.
+- `loading: boolean` - It is loading. The state is `loading`. This is only a shorthand.
 - `error: PouchDB.Error | null` - If there was an error, then this field will contain the error. The error is reset
   to `null` once a document was successfully loaded.
 

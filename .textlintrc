@@ -3,6 +3,7 @@
   "rules": {
     "alex": {
       "allow": [
+        special,
         reject,
         rejects,
         hook,

@@ -68,7 +68,7 @@ potential conflicts. Better check if we even need to update the doc.
 `db.get()` and `db.put()` also take their time. And if in this time-frame another change did sync, we get a
 conflict! A conflict that throws right away: an [immediate conflict](https://pouchdb.com/guides/conflicts.html).
 
-In this example we've chosen to handle the immediate conflict by simply trying again. We run `update` again, with
+In this example we've chosen to handle the immediate conflict by trying again. We run `update` again, with
 it still having a reverence to the old todo. It'll `get` the new version of the document, check if `done` has the
 desired value, and update the new doc only if not.
 

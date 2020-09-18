@@ -41,7 +41,7 @@ page.
      - The rows are returned in the same order as in the supplied `keys` array.
      - The row for a deleted document will have the revision ID of the deletion, and an extra key `deleted: true`
        in the `value` property.
-     - The row for a nonexistent document will just contain an `error` property with the value `"not_found"`.
+     - The row for a nonexistent document will only contain an `error` property with the value `"not_found"`.
      - For more details, see the [`db.allDocs() documentation`](https://pouchdb.com/api.html#batch_fetch) or the
        [CouchDB query options documentation](https://docs.couchdb.org/en/stable/api/ddoc/views.html#db-design-design-doc-view-view-name).
    - `options.update_seq?: boolean` - Include an `update_seq` value indicating which sequence id of the underlying
@@ -72,7 +72,7 @@ page.
   - `loading` - It is loading the documents. Or it is loading the updated version of them.
   - `done` - The documents are loaded, and no update is being loaded.
   - `error` - There was an error with fetching the documents. Look into the `error` field.
-- `loading: boolean` - It is loading. The state is `loading`. This is just a shorthand.
+- `loading: boolean` - It is loading. The state is `loading`. This is only a shorthand.
 - `error: PouchDB.Error | null` - If there was an error, then this field will contain the error. The error is reset
   to `null` once a fetch was successful.
 

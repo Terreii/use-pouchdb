@@ -88,7 +88,7 @@ Default is <code>true</code>.</li>
 <li>The rows are returned in the same order as in the supplied <code>keys</code> array.</li>
 <li>The row for a deleted document will have the revision ID of the deletion, and an extra key <code>deleted: true</code>
 in the <code>value</code> property.</li>
-<li>The row for a nonexistent document will just contain an <code>error</code> property with the value <code>&quot;not_found&quot;</code>.</li>
+<li>The row for a nonexistent document will only contain an <code>error</code> property with the value <code>&quot;not_found&quot;</code>.</li>
 <li>For more details, see the <a href="https://pouchdb.com/api.html#batch_fetch"><code>db.allDocs() documentation</code></a> or the
 <a href="https://docs.couchdb.org/en/stable/api/ddoc/views.html#db-design-design-doc-view-view-name">CouchDB query options documentation</a>.</li>
 </ul></li>
@@ -127,7 +127,7 @@ database.</li>
 <li><code>done</code> - The documents are loaded, and no update is being loaded.</li>
 <li><code>error</code> - There was an error with fetching the documents. Look into the <code>error</code> field.</li>
 </ul></li>
-<li><code>loading: boolean</code> - It is loading. The state is <code>loading</code>. This is just a shorthand.</li>
+<li><code>loading: boolean</code> - It is loading. The state is <code>loading</code>. This is only a shorthand.</li>
 <li><code>error: PouchDB.Error | null</code> - If there was an error, then this field will contain the error. The error is reset
 to <code>null</code> once a fetch was successful.</li>
 </ul>

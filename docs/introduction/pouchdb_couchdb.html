@@ -101,7 +101,7 @@ multiple? Are they like SQL tables? And are <strong>documents</strong> like rows
 <p>The longer answer: A <strong>database</strong> (db) stores multiple <strong>documents</strong> (doc), and docs are a single data container.
 Documents have a unique ID (<code>_id</code>) per db. But there stops the similarities.</p>
 <p>While tables require you to create a schema, which all rows must confirm to. A database is schemaless. Every doc
-could have a different structure. It is recommended to add a <code>type</code> field on every document. Just like in
+could have a different structure. It is recommended to add a <code>type</code> field on every document. Like in
 <a href="https://redux.js.org/basics/actions">Redux Actions</a>.</p>
 <p>In CouchDB access control is handled on a per database level. There is a common setup that gives every user their
 own db, to which only they have access (think of a note or todo app).</p>
@@ -121,7 +121,7 @@ document.</p>
 tagged data, using foreign keys.</p>
 <p>This could become in a sync environment a hugh problem! What if the linking was changed, but the tagged data didn't
 sync yet? Because <em>networks fail</em>. Better store the tags in an array in the document. It is JSON after all. And not
-just the id to the tag, the tag <em>itself</em>. This way there will never be a link to something that doesn't exist.</p>
+only the id to the tag, the tag <em>itself</em>. This way there will never be a link to something that doesn't exist.</p>
 <pre><code class="hljs css language-json">{
   <span class="hljs-attr">"_id"</span>: <span class="hljs-string">"The Matrix"</span>,
   <span class="hljs-attr">"type"</span>: <span class="hljs-string">"movie"</span>,
@@ -266,6 +266,7 @@ replace the old document.</p>
 <li><code>_rev</code> (string) is a version &quot;number&quot;.</li>
 </ul>
 <pre><code class="hljs css language-javascript"><span class="hljs-string">'1-e78451c157971875ec76860d33e7da93'</span>
+
 </code></pre>
 <p>The rev consists out of two parts: a <strong>number</strong> and a <strong>hash</strong>, separated by <code>-</code>.
 On every update the <strong>number</strong> will be increased by 1. And a new <strong>hash</strong> calculated.

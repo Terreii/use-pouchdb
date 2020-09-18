@@ -160,7 +160,8 @@ export default function useFind<Content>(
             // if _id was added to the fields array, remove it,
             // so that the user only gets what they want.
             if (didAddIdToFields) {
-              delete doc._id
+              const removeDoc = (doc as unknown) as { _id?: string }
+              delete removeDoc._id
             }
           }
 

@@ -41,12 +41,6 @@ export default function useStateMachine<Result>(
   stateRef.current = currentState
 
   const changeState = useCallback((fn: (state: Result) => Result) => {
-    const oldState = {
-      ...stateRef.current,
-    }
-    delete oldState.state
-    delete oldState.error
-
     const next = fn(stateRef.current as Result)
     dispatch({
       type: 'loading_finished',

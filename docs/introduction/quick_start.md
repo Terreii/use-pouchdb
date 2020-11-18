@@ -16,8 +16,8 @@ its [vast plugin ecosystem](https://pouchdb.com/external.html 'List of plugins f
 [Hooks](https://reactjs.org/docs/hooks-intro.html), you have everything you need to build a CRUD Web-App.
 
 It is now intended to be a puzzle piece in the replacement of CouchApps (the ones that use the deprecated
-[show](https://docs.couchdb.org/en/3.1.0/ddocs/ddocs.html#show-functions) and
-[list](https://docs.couchdb.org/en/3.1.0/ddocs/ddocs.html#list-functions) functions).
+[show](https://docs.couchdb.org/en/stable/ddocs/ddocs.html#show-functions) and
+[list](https://docs.couchdb.org/en/stable/ddocs/ddocs.html#list-functions) functions).
 
 > Note that usePouchDB is, for now, only optimized for local DBs and not for accessing a DB over HTTP!
 >

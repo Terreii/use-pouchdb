@@ -49,7 +49,7 @@ You can use it to test your own hooks. Be they extensions of hooks from `usePouc
 
 ### React Testing Library
 
-[React Testing Library](https://www.npmjs.com/package/@testing-library/react) comes pre-installed on
+[React Testing Library](https://www.npmjs.com/package/@testing-library/react) comes pre-installed with
 create-react-app. It is a testing library that encourage you to test from the users perspective.
 
 The documentation for it can be found at https://testing-library.com/docs/react-testing-library/intro.
@@ -58,7 +58,7 @@ The documentation for it can be found at https://testing-library.com/docs/react-
 
 Your tests should be closed systems. And no test before or after it should influence them. To achieve this I
 recommend that you create a new PouchDB database before each test. And that db should have the
-`pouchdb-adapter-http` active.
+`pouchdb-adapter-memory` active.
 
 ```javascript
 // Using jest
@@ -77,8 +77,8 @@ beforeEach(() => {
 })
 
 afterEach(async () => {
-  // After each test the database will get destroyed.
-  // No data will be left from the previous test.
+  // Destroy the database after each test,
+  // so that no data will be left from the previous test.
   await myPouch.destroy()
 })
 ```
@@ -87,7 +87,7 @@ Also remember, that you must add all needed document before/during the test!
 
 ### Components
 
-All hooks must be in child components of `<Provider />`.
+All hooks must be in child components of [`<Provider />`](../api/provider.md).
 
 For **React Testing Library** you can warp your component with `<Provider />`:
 
@@ -112,6 +112,7 @@ afterEach(async () => {
 })
 
 test('Test Component', async () => {
+  // Add needed documents
   const putResult = await myPouch.bulkDocs([
     {
       _id: new Date(2020, 4, 30, 22, 03, 45, 0).toJSON(),
@@ -127,6 +128,7 @@ test('Test Component', async () => {
     },
   ])
 
+  // Render the Component
   const { queryByByText } = render(
     <Provider pouchdb={db}>
       <TodoList />
@@ -153,18 +155,20 @@ test('Test Component', async () => {
 
 ### Hooks
 
-To test hooks that depend on one of `usePouchDB`'s hooks, you also must warp it in `<Provider />`.
+To test hooks that depend on one of `usePouchDB`'s hooks, you also must warp it in
+[`<Provider />`](../api/provider.md).
 
 **react-hooks-testing-library**'s `renderHook` function can receive in the second argument a warper
 ([documented here](https://react-hooks-testing-library.com/usage/advanced-hooks#context)).
 
-The addTodo from [**add-todo**](./add-todo) extracted into a hook:
+Let's test the addTodo from [**Add Todos**](./add-todo.md) extracted into a hook:
 
 ```javascript
 // hooks.js
 import { useCallback } from 'react'
 import { usePouch } from 'use-pouchdb'
 
+// This hook returns a function, which we then call with the todo's text.
 export function useAddDoc() {
   const db = usePouch()
 
@@ -186,7 +190,7 @@ export function useAddDoc() {
 
 ```jsx
 import React from 'react'
-import { renderHook, act } from '@testing-library/react-hooks'
+import { renderHook } from '@testing-library/react-hooks'
 import PouchDB from 'pouchdb'
 import memory from 'pouchdb-adapter-memory'
 import { Provider } from 'use-pouchdb'
@@ -219,9 +223,13 @@ test('add document', async () => {
 
   const { rows } = await myPouch.allDocs({ include_docs: true })
   expect(rows).toHaveLength(1)
-  expect(rows[0].doc.type).toBe('todo')
-  expect(rows[0].doc.text).toBe('test todo')
-  expect(rows[0].doc.done).toBeFalsy()
+  expect(rows[0]).toEqual({
+    _id: expect.any(String),
+    _rev: expect.any(String),
+    type: 'todo',
+    text: 'test todo',
+    done: false,
+  })
 })
 ```
 

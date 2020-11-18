@@ -6,21 +6,21 @@ title: Sync account
 Now to Syncing over devices and user accounts.
 
 CouchDB has integrated
-[user authentication and authorization](https://docs.couchdb.org/en/3.1.0/intro/security.html)! We are going to use
+[user authentication and authorization](https://docs.couchdb.org/en/stable/intro/security.html)! We are going to use
 it, together with the common setup of one database per user, to enable syncing.
 
 You should have PouchDB-Server running for this section.
 
 ## A word about Version 3
 
-With [version 3](https://docs.couchdb.org/en/3.1.0/whatsnew/3.0.html) Apache CouchDB's default settings became more
+With [version 3](https://docs.couchdb.org/en/stable/whatsnew/3.0.html) Apache CouchDB's default settings became more
 secure. Now every newly created database is _admin only_ by default. You must change the
-[`_security` document](https://docs.couchdb.org/en/3.1.0/api/database/security.html#api-db-security) of a database,
+[`_security` document](https://docs.couchdb.org/en/stable/api/database/security.html#api-db-security) of a database,
 to alow users to access it. This also affects the `_users` database. Which means, that you need admin rights to
 create users.
 
 Additionally you must change
-[a config](https://docs.couchdb.org/en/3.1.0/config/couchdb.html#couchdb/users_db_security_editable) to be able to
+[a config](https://docs.couchdb.org/en/stable/config/couchdb.html#couchdb/users_db_security_editable) to be able to
 change the `_security` document of the `_users` database. That config will be removed with version 4, though!
 
 _What does that mean for this tutorial?_ This is a beginners guide. We will be using
@@ -28,18 +28,18 @@ _What does that mean for this tutorial?_ This is a beginners guide. We will be u
 everyone to sign up. And
 [pouchdb-authentication](https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/api.md#dbsignupusername-password--options--callback)
 works fine. This does not mean PouchDB-Server is insecure! It only means that `_users`-database follows the rules
-listed [here](https://docs.couchdb.org/en/3.1.0/intro/security.html#authentication-database).
+listed [here](https://docs.couchdb.org/en/stable/intro/security.html#authentication-database).
 
 _What does that mean for CouchDB App developers?_ The future is clear: You have to write a small server (or a bunch
 of **serverless functions**) for **sign up**, **changing passwords**, **resetting passwords** and
 **changing the username**. But CouchDB had already no way of send confirmation mails. So you already had to write
 some logic yourself anyway. Now it is a little bit more.
-**Please read [CouchDB's security tutorial](https://docs.couchdb.org/en/3.1.0/intro/security.html) before you
+**Please read [CouchDB's security tutorial](https://docs.couchdb.org/en/stable/intro/security.html) before you
 release your app!**
 
 ## couch_peruser
 
-A common setup is [couch_peruser](https://docs.couchdb.org/en/3.1.0/config/couch-peruser.html). With
+A common setup is [couch_peruser](https://docs.couchdb.org/en/stable/config/couch-peruser.html). With
 _couch_peruser_ every user has their own, private database. Database names are in the following form:
 `userdb-{hex encoded username}`. Or in code:
 
@@ -62,7 +62,7 @@ function getUserDatabaseName(name, prefix = 'userdb-') {
 
 We will be using couch_peruser.
 
-> [couch_peruser](https://docs.couchdb.org/en/3.1.0/config/couch-peruser.html) became with Apache CouchDB version 3
+> [couch_peruser](https://docs.couchdb.org/en/stable/config/couch-peruser.html) became with Apache CouchDB version 3
 > a setting. If enabled, CouchDB will create for every user a database, pre-configured for their access!
 >
 > But couch_peruser was before version 3 possible, you just had to do everything yourself.
@@ -100,8 +100,8 @@ The `skip_setup: true` is imported, because we didn't login in yet.
 
 ### Sign up
 
-To [sign up a new user you `put`](https://docs.couchdb.org/en/3.1.0/intro/security.html#creating-a-new-user) a new
-[user document](https://docs.couchdb.org/en/3.1.0/intro/security.html#users-documents) to the `_users` database.
+To [sign up a new user you `put`](https://docs.couchdb.org/en/stable/intro/security.html#creating-a-new-user) a new
+[user document](https://docs.couchdb.org/en/stable/intro/security.html#users-documents) to the `_users` database.
 
 ```javascript
 const response = await fetch(
@@ -134,20 +134,20 @@ It must be run on one of the remote databases.
 
 CouchDB supports 4 login methods:
 
-- [**Basic Authentication**](https://docs.couchdb.org/en/3.1.0/api/server/authn.html#basic-authentication): Add
+- [**Basic Authentication**](https://docs.couchdb.org/en/stable/api/server/authn.html#basic-authentication): Add
   username and password to every request.
-- [**Cookie Authentication**](https://docs.couchdb.org/en/3.1.0/api/server/authn.html#cookie-authentication): Use a
+- [**Cookie Authentication**](https://docs.couchdb.org/en/stable/api/server/authn.html#cookie-authentication): Use a
   special `_session` API to set a cookie. Which will be send on every request.
-- [**Proxy Authentication**](https://docs.couchdb.org/en/3.1.0/api/server/authn.html#proxy-authentication): Use an
+- [**Proxy Authentication**](https://docs.couchdb.org/en/stable/api/server/authn.html#proxy-authentication): Use an
   external authentication service.
-- [**JWT Authentication**](https://docs.couchdb.org/en/3.1.0/api/server/authn.html#jwt-authentication): Use
+- [**JWT Authentication**](https://docs.couchdb.org/en/stable/api/server/authn.html#jwt-authentication): Use
   externally-generated JWT tokens. (new in version 3.1)
 
 We will be using **Cookie Authentication**. But first a little bit about **Basic Authentication**:
 
 #### Basic Authentication
 
-[**Basic Authentication**](https://docs.couchdb.org/en/3.1.0/api/server/authn.html#basic-authentication) is when
+[**Basic Authentication**](https://docs.couchdb.org/en/stable/api/server/authn.html#basic-authentication) is when
 you add the username and password in the header of every request.
 [Read more on MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication#Basic_authentication_scheme).
 
@@ -179,7 +179,7 @@ It is inefficient, though. Because CouchDB has to re-hash the password on every 
 
 #### Cookie Authentication
 
-By [**Cookie Authentication**](https://docs.couchdb.org/en/3.1.0/api/server/authn.html#cookie-authentication) you
+By [**Cookie Authentication**](https://docs.couchdb.org/en/stable/api/server/authn.html#cookie-authentication) you
 request a session cookie, and the cookie is then send on every request.
 
 CouchDB's API is `POST`, `GET` and `DELETE` on `/_session`.
@@ -240,7 +240,7 @@ and
 [`db.getSession`](https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/api.md#dbgetsessionopts--callback).
 
 > You can enable the
-> [`allow_persistent_cookies`](https://docs.couchdb.org/en/3.1.0/config/auth.html#couch_httpd_auth) config. If
+> [`allow_persistent_cookies`](https://docs.couchdb.org/en/stable/config/auth.html#couch_httpd_auth) config. If
 > enabled CouchDB will refresh the session cookie, on request close the nearing expiration time.
 
 #### About Cookies' sameSite attribute
@@ -250,8 +250,8 @@ You might get a notice that the Cookie "AuthSession" uses the
 will be rejected in the future. Or if you are from the future, login doesn't work.
 
 In Apache CouchDB you can set the config
-[`[couch_httpd_auth] same_site`](https://docs.couchdb.org/en/3.1.0/config/auth.html#couch_httpd_auth/same_site) to
-`strict`. This will fix this message. To validate you must restart your browser (only to check if the notice
+[`[couch_httpd_auth] same_site`](https://docs.couchdb.org/en/stable/config/auth.html#couch_httpd_auth/same_site) to
+`lax`. This will fix this message. To validate you must restart your browser (only to check if the notice
 still appears, it is a server setting after all. P.S.: CouchDB configs don't need a restart!).
 
 PouchDB-Server version 4.2 doesn't support it, yet. What you can do is Proxy every request to PouchDB-Server
@@ -565,14 +565,14 @@ the default effects of dom-events.
 `doLogIn` checks the session state with `checkSessionState` after login.
 
 And `doLogOut` destroys the local database. When you destroy a database it's data will be deleted. But the deletion
-will not be synced! In [`Add the Provider`](./provider) we did add an event-listener for destroy events. And when
+will not be synced! In [`Add the Provider`](./provider.md) we did add an event-listener for destroy events. And when
 the local database was destroyed, we did create a new one. This was for logging out.
 
 > We didn't implement error handling, because, well …, this component is already long.
 >
 > If you want to, you can add some error handling as an exercise. Read more about
 > [PouchDB Authentication's API](https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/api.md)
-> and [CouchDB's Session API](https://docs.couchdb.org/en/3.1.0/api/server/authn.html#cookie-authentication) to learn
+> and [CouchDB's Session API](https://docs.couchdb.org/en/stable/api/server/authn.html#cookie-authentication) to learn
 > the error responses.
 
 Finally add `Session.js` to `App.js`:

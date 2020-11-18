@@ -6,7 +6,7 @@ title: useFind
 ## Overview
 
 Query, and optionally create, a [Mango query](https://pouchdb.com/guides/mango-queries.html).
-It uses the [Mango query language](https://docs.couchdb.org/en/3.1.0/api/database/find.html#selector-syntax).
+It uses the [Mango query language](https://docs.couchdb.org/en/stable/api/database/find.html#selector-syntax).
 
 It also subscripts to updates of the index. With the added bonus of also subscribing to updates of
 the documents in the [result](#result). If you update or delete a document in a way that would
@@ -45,7 +45,7 @@ Options descriptions are copied from the PouchDB API page.
        - `options.index.type?: string` - Type of the index. Only `json` is supported,
          which is also the default.
    - `options.selector: PouchDB.Find.Selector` - The selector to filter the results. Required.
-     It uses [Mango Selector Syntax](https://docs.couchdb.org/en/3.1.0/api/database/find.html#selector-syntax).
+     It uses [Mango Selector Syntax](https://docs.couchdb.org/en/stable/api/database/find.html#selector-syntax).
    - `options.fields?: string[]` - List of fields that you want to receive.
      If omitted, you get the full documents.
    - `options.sort?: string[]` - List of fields defining how you want to sort.

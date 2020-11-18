@@ -46,13 +46,14 @@ export default function Todo({ todo }) {
 }
 ```
 
-Right away you might see some familiar functions, like `usePouch` and `db.put()`. But also the new `db.get()`.
+Right away you might see some familiar functions, like [`usePouch`](../api/use-pouch.md) and
+`db.put()`. But also the new `db.get()`.
 
 [`db.get()`](https://pouchdb.com/api.html#fetch_document) fetches a single document. All it needs is the _id_ of
 the doc. Like most methods of PouchDB, it too can fail. For example, if the doc doesn't exist, or you don't have
 access to the database.
 
-> The hook for fetching and subscribing to a single document is `useDoc`.
+> The hook for fetching and subscribing to a single document is [`useDoc`](../api/use-doc.md).
 
 In `update` we first _load_ the document from the database. Then we _check_ if the doc matches the UI state. And if
 it does, we _update_ the `done` field and _put_ the new version into the database. If the update fails with a
@@ -60,9 +61,10 @@ it does, we _update_ the `done` field and _put_ the new version into the databas
 
 That seems a little bit of an over engineered example. But remember PouchDB is a _distributed_ system.
 
-`useAllDocs` takes some time between receiving a change update and re-rendering a component. In this time-frame the
-user could have clicked. If the document did update, so that `done` has already the desired value, there is no need
-in updating the document again. It would only add in used disk space and network traffic. Which the added bonus of
+[`useAllDocs`](../api/use-all-docs.md) takes some time between receiving a change update and
+re-rendering a component. In this time-frame the user could have clicked. If the document did
+update, so that `done` has already the desired value, there is no need in updating the document
+again. It would only add in used disk space and network traffic. Which the added bonus of
 potential conflicts. Better check if we even need to update the doc.
 
 `db.get()` and `db.put()` also take their time. And if in this time-frame another change did sync, we get a

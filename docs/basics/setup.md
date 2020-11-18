@@ -74,7 +74,7 @@ There are some incompatibilities though.
 
 While PouchDB-Server is intended as a drop-in replacement of CouchDB, the later moves faster. At the time of
 writing, <time datetime="2020-05-23">2020-05-23</time>, CouchDB did release
-[version 3](https://docs.couchdb.org/en/3.1.0/whatsnew/3.0.html) and PouchDB-Server didn't catchup yet.
+[version 3](https://docs.couchdb.org/en/stable/whatsnew/3.0.html) and PouchDB-Server didn't catchup yet.
 
 Regarding compatibility the biggest change was, that the default setup of CouchDB _is more secure_. In previous
 versions in the standard setup, everyone could create an user. Now you must be an admin or change some settings.

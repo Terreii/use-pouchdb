@@ -13,7 +13,7 @@ documents did sync.
 
 As all hooks, it subscribes to updates.
 
-`useAllDocs` can only be invoked from a component nested inside of a `<Provider />`.
+`useAllDocs` can only be invoked from a component nested inside of a [`<Provider />`](./provider.md).
 
 ## Parameters
 
@@ -50,7 +50,7 @@ page.
      The special key `"_default"` selects the _default database_. Defaults to `"_default"`.
 
 > `keys` is check for equality with a deep equal algorithm.
-> And only if it differentiate by _value_ will it cause new query be made.
+> And only if it differentiate by _value_ will it cause a new query be made.
 
 ## Result
 
@@ -177,15 +177,18 @@ import ms from 'milliseconds'
 import { ErrorMessage } from './ErrorMessage'
 
 export function LastBookings() {
-  const now = new Date()
+  const midnight = new Date()
+  midnight.setHours(0)
+  midnight.setMinutes(0)
+  midnight.setSeconds(0)
 
-  // this goes from now to 7 days ago.
+  // this goes from midnight to 7 days ago.
   const { rows, loading, state, error } = useAllDocs({
-    // start now
-    startkey: 'bookings_' + now.toJSON(),
+    // start midnight
+    startkey: 'bookings_' + midnight.toJSON(),
     // End at endkey
     // the date 7 days ago is the end.
-    endkey: 'bookings_' + new Date(now.getTime() - ms.days(7)).toJSON(),
+    endkey: 'bookings_' + new Date(midnight.getTime() - ms.days(7)).toJSON(),
     include_docs: true,
     descending: true,
   })

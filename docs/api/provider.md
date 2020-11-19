@@ -14,9 +14,9 @@ Most apps will render the `<Provider />` as one of the most top level components
 tree inside of it. But they can be nested.
 
 Every `<Provider />` has a _default database_. The _default database_ is used whenever the `db`
-options of **hooks** are not used. They select a database. For a single database `<Provider />`
-that database is the default. A multi database `<Provider />` requires a `default` prop that
-selects the default database by it's key.
+option of the **hooks** is not used. This `db`-option selects the database the hook will use. For a
+single database `<Provider />` that database is the default. A multi database `<Provider />`
+requires a `default` prop that selects the default database by it's key.
 
 If a `<Provider />` is nested inside of another `<Provider />`, the child will merge the databases
 of the parent into it's databases set. But overwrites any database with conflicting keys.
@@ -80,8 +80,13 @@ ReactDOM.render(
 Hooks access the _local_ database if `undefined`, `null`, `"_default"` or `"local"` is passed to
 their `db` option. To access the _remote_ database you must pass `remote` to the hook's `db` option.
 
-To change this, change the `default`'s value. All hooks that access the _default_ database will re-query,
-using the new _default_ database.
+To change the _default database_, change the `default`'s value. All hooks that access the
+_default database_ will re-query, using the new _default database_, while still returning the old
+content.
+
+This pattern can be used for the first visit: Use the remote db when no local data exist.
+But sync in the background. Once all data is locally available, fetch all used views and indexes on
+the local db, which will start the indexing. And then switch to the local db.
 
 ```jsx
 import React from 'react'
@@ -182,6 +187,12 @@ ReactDOM.render(
   document.getElementById('root')
 )
 ```
+
+While you don't need to use Redux and can build full apps using only usePouchDB.
+You might already use Redux. Or if you want to share complicated derived state between multiple
+components Redux might be a tool for you.
+
+You can use both at the same time.
 
 ### Extending the context
 

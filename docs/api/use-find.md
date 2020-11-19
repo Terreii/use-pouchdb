@@ -16,7 +16,7 @@ not included in `fields`.
 The hook is a combination of `db.createIndex()` and `db.find()`. With the right arguments (`options.index`),
 it will ensure that an index exist, using `db.createIndex()`, and use that index with `db.find()`.
 
-`useFind` can only be invoked from a component nested inside of a `<Provider />`.
+`useFind` can only be invoked from a component nested inside of a [`<Provider />`](./provider.md).
 
 > `useFind` requires [`pouchdb-find`](https://www.npmjs.com/package/pouchdb-find) to be
 > installed and setup.
@@ -96,6 +96,8 @@ export default function StoryList() {
     // Ensure that this index exist, create it if not. And use it.
     index: {
       fields: ['type', 'title'],
+      // 'ddoc' and 'name' are not required. PouchDB will check all existing indexes
+      // if they match the requirements. And only create a one if none match.
     },
     selector: {
       type: 'story',

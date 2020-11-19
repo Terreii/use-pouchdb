@@ -5,10 +5,11 @@ title: usePouch
 
 ## Overview
 
-Sometimes you need more than the provided hooks alow, the `usePouch` is for those moments. `usePouch` returns a
-reference to the [PouchDB database](https://pouchdb.com/api.html#create_database) past into `<Provider />`.
+Sometimes you need more than the provided hooks allow, the `usePouch` is for those moments.
+`usePouch` returns a reference to the [PouchDB database](https://pouchdb.com/api.html#create_database)
+past into [`<Provider />`](./provider.md).
 
-It can only be invoked from a component nested inside of a `<Provider />`.
+It can only be invoked from a component nested inside of a [`<Provider />`](./provider.md).
 
 ## Parameters
 
@@ -18,7 +19,7 @@ It can only be invoked from a component nested inside of a `<Provider />`.
 ## Result
 
 `usePouch` returns a reference to the [PouchDB database](https://pouchdb.com/api.html#create_database) past into
-`<Provider />`.
+[`<Provider />`](./provider.md).
 
 ## Example Usage
 

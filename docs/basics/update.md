@@ -344,6 +344,21 @@ and then their `done` fields.
 
 We then dynamically pass the value for the `done` field into the `selector` object.
 
+Mango queries return by default max 25 docs. If you want more, then you must pass `"limit": 50`
+to `useFind`:
+
+```javascript
+useFind({
+  index: {
+    fields: ['type'],
+  },
+  selector: {
+    type: 'todo',
+  },
+  limit: 50, // or more or what you need.
+})
+```
+
 > PouchDB's secondary indexes are **lazy**.
 >
 > Most Databases will update all indexes whenever data is _updated_.

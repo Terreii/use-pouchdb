@@ -1,47 +1,48 @@
 ---
 id: sync
-title: Sync account
+title: Syncing
 ---
 
 Now to Syncing over devices and user accounts.
 
 CouchDB has integrated
-[user authentication and authorization](https://docs.couchdb.org/en/stable/intro/security.html)! We are going to use
-it, together with the common setup of one database per user, to enable syncing.
+[user authentication and authorization](https://docs.couchdb.org/en/stable/intro/security.html)!
+We are going to use it, together with the common setup of one database per user, to enable syncing.
 
 You should have PouchDB-Server running for this section.
 
 ## A word about Version 3
 
-With [version 3](https://docs.couchdb.org/en/stable/whatsnew/3.0.html) Apache CouchDB's default settings became more
-secure. Now every newly created database is _admin only_ by default. You must change the
-[`_security` document](https://docs.couchdb.org/en/stable/api/database/security.html#api-db-security) of a database,
-to alow users to access it. This also affects the `_users` database. Which means, that you need admin rights to
-create users.
+With [version 3](https://docs.couchdb.org/en/stable/whatsnew/3.0.html) Apache CouchDB's
+settings became more secure. Now every newly created database is _admin only_ by default.
+You must change the
+[`_security` object](https://docs.couchdb.org/en/stable/api/database/security.html#api-db-security)
+of a database, to allow users to access it. This also affects the `_users` database.
+Which means, that you need admin rights to create users.
 
 Additionally you must change
-[a config](https://docs.couchdb.org/en/stable/config/couchdb.html#couchdb/users_db_security_editable) to be able to
-change the `_security` document of the `_users` database. That config will be removed with version 4, though!
+[a config](https://docs.couchdb.org/en/stable/config/couchdb.html#couchdb/users_db_security_editable)
+to be able to change the `_security` document of the `_users` database.
+That config will be removed with version 4, though!
 
 _What does that mean for this tutorial?_ This is a beginners guide. We will be using
-[PouchDB-Server](https://github.com/pouchdb/pouchdb-server). At the time of writing, PouchDB-Server (v4.2) allows
-everyone to sign up. And
-[pouchdb-authentication](https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/api.md#dbsignupusername-password--options--callback)
-works fine. This does not mean PouchDB-Server is insecure! It only means that `_users`-database follows the rules
-listed [here](https://docs.couchdb.org/en/stable/intro/security.html#authentication-database).
+[PouchDB-Server](https://github.com/pouchdb/pouchdb-server/). At the time of writing,
+PouchDB-Server (v4.2) allows everyone to sign up. This does not mean PouchDB-Server is insecure!
+It only means that `_users`-database follows the rules listed
+[here](https://docs.couchdb.org/en/stable/intro/security.html#authentication-database).
 
-_What does that mean for CouchDB App developers?_ The future is clear: You have to write a small server (or a bunch
-of **serverless functions**) for **sign up**, **changing passwords**, **resetting passwords** and
-**changing the username**. But CouchDB had already no way of send confirmation mails. So you already had to write
-some logic yourself anyway. Now it is a little bit more.
-**Please read [CouchDB's security tutorial](https://docs.couchdb.org/en/stable/intro/security.html) before you
-release your app!**
+_What does that mean for CouchDB App developers?_ The future is clear: You have to write a small
+server (or a bunch of **serverless functions**) for **sign up**, **changing passwords**,
+**resetting passwords** and **changing the username**. But CouchDB had already no way of sending
+confirmation mails. So you already had to write some logic yourself anyway. Now it is a little bit more.
+**Please read [CouchDB's security tutorial](https://docs.couchdb.org/en/stable/intro/security.html)
+before you release your app!**
 
 ## couch_peruser
 
-A common setup is [couch_peruser](https://docs.couchdb.org/en/stable/config/couch-peruser.html). With
-_couch_peruser_ every user has their own, private database. Database names are in the following form:
-`userdb-{hex encoded username}`. Or in code:
+A common setup is [couch_peruser](https://docs.couchdb.org/en/stable/config/couch-peruser.html).
+With _couch_peruser_ every user has their own, private database. Database names are in the
+following form: `userdb-{hex encoded username}`. Or in code:
 
 ```javascript
 /**
@@ -96,7 +97,7 @@ const remoteDB = new PouchDB(
 // )
 ```
 
-The `skip_setup: true` is imported, because we didn't login in yet.
+The `skip_setup: true` is only imported when we didn't login in yet.
 
 ### Sign up
 
@@ -104,8 +105,9 @@ To [sign up a new user you `put`](https://docs.couchdb.org/en/stable/intro/secur
 [user document](https://docs.couchdb.org/en/stable/intro/security.html#users-documents) to the `_users` database.
 
 ```javascript
+// This example uses CouchDB's HTTP API
 const response = await fetch(
-  `http://localhost:5984/_users/org.couchdb.user:${username}`,
+  `https://couchdb.example.com/_users/org.couchdb.user:${username}`,
   {
     method: 'PUT',
     headers: {
@@ -120,15 +122,6 @@ const response = await fetch(
   }
 )
 ```
-
-But luckily [PouchDB Authentication](https://github.com/pouchdb-community/pouchdb-authentication) has a nice to use
-[`signUp` method](https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/api.md#dbsignupusername-password--options--callback):
-
-```javascript
-const response = await remoteDB.signUp(username, password)
-```
-
-It must be run on one of the remote databases.
 
 ### Log in and out
 
@@ -155,7 +148,7 @@ You can add the login credentials by adding it to the URL or with the `auth` opt
 instance.
 
 ```javascript
-const url = new URL('http://127.0.0.1:5984/')
+const url = new URL('https://couchdb.example.com/')
 url.pathname += getUserDatabaseName(username)
 url.username = username
 url.password = password
@@ -165,7 +158,7 @@ const remote = new PouchDB(url.href)
 // or
 
 const remoteDB = new PouchDB(
-  `http://127.0.0.1:5984/${getUserDatabaseName(username)}`,
+  `https://couchdb.example.com/${getUserDatabaseName(username)}`,
   {
     auth: {
       username: username,
@@ -186,7 +179,7 @@ CouchDB's API is `POST`, `GET` and `DELETE` on `/_session`.
 
 ```javascript
 // Login
-const response = await fetch('http://localhost:5984/_session', {
+const response = await fetch('https://couchdb.example.com/_session', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -198,243 +191,48 @@ const response = await fetch('http://localhost:5984/_session', {
 })
 
 // get session info
-const response = await fetch('http://localhost:5984/_session', {
+const response = await fetch('https://couchdb.example.com/_session', {
   credentials: 'include', // or 'same-origin' if it is
 })
 
 // log out
-const response = await fetch('http://localhost:5984/_session', {
+const response = await fetch('https://couchdb.example.com/_session', {
   method: 'DELETE',
   credentials: 'include', // or 'same-origin' if it is
 })
 ```
 
-Or we user [PouchDB Authentication](https://github.com/pouchdb-community/pouchdb-authentication)'s methods:
+> Tip: There is a PouchDB-Plugin for handling the Session flow:
+> [PouchDB Authentication](https://github.com/pouchdb-community/pouchdb-authentication)
+>
+> It adds
+> [`db.logIn`](https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/api.md#dbloginusername-password--options--callback),
+> [`db.logOut`](https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/api.md#dblogoutcallback),
+> [`db.getSession`](https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/api.md#dbgetsessionopts--callback),
+> and more to a PouchDB instance.
 
-```javascript
-try {
-  await remote.logIn(username, password)
-  // did log in
-} catch (err) {
-  if (err.name === 'unauthorized' || err.name === 'forbidden') {
-    // name or password incorrect
-  } else {
-    // cosmic rays, a meteor, etc.
-  }
-}
+## The session and sync component
 
-const response = await remote.getSession()
-if (!response.userCtx.name) {
-  // nobody's logged in
-} else {
-  // logged in as response.userCtx.name
-}
+Now let's implement it! You should have a `src/setupProxy.js` file as described in [Setup](./setup.md).
 
-await remote.logOut()
-```
+In our small tutorial app a single component will handle sessions and syncing!
 
-Read more about
-[`db.logIn`](https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/api.md#dbloginusername-password--options--callback),
-[`db.logOut`](https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/api.md#dblogoutcallback)
-and
-[`db.getSession`](https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/api.md#dbgetsessionopts--callback).
-
-> You can enable the
-> [`allow_persistent_cookies`](https://docs.couchdb.org/en/stable/config/auth.html#couch_httpd_auth) config. If
-> enabled CouchDB will refresh the session cookie, on request close the nearing expiration time.
-
-#### About Cookies' sameSite attribute
-
-You might get a notice that the Cookie "AuthSession" uses the
-[`sameSite` attribute](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite) wrong and
-will be rejected in the future. Or if you are from the future, login doesn't work.
-
-In Apache CouchDB you can set the config
-[`[couch_httpd_auth] same_site`](https://docs.couchdb.org/en/stable/config/auth.html#couch_httpd_auth/same_site) to
-`lax`. This will fix this message. To validate you must restart your browser (only to check if the notice
-still appears, it is a server setting after all. P.S.: CouchDB configs don't need a restart!).
-
-PouchDB-Server version 4.2 doesn't support it, yet. What you can do is Proxy every request to PouchDB-Server
-through Create-react-app's dev server. Docs about proxy can be found
-[here](https://create-react-app.dev/docs/proxying-api-requests-in-development).
-
-First install [`http-proxy-middleware`](https://www.npmjs.com/package/http-proxy-middleware).
-
-<!--DOCUSAURUS_CODE_TABS-->
-<!--npm-->
-
-```sh
-npm i -D http-proxy-middleware
-```
-
-<!--yarn-->
-
-```sh
-yarn add -D http-proxy-middleware
-```
-
-<!--END_DOCUSAURUS_CODE_TABS-->
-
-Next create `src/setupProxy.js` with the content of:
-
-```javascript
-const { createProxyMiddleware } = require('http-proxy-middleware')
-
-module.exports = function (app) {
-  app.use(
-    '/db',
-    createProxyMiddleware({
-      target: 'http://localhost:5984', // the port of your PouchDB-Server
-      changeOrigin: true,
-      pathRewrite: {
-        '^/db': '/', // remove /db from the requests path
-      },
-    })
-  )
-}
-```
-
-After you restart your dev-server it will proxy all request to `/db/*` to your PouchDB-Server. You need to replace
-the URLs in this section!
-
-```javascript
-new PouchDB('http://localhost:5984/db_name')
-
-// into:
-
-new PouchDB('http://localhost:3000/db/db_name')
-// or if you want to be domain independent
-new PouchDB(new URL('/db/db_name', window.location.href).href)
-// or
-new PouchDB('/db/db_name', { adapter: 'http' })
-```
-
-Many static site hosting provider allow you to setup a similar proxy.
-
-## Session and sync functions
-
-Now let's implement it!
-
-This will be handled by our own global module. We will be using separate functions, because most of the session
-logic will be handled by components.
-
-```javascript
-// account.js
-import PouchDB from 'pouchdb-browser'
-import auth from 'pouchdb-authentication'
-
-PouchDB.plugin(auth) // register pouchdb-authentication as a plugin
-
-let remote = new PouchDB(
-  'http://localhost:5984/_users', // just a known existing db
-  { skip_setup: true } // Don't check for the existence!
-)
-
-export function signUp(username, password) {
-  return remote.signUp(username, password)
-}
-
-export async function logIn(username, password) {
-  // We don't capture errors from logIn
-  const result = await remote.logIn(username, password)
-
-  if (result.ok && result.name != null && result.name.length > 0) {
-    // connect to the user database
-
-    // Close the old one first!
-    await remote.close()
-
-    // Create the new remote DB.
-    // Because we have no { skip_setup: true }, it will create the DB on the server.
-    // In CouchDB you should add skip_setup.
-    remote = new PouchDB(
-      `http://localhost:5984/${getUserDatabaseName(username)}`
-    )
-    return result
-  } else {
-    throw new Error('user not logged in')
-  }
-}
-
-export async function logOut() {
-  await remote.close()
-  return remote.logOut()
-}
-
-export function getSession() {
-  return remote.getSession()
-}
-
-export async function getIsLoggedIn() {
-  const session = await remote.getSession()
-
-  return session.ok && session.userCtx && session.userCtx.name != null
-}
-
-// A useEffect friendly sync function
-export function startSync(localDB) {
-  let isActive = true
-  let sync = null
-
-  const syncing = async () => {
-    const loggedIn = await getIsLoggedIn()
-
-    if (loggedIn && isActive) {
-      sync = localDB.sync(remote, {
-        live: true,
-        retry: true,
-      })
-    }
-  }
-  syncing()
-
-  return () => {
-    if (!isActive) {
-      return
-    }
-    isActive = false
-    if (sync) {
-      sync.cancel()
-    }
-  }
-}
-
-function getUserDatabaseName(name, prefix = 'userdb-') {
-  const encoder = new TextEncoder()
-  const buffy = encoder.encode(name)
-  const bytes = Array.from(buffy).map(byte =>
-    byte.toString(16).padStart(2, '0')
-  )
-  return prefix + bytes.join('')
-}
-```
-
-We don't have to handle incoming changes, because changes subscriptions on the local database are emitting
-those, too.
-
-## Components
-
-Now to the component:
+### Component
 
 ```jsx
 // Session.js
 import React, { useState, useEffect } from 'react'
 import { usePouch } from 'use-pouchdb'
 
-import {
-  signUp,
-  logIn,
-  logOut,
-  getSession,
-  getIsLoggedIn,
-  startSync,
-} from './account'
-
 const sessionStates = {
   loading: 0,
   loggedIn: 1,
   loggedOut: 2,
 }
+
+const dbBaseUrl = new URL('/db/', window.location.href)
+const sessionUrl = new URL('./_session', dbBaseUrl)
+const usersDB = new URL('./_users', dbBaseUrl)
 
 export default function Session() {
   const db = usePouch()
@@ -444,15 +242,7 @@ export default function Session() {
   const [password, setPassword] = useState('')
 
   const checkSessionState = async () => {
-    const isLoggedIn = await getIsLoggedIn()
-
-    if (isLoggedIn) {
-      const info = await getSession()
-      setSessionState(sessionStates.loggedIn)
-      setUsername(info.userCtx.name)
-    } else {
-      setSessionState(sessionStates.loggedOut)
-    }
+    // we will implement it later
   }
 
   useEffect(() => {
@@ -461,38 +251,37 @@ export default function Session() {
   }, [])
 
   useEffect(() => {
+    // sync effect
     if (sessionState === sessionStates.loggedIn) {
-      // whenever we are logged in: start syncing
-      return startSync(db)
+      // we will implement it later
     }
-  }, [sessionState, db])
+  }, [sessionState, username, db])
 
-  const doLogIn = async event => {
-    if (event) {
-      event.preventDefault()
-    }
-    await logIn(username, password)
-    checkSessionState()
+  const doLogIn = async () => {
+    // we will implement it later
   }
 
   const doSignUp = async event => {
     event.preventDefault()
-    await signUp(username, password)
-    doLogIn()
+
+    // we will implement it later
   }
 
   const doLogOut = async event => {
     event.preventDefault()
-    await logOut()
-    // destroy local database, to remove all local data
-    await db.destroy()
-    checkSessionState()
+
+    // we will implement it later
   }
 
   switch (sessionState) {
     case sessionStates.loggedOut:
       return (
-        <form onSubmit={doLogIn}>
+        <form
+          onSubmit={event => {
+            event.preventDefault()
+            doLogIn()
+          }}
+        >
           <label>
             Username
             <input
@@ -541,6 +330,15 @@ export default function Session() {
       return null
   }
 }
+
+function getUserDatabaseName(name, prefix = 'userdb-') {
+  const encoder = new TextEncoder()
+  const buffy = encoder.encode(name)
+  const bytes = Array.from(buffy).map(byte =>
+    byte.toString(16).padStart(2, '0')
+  )
+  return prefix + bytes.join('')
+}
 ```
 
 This is a more complicated component! It does quite a lot!
@@ -553,27 +351,416 @@ This component has 3 states:
 
 The first `useEffect` only runs after the first render. It checks if a user is logged in.
 
-The second `useEffect` runs every time the sessionState (or the db) changes. And if a user is logged in, it starts
-the sync process. Because `startSync` returns a cancel function, we can return the cancel function in the
-`useEffect` body. It will then cancel every time the effect re-runs.
+The second `useEffect` runs every time the sessionState (or username, or the db) changes.
+It will be responsible for starting and canceling the sync process.
 
-Then we have `doLogIn`, `doSignUp` and `doLogOut`. They call their counterpart in `account.js`, but also prevent
-the default effects of dom-events.
+Then we have `doLogIn`, `doSignUp` and `doLogOut`.
 
-`doSignUp` calls `doLogIn` after a new user was created.
+Lets implement the functions!
 
-`doLogIn` checks the session state with `checkSessionState` after login.
+### Check session state
 
-And `doLogOut` destroys the local database. When you destroy a database it's data will be deleted. But the deletion
-will not be synced! In [`Add the Provider`](./provider.md) we did add an event-listener for destroy events. And when
-the local database was destroyed, we did create a new one. This was for logging out.
+First lets implement the checking the session:
+
+Change the `checkSessionState` to this:
+
+```javascript
+export default function Session() {
+  // ...
+
+  const checkSessionState = async () => {
+    const request = await fetch(sessionUrl, {
+      credentials: 'include',
+    })
+    const sessionInfo = await request.json()
+    const name = sessionInfo.userCtx.name
+    const isLoggedIn = name != null
+
+    if (isLoggedIn) {
+      setSessionState(sessionStates.loggedIn)
+      setUsername(name)
+    } else {
+      setSessionState(sessionStates.loggedOut)
+      setUsername('')
+      setPassword('')
+    }
+  }
+
+  // ...
+}
+```
+
+This function will fetch the [`/_session`](https://docs.couchdb.org/en/stable/api/server/authn.html#get--_session)
+endpoint. It will always return an object. But if the name field is `null` then the user isn't
+logged in.
+
+### Sign up
+
+Next we implement `doSignUp`:
+
+```javascript
+export default function Session() {
+  // ...
+
+  const doSignUp = async event => {
+    event.preventDefault()
+
+    if (username.length === 0) return
+
+    const request = await fetch(
+      `${usersDB.href}/org.couchdb.user:${username}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: username,
+          password,
+          roles: [],
+          type: 'user',
+        }),
+      }
+    )
+    const response = await request.json()
+    if (response.ok) {
+      doLogIn()
+    }
+  }
+
+  // ...
+}
+```
+
+As in [Basics/Sign Up](#sign-up) we `PUT` an user-document into the `_users`-db.
+
+Important is, that the username must be in the docs `_id` (prefixed by `"org.couchdb.user:"`)
+and in the `name`-field.
+
+Don't worry, the **password** will be hashed by CouchDB.
+Isn't CouchDB awesome! It prevents one of the _biggest_ security risks by default!
+
+If the sign up process did succeed, it will return the same response as PouchDB's `put`-method.
+Here we check for the `ok` field. If it is `true`, then we log the user in.
+
+When `doSignUp` calls `doLogIn`, `doLogIn` is the closure that references the same `username`
+and `password` as `doSignUp` does.
+
+### Log in
+
+Next up `doLogIn`:
+
+```javascript
+export default function Session() {
+  // ...
+
+  const doLogIn = async () => {
+    if (username.length === 0) return
+
+    const request = await fetch(sessionUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: username,
+        password: password,
+      }),
+    })
+    const response = await request.json()
+    if (response.ok) {
+      checkSessionState()
+    }
+  }
+
+  // ...
+}
+```
+
+`doLogIn` [`POST` to `/_session`](https://docs.couchdb.org/en/stable/api/server/authn.html#post--_session)
+the users login data. And if that succeed, then it calls `checkSessionState` again.
+
+### Log out
+
+To end a session, update `doLogOut`:
+
+```javascript
+export default function Session() {
+  // ...
+
+  const doLogOut = async event => {
+    event.preventDefault()
+
+    const request = await fetch(sessionUrl, {
+      method: 'DELETE',
+      credentials: 'include',
+    })
+    const response = await request.json()
+    if (response.ok) {
+      // destroy local database, to remove all local data
+      await db.destroy()
+      checkSessionState()
+    }
+  }
+
+  // ...
+}
+```
+
+It sends a `DELETE` request to [`/_session`](https://docs.couchdb.org/en/stable/api/server/authn.html#delete--_session).
+
+And `doLogOut` destroys the local database. When you destroy a database it's data will be deleted.
+But the deletion will not be synced! In [`Add the Provider`](./provider.md) we did add an
+event-listener for destroy events. And when the local database was destroyed, we did create a new
+one. This was for logging out.
+
+### Syncing
+
+Now to the final section: Syncing our data!
+
+Update the second `useEffect` hook:
+
+```javascript
+export default function Session() {
+  // ...
+
+  useEffect(() => {
+    // sync effect
+    if (sessionState === sessionStates.loggedIn) {
+      // whenever we are logged in: start syncing
+
+      // Get the URL of the users remote db
+      const remoteDbUrl = new URL(getUserDatabaseName(username), dbBaseUrl)
+      // And sync
+      const sync = db.sync(remoteDbUrl.href, {
+        retry: true,
+        live: true,
+      })
+      return () => {
+        // and cancel syncing whenever our sessionState changes
+        sync.cancel()
+      }
+    }
+  }, [sessionState, username, db])
+
+  // ...
+}
+```
+
+Yes, _thats it!_ One function call! Remember the update dance in
+[Update docs](./update.md#todo-component-updates-the-doc)?
+Because we did handle most conflict there, we can reduce our syncing down to this!
+
+[`db.sync`](https://pouchdb.com/api.html#sync) starts a bidirectional data replication.
+There is also a mono-directional data replication. In fact sync is a convenience method for calling
+[`db.replicate`](https://pouchdb.com/api.html#replication) two times.
+
+`retry: true` indicates that PouchDB will retry syncing (from where it left of) incase it did lose
+connection.
+
+`live: true` will include all future changes.
+
+### Complete component
+
+Your `Session.js` should look something like this:
+
+```jsx
+// Session.js
+import React, { useState, useEffect } from 'react'
+import { usePouch } from 'use-pouchdb'
+
+const sessionStates = {
+  loading: 0,
+  loggedIn: 1,
+  loggedOut: 2,
+}
+
+const dbBaseUrl = new URL('/db/', window.location.href)
+const sessionUrl = new URL('./_session', dbBaseUrl)
+const usersDB = new URL('./_users', dbBaseUrl)
+
+export default function Session() {
+  const db = usePouch()
+
+  const [sessionState, setSessionState] = useState(sessionStates.loading)
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+
+  const checkSessionState = async () => {
+    const request = await fetch(sessionUrl, {
+      credentials: 'include',
+    })
+    const sessionInfo = await request.json()
+    const name = sessionInfo.userCtx.name
+    const isLoggedIn = name != null
+
+    if (isLoggedIn) {
+      setSessionState(sessionStates.loggedIn)
+      setUsername(name)
+    } else {
+      setSessionState(sessionStates.loggedOut)
+      setUsername('')
+      setPassword('')
+    }
+  }
+
+  useEffect(() => {
+    // On first render: check if we are logged in
+    checkSessionState()
+  }, [])
+
+  useEffect(() => {
+    // sync effect
+    if (sessionState === sessionStates.loggedIn) {
+      // whenever we are logged in: start syncing
+
+      // Get the URL of the users remote db
+      const remoteDbUrl = new URL(getUserDatabaseName(username), dbBaseUrl)
+      // And sync
+      const sync = db.sync(remoteDbUrl.href, {
+        retry: true,
+        live: true,
+      })
+      return () => {
+        // and cancel syncing whenever our sessionState changes
+        sync.cancel()
+      }
+    }
+  }, [sessionState, username, db])
+
+  const doLogIn = async () => {
+    if (username.length === 0) return
+
+    const request = await fetch(sessionUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: username,
+        password: password,
+      }),
+    })
+    const response = await request.json()
+    if (response.ok) {
+      checkSessionState()
+    }
+  }
+
+  const doSignUp = async event => {
+    event.preventDefault()
+
+    if (username.length === 0) return
+
+    const request = await fetch(
+      `${usersDB.href}/org.couchdb.user:${username}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: username,
+          password,
+          roles: [],
+          type: 'user',
+        }),
+      }
+    )
+    const response = await request.json()
+    if (response.ok) {
+      doLogIn()
+    }
+  }
+
+  const doLogOut = async event => {
+    event.preventDefault()
+
+    const request = await fetch(sessionUrl, {
+      method: 'DELETE',
+      credentials: 'include',
+    })
+    const response = await request.json()
+    if (response.ok) {
+      // destroy local database, to remove all local data
+      await db.destroy()
+      checkSessionState()
+    }
+  }
+
+  switch (sessionState) {
+    case sessionStates.loggedOut:
+      return (
+        <form
+          onSubmit={event => {
+            event.preventDefault()
+            doLogIn()
+          }}
+        >
+          <label>
+            Username
+            <input
+              type="text"
+              autoComplete="username"
+              minLength="2"
+              required
+              value={username}
+              onChange={event => {
+                setUsername(event.target.value)
+              }}
+            />
+          </label>
+          <label>
+            Password
+            <input
+              type="password"
+              autoComplete="current-password"
+              minLength="2"
+              required
+              value={password}
+              onChange={event => {
+                setPassword(event.target.value)
+              }}
+            />
+          </label>
+          <button>Log in</button>
+          <button type="button" onClick={doSignUp}>
+            Sign Up
+          </button>
+        </form>
+      )
+
+    case sessionStates.loggedIn:
+      return (
+        <div>
+          Hello, {username}
+          <button type="button" onClick={doLogOut}>
+            Log out
+          </button>
+        </div>
+      )
+
+    case sessionStates.loading:
+    default:
+      return null
+  }
+}
+
+function getUserDatabaseName(name, prefix = 'userdb-') {
+  const encoder = new TextEncoder()
+  const buffy = encoder.encode(name)
+  const bytes = Array.from(buffy).map(byte =>
+    byte.toString(16).padStart(2, '0')
+  )
+  return prefix + bytes.join('')
+}
+```
 
 > We didn't implement error handling, because, well …, this component is already long.
 >
 > If you want to, you can add some error handling as an exercise. Read more about
-> [PouchDB Authentication's API](https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/api.md)
-> and [CouchDB's Session API](https://docs.couchdb.org/en/stable/api/server/authn.html#cookie-authentication) to learn
-> the error responses.
+> [CouchDB's Session API](https://docs.couchdb.org/en/stable/api/server/authn.html#cookie-authentication)
+> to learn the error responses.
 
 Finally add `Session.js` to `App.js`:
 
@@ -600,5 +787,4 @@ import TodoList from './TodoList'
   )
 ```
 
-If you now open a different browser, you will be able to sync your Todos between them. They should also be listed
-in Fauxton (http://127.0.0.1:5984/_utils/#/_all_dbs).
+If you now open a different browser, you will be able to sync your Todos between them!

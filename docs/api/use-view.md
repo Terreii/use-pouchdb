@@ -5,7 +5,7 @@ title: useView
 
 ## Overview
 
-For accessing [map-reduce view](https://pouchdb.com/guides/queries.html) use the `useView` hook.
+For accessing a [map-reduce view](https://pouchdb.com/guides/queries.html) use the `useView` hook.
 
 It also subscripts to updates of the view. With the added bonus of also subscribing to updates of the documents in
 the [result](#result). If you update or delete a document in a way that would remove it from the view, than it will
@@ -16,11 +16,14 @@ Same when the design document did change. Whenever it changes, useView will re-q
 
 Read more about views in [CouchDB's Guide to Views](https://docs.couchdb.org/en/stable/ddocs/views/index.html).
 
-`useView` can only be invoked from a component nested inside of a `<Provider />`.
+`useView` can only be invoked from a component nested inside of a [`<Provider />`](./provider.md).
 
 > `useView` requires [`pouchdb-mapreduce`](https://www.npmjs.com/package/pouchdb-mapreduce) to be
 > installed and setup. If you use the [`pouchdb`](https://www.npmjs.com/package/pouchdb) or
 > [`pouchdb-browser`](https://www.npmjs.com/package/pouchdb-browser) packages, it is already setup.
+>
+> `pouchdb-mapreduce` uses the `Function` constructor. If your Javascript-environment doesn't allow
+> `eval`, then you can't use `useView`!
 
 ## Parameters
 
@@ -223,7 +226,7 @@ var designDoc = {
   _id: '_design/accounting',
   views: {
     change: {
-      map: function tagsMap(doc) {
+      map: function accountChangeMap(doc) {
         // only if it is the correct doc type
         if (doc.type === 'booking') {
           var time = new Date(doc.timestamp)
@@ -254,7 +257,7 @@ import { useView } from 'use-pouchdb'
 import { ErrorMessage } from './ErrorMessage'
 
 export function BankAccountChange({ year }) {
-  const { rows, loading, error } = useView('app/tags', {
+  const { rows, loading, error } = useView('accounting/change', {
     group_level: 1, // sum together all keys with the same year
     startkey: [year],
     // objects are sorted last:

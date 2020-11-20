@@ -10,19 +10,23 @@ _PouchDB database_.
 
 usePouchDB is intended to be used by small
 [CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete 'CRUD on Wikipedia') apps and more complicated
-Web-Apps alike. It was originally created by me, after I realized that with [PouchDB](https://pouchdb.com/) (and
+Web-Apps alike. It was originally created by me, after I realised that with [PouchDB](https://pouchdb.com/) (and
 its [vast plugin ecosystem](https://pouchdb.com/external.html 'List of plugins for PouchDB')),
 [CouchDB](https://couchdb.apache.org/) as the data backend and [React](https://reactjs.org/) with
 [Hooks](https://reactjs.org/docs/hooks-intro.html), you have everything you need to build a CRUD Web-App.
 
 It is now intended to be a puzzle piece in the replacement of CouchApps (the ones that use the deprecated
-[show](https://docs.couchdb.org/en/3.1.0/ddocs/ddocs.html#show-functions) and
-[list](https://docs.couchdb.org/en/3.1.0/ddocs/ddocs.html#list-functions) functions).
+[show](https://docs.couchdb.org/en/stable/ddocs/ddocs.html#show-functions) and
+[list](https://docs.couchdb.org/en/stable/ddocs/ddocs.html#list-functions) functions).
 
-> Note that usePouchDB is, for now, only optimized for local DBs and not for accessing a DB over HTTP!
+> Note that usePouchDB is, for now, only optimised for local DBs and not for accessing a DB over
+> HTTP! But you can still use it over HTTP.
 >
-> It subscribes to all changes and once for every view! And every subscription is a HTTP request.
-> It will still work, but could exceed the 4 concurrent request per domain limit on HTTP 1.1.
+> It subscribes to all changes and once for every used view! And every subscription is a HTTP
+> request. It will still work, but when you use views, it could exceed the 4 concurrent request
+> per domain limit on HTTP 1.1.
+>
+> When you restrict you self to not use views, then usePouchDB should work well over HTTP.
 
 ## Installation
 

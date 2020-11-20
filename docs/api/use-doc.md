@@ -6,9 +6,9 @@ title: useDoc
 ## Overview
 
 To read a single document use `useDoc`. It is the hook version of
-[`db.get()`](https://pouchdb.com/api.html#fetch_document). It also subscripts to updates of that document.
+[`db.get()`](https://pouchdb.com/api.html#fetch_document). It also subscripts to updates for that document.
 
-`useDoc` can only be invoked from a component nested inside of a `<Provider />`.
+`useDoc` can only be invoked from a component nested inside of a [`<Provider />`](./provider.md).
 
 ## Parameters
 
@@ -154,7 +154,7 @@ export function PostViewer({ id }) {
 ```
 
 The `initialValue` can also be used for a blue print of documents. If no doc was fount, use the
-initial value and edit it. Once it is saved, the `useDoc` will re-fetch the doc.
+initial value and edit it. Once it is saved/created, `useDoc` will fetch the newly saved doc.
 
 ### Select a database
 

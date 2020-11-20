@@ -6,7 +6,7 @@ title: useFind
 ## Overview
 
 Query, and optionally create, a [Mango query](https://pouchdb.com/guides/mango-queries.html).
-It uses the [Mango query language](https://docs.couchdb.org/en/3.1.0/api/database/find.html#selector-syntax).
+It uses the [Mango query language](https://docs.couchdb.org/en/stable/api/database/find.html#selector-syntax).
 
 It also subscripts to updates of the index. With the added bonus of also subscribing to updates of
 the documents in the [result](#result). If you update or delete a document in a way that would
@@ -16,7 +16,7 @@ not included in `fields`.
 The hook is a combination of `db.createIndex()` and `db.find()`. With the right arguments (`options.index`),
 it will ensure that an index exist, using `db.createIndex()`, and use that index with `db.find()`.
 
-`useFind` can only be invoked from a component nested inside of a `<Provider />`.
+`useFind` can only be invoked from a component nested inside of a [`<Provider />`](./provider.md).
 
 > `useFind` requires [`pouchdb-find`](https://www.npmjs.com/package/pouchdb-find) to be
 > installed and setup.
@@ -45,7 +45,7 @@ Options descriptions are copied from the PouchDB API page.
        - `options.index.type?: string` - Type of the index. Only `json` is supported,
          which is also the default.
    - `options.selector: PouchDB.Find.Selector` - The selector to filter the results. Required.
-     It uses [Mango Selector Syntax](https://docs.couchdb.org/en/3.1.0/api/database/find.html#selector-syntax).
+     It uses [Mango Selector Syntax](https://docs.couchdb.org/en/stable/api/database/find.html#selector-syntax).
    - `options.fields?: string[]` - List of fields that you want to receive.
      If omitted, you get the full documents.
    - `options.sort?: string[]` - List of fields defining how you want to sort.
@@ -96,6 +96,8 @@ export default function StoryList() {
     // Ensure that this index exist, create it if not. And use it.
     index: {
       fields: ['type', 'title'],
+      // 'ddoc' and 'name' are not required. PouchDB will check all existing indexes
+      // if they match the requirements. And only create a one if none match.
     },
     selector: {
       type: 'story',

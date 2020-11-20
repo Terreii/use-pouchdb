@@ -13,7 +13,7 @@ There are some things we didn't handle in this tutorial:
 
 - How to [delete documents](https://pouchdb.com/guides/updating-deleting.html#deleting-documents).
 - Handling [eventual conflicts](https://pouchdb.com/guides/conflicts.html).
-- [Mango queries](https://pouchdb.com/guides/mango-queries.html) (also read
+- Not everything about [Mango queries](https://pouchdb.com/guides/mango-queries.html) (also read
   [CouchDB's docs with all operators](https://docs.couchdb.org/en/stable/api/database/find.html)).
 - [Map/reduce queries](https://pouchdb.com/guides/queries.html).
 - [Attachments](https://pouchdb.com/guides/attachments.html) (files on your documents).
@@ -23,7 +23,7 @@ There are some things we didn't handle in this tutorial:
 
 - General links
   - [12 pro tips for better code with PouchDB](https://pouchdb.com/2014/06/17/12-pro-tips-for-better-code-with-pouchdb.html)
-  - [CouchDB Best Practices](https://docs.couchdb.org/en/latest/best-practices/index.html)
+  - [CouchDB Best Practices](https://docs.couchdb.org/en/stable/best-practices/index.html)
   - [CouchDB's installation guide](https://docs.couchdb.org/en/stable/install/index.html)
   - [CouchDB Chat](https://couchdb.apache.org/#chat) (for help and more)
   - [PouchDB plugins and external projects](https://pouchdb.com/external.html)

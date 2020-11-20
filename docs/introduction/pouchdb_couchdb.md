@@ -76,7 +76,7 @@ could have a different structure. It is recommended to add a `type` field on eve
 In CouchDB access control is handled on a per database level. There is a common setup that gives every user their
 own db, to which only they have access (think of a note or todo app).
 
-It might be better to view databases as a collection of data, that should be synchronized together\*, and have
+It might be better to view databases as a collection of data, that should be synchronised together\*, and have
 access control\* on them. Fewer databases are better.
 
 > \* You can filter out what will be synced, but not enforce it, and there is also work going on to add access

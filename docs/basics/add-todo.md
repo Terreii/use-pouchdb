@@ -4,7 +4,7 @@ title: Add Todos
 ---
 
 Let's work on `<AddTodo />` next. It will add a new Todo to the database. Therefore, it needs access to the
-database. We are going to use the `usePouch` hook for this.
+database. We are going to use the [`usePouch`](../api/use-pouch.md) hook for this.
 
 ```jsx
 // AddTodo.js
@@ -36,7 +36,7 @@ export default function AddTodo() {
       <input
         type="text"
         value={input}
-        minlength="1"
+        minLength="1"
         onChange={event => {
           setInput(event.target.value)
         }}
@@ -50,8 +50,8 @@ export default function AddTodo() {
 
 Let's go through this component:
 
-First we get a reference to the database with `usePouch()`. It is the database we provided to `<Provider />` in the
-last section.
+First we get a reference to the database with `usePouch()`. It is the database we provided to
+[`<Provider />`](../api/provider.md) in the last section.
 
 The next instruction is the [`useState`](https://reactjs.org/docs/hooks-reference.html#usestate) hook, to store
 what the user did enter.

@@ -4,7 +4,7 @@ title: List all Todos
 ---
 
 The `<TodoList />` component is responsible for rendering the list of todos. Therefore, it needs to read data from
-the database. With `useAllDocs` we can! It loads all documents.
+the database. With [`useAllDocs`](../api/use-all-docs.md) we can! It loads all documents.
 
 Our `<Todo />` component takes the todo document as props and displays it.
 
@@ -58,7 +58,7 @@ We use the option `include_docs: true` to load all documents in one go. Without 
 
 > Yes `key` and `id` are a little bit redundant. But the underlying
 > [`db.allDocs`](https://pouchdb.com/api.html#batch_fetch) and
-> [`db.query`](https://pouchdb.com/api.html#query_database) (for `useView`) share most of their API.
+> [`db.query`](https://pouchdb.com/api.html#query_database) (for [`useView`](../api/use-view.md)) share most of their API.
 
 Now to the `<Todo />` component:
 

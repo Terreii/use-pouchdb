@@ -30,10 +30,9 @@ export default function App() {
 
     PouchDB.on('destroyed', listener)
     return () => {
-      db.close()
       PouchDB.removeListener('destroyed', listener)
     }
-  }, [db])
+  }, [])
 
   return (
     <Provider pouchdb={db}>
@@ -51,7 +50,3 @@ deletion. The database will be completely removed from disk.
 
 But we can't use a destroyed database in hooks! That's why we instantly re-create a new database with the same
 name. But it will not have any data from the old one.
-
-[`db.close()`](https://pouchdb.com/api.html#close_database) is there to remove all event listeners from the
-database. All hooks from usePouchDB will auto-remove listeners if the db in the `<Provider pouchdb={db} />` did
-change.

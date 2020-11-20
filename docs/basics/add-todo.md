@@ -36,7 +36,7 @@ export default function AddTodo() {
       <input
         type="text"
         value={input}
-        minlength="1"
+        minLength="1"
         onChange={event => {
           setInput(event.target.value)
         }}

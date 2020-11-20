@@ -448,10 +448,10 @@ export default function Session() {
 
     if (isLoggedIn) {
       const info = await getSession()
-      setSessionState(isLoggedIn)
+      setSessionState(sessionStates.loggedIn)
       setUsername(info.userCtx.name)
     } else {
-      setSessionState(isLoggedIn)
+      setSessionState(sessionStates.loggedOut)
     }
   }
 
@@ -497,8 +497,8 @@ export default function Session() {
             Username
             <input
               type="text"
-              autocomplete="username"
-              minlength="2"
+              autoComplete="username"
+              minLength="2"
               required
               value={username}
               onChange={event => {
@@ -510,8 +510,8 @@ export default function Session() {
             Password
             <input
               type="password"
-              autocomplete="current-password"
-              minlength="2"
+              autoComplete="current-password"
+              minLength="2"
               required
               value={password}
               onChange={event => {

@@ -153,6 +153,9 @@ test('Test Component', async () => {
 })
 ```
 
+[`myPouch.bulkDocs`](https://pouchdb.com/api.html#batch_create) is a method to create/update
+multiple docs in one go.
+
 ### Hooks
 
 To test hooks that depend on one of `usePouchDB`'s hooks, you also must warp it in
@@ -213,7 +216,7 @@ test('add document', async () => {
   const wrapper = ({ children }) => (
     <Provider pouchdb={myPouch}>{children}</Provider>
   )
-  const { result, waitForNextUpdate } = renderHook(() => useAddDoc(), {
+  const { result } = renderHook(() => useAddDoc(), {
     wrapper,
   })
 

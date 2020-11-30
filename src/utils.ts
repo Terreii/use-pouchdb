@@ -1,5 +1,5 @@
 import { useMemo, useRef } from 'react'
-import { isEqual } from 'underscore'
+import isEqual from 'fast-deep-equal'
 
 /**
  * Memorize a value. Only invalidate if the value in it did change. Does a deep equal.

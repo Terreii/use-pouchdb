@@ -70,6 +70,8 @@ We will be using couch_peruser.
 >
 > If you don't setup an admin in PouchDB-Server, then everyone is admin (called **admin-party**)! Which allows the
 > client PouchDB to create the user-database.
+>
+> And, yes, that is how our app will work.
 
 ## Basics
 
@@ -77,7 +79,7 @@ First some basics about sessions in CouchDB and PouchDB-Server.
 
 ### Access a remote Database
 
-To access a remote database, create a new instance of PouchDB with a url-string as the name:
+To access a remote database, create a new instance of PouchDB with a url-string (_not_ `new URL()`) as the name:
 
 ```javascript
 const remoteDB = new PouchDB(
@@ -106,6 +108,7 @@ To [sign up a new user you `put`](https://docs.couchdb.org/en/stable/intro/secur
 
 ```javascript
 // This example uses CouchDB's HTTP API
+// we put a document with the ID of `org.couchdb.user:${username}` into _users
 const response = await fetch(
   `https://couchdb.example.com/_users/org.couchdb.user:${username}`,
   {
@@ -303,7 +306,7 @@ export default function Session() {
     if (sessionState === sessionStates.loggedIn) {
       // we will implement it later
     }
-  }, [sessionState, username, db])
+  }, [sessionState, db])
 
   const doLogIn = async () => {
     // we will implement it later
@@ -399,7 +402,7 @@ This component has 3 states:
 
 The first `useEffect` only runs after the first render. It checks if a user is logged in.
 
-The second `useEffect` runs every time the sessionState (or username, or the db) changes.
+The second `useEffect` runs every time the sessionState or the db changes.
 It will be responsible for starting and canceling the sync process.
 
 Then we have `doLogIn`, `doSignUp` and `doLogOut`.
@@ -410,7 +413,7 @@ Let's implement the functions!
 
 First lets implement checking the session:
 
-Change the `checkSessionState` function to this:
+Change the `useEffect` hook to this:
 
 ```javascript
 export default function Session() {
@@ -550,7 +553,7 @@ export default function Session() {
         // Close the active remote db.
         await remoteDbRef.current.close()
 
-        // remote the current remote db.
+        // remove the current remote db.
         remoteDbRef.current = null
 
         // destroy local database, to remove all local data

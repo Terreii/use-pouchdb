@@ -116,12 +116,21 @@ Please create in your `src` a `setupProxy.js` file with this content:
 const PouchDB = require('pouchdb-node')
 const expressPouchDB = require('express-pouchdb')
 
+const PrefixedPouch = PouchDB.defaults({
+  prefix: 'db/', // All PouchDB data will be stored in the directory ./db/*
+})
+
 module.exports = function (app) {
   // app is the Create-React-App dev server.
   // Our databases will be available at http://localhost:3000/db/*
-  app.use('/db', expressPouchDB(PouchDB))
+  app.use('/db', expressPouchDB(PrefixedPouch))
 }
 ```
+
+Please create a directory with the name of `db` in your project root.
+We use [defaults](https://github.com/pouchdb/pouchdb-server#pouchdb-defaults).
+
+After saving this file, you have to re-start your dev-server. Press `ctrl` + `c` to stop it.
 
 In production you would have to use [Express.js](https://expressjs.com/) or use Apache CouchDB.
 There are also some [CouchDB as a Service providers](./more.md).

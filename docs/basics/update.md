@@ -315,8 +315,8 @@ When `filter` is set to `all`:
 }
 ```
 
-This will create an index sorted by the `type` field of a document.
-And the fetch all documents that have a `type` field with the value of `"todo"`.
+This will create an index sorted by the `type` field of a document (and then their `_id`).
+And then fetch all documents that have a `type` field with the value of `"todo"`.
 
 The `index` object creates the index. Its `fields` array describes which field should be indexed.
 The [order matters](https://pouchdb.com/guides/mango-queries.html#more-than-one-field).
@@ -340,7 +340,7 @@ The other option is for filtered todos:
 ```
 
 This will create an index where the documents are sorted first by their `type` field,
-and then their `done` fields.
+and then their `done` fields, and finally their `_id` fields.
 
 We then dynamically pass the value for the `done` field into the `selector` object.
 

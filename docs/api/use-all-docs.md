@@ -140,7 +140,7 @@ import { ErrorMessage } from './ErrorMessage'
 
 export function Related({ doc }) {
   const { rows, loading, state, error } = useAllDocs({
-    keys: doc.related || [],
+    keys: doc.related || [], // doc.related is an Array of IDs.
     include_docs: true,
   })
 

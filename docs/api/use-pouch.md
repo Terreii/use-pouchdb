@@ -5,7 +5,7 @@ title: usePouch
 
 ## Overview
 
-Sometimes you need more than the provided hooks allow, the `usePouch` is for those moments.
+Sometimes you need more than the provided hooks allow, the `usePouch` hook is for those moments.
 `usePouch` returns a reference to the [PouchDB database](https://pouchdb.com/api.html#create_database)
 past into [`<Provider />`](./provider.md).
 
@@ -13,7 +13,7 @@ It can only be invoked from a component nested inside of a [`<Provider />`](./pr
 
 ## Parameters
 
-1. `databaseName?: string` - Select the database by it's name/key. The special key `"_default"` selects
+1. `databaseName?: string` - Select the database by its name/key. The special key `"_default"` selects
    the _default database_. Defaults to `"_default"`.
 
 ## Result

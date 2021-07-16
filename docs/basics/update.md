@@ -366,7 +366,7 @@ useFind({
 > It knows what did change and only update those documents.
 >
 > The drawback is that if a user didn't use an index for a while, the query will take a while.
-> But if a use never uses an index, then they never pay the update cost for that index.
+> But if a user never uses an index, then they never pay the update cost for that index.
 
 Now our filter is performant and correct! And our data is still synced between tabs!
 

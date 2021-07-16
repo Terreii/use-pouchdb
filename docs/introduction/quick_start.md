@@ -15,10 +15,6 @@ its [vast plugin ecosystem](https://pouchdb.com/external.html 'List of plugins f
 [CouchDB](https://couchdb.apache.org/) as the data backend and [React](https://reactjs.org/) with
 [Hooks](https://reactjs.org/docs/hooks-intro.html), you have everything you need to build a CRUD Web-App.
 
-It is now intended to be a puzzle piece in the replacement of CouchApps (the ones that use the deprecated
-[show](https://docs.couchdb.org/en/stable/ddocs/ddocs.html#show-functions) and
-[list](https://docs.couchdb.org/en/stable/ddocs/ddocs.html#list-functions) functions).
-
 > Note that usePouchDB is, for now, only optimised for local DBs and not for accessing a DB over
 > HTTP! But you can still use it over HTTP.
 >
@@ -27,6 +23,7 @@ It is now intended to be a puzzle piece in the replacement of CouchApps (the one
 > per domain limit on HTTP 1.1.
 >
 > When you restrict you self to not use views, then usePouchDB should work well over HTTP.
+> Or if you use **HTTP 2** or newer, that this limitation doesn't matter!
 
 ## Installation
 

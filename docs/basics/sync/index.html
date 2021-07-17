@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Syncing · usePouchDB</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="Now to Syncing over devices and user accounts."/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Syncing · usePouchDB"/><meta property="og:type" content="website"/><meta property="og:url" content="https://christopher-astfalk.de/use-pouchdb/"/><meta property="og:description" content="Now to Syncing over devices and user accounts."/><meta property="og:image" content="https://christopher-astfalk.de/use-pouchdb/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://christopher-astfalk.de/use-pouchdb/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/use-pouchdb/img/favicon.ico"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="/use-pouchdb/js/scrollSpy.js"></script><link rel="stylesheet" href="/use-pouchdb/css/main.css"/><script src="/use-pouchdb/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/use-pouchdb/"><img class="logo" src="/use-pouchdb/img/favicon.ico" alt="usePouchDB"/><h2 class="headerTitleWithLogo">usePouchDB</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/use-pouchdb/docs/introduction/quick_start" target="_self">Docs</a></li><li class="siteNavGroupActive"><a href="/use-pouchdb/docs/api/provider" target="_self">API</a></li><li class=""><a href="/use-pouchdb/help" target="_self">Help</a></li><li class=""><a href="https://github.com/Terreii/use-pouchdb" target="_self">GitHub</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Basic Tutorial</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Introduction<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/introduction/quick_start">Quick Start</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/introduction/pouchdb_couchdb">PouchDB and CouchDB</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Basic Tutorial<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/basics/intro">&#x27;Basic Tutorial: Intro&#x27;</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/basics/setup">Setup</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/basics/provider">Add the Provider</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/basics/add-todo">Add Todos</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/basics/list-all">List all Todos</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/basics/update">Update docs</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/use-pouchdb/docs/basics/sync">Syncing</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/basics/testing">Testing</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/basics/more">More</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">API<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/api/provider">Provider</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/api/use-pouch">usePouch</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/api/use-doc">useDoc</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/api/use-all-docs">useAllDocs</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/api/use-find">useFind</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/api/use-view">useView</a></li></ul></div></div></section></div><script>
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Syncing · usePouchDB</title><meta name="viewport" content="width=device-width, initial-scale=1.0"/><meta name="generator" content="Docusaurus"/><meta name="description" content="Now to Syncing over devices and user accounts."/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Syncing · usePouchDB"/><meta property="og:type" content="website"/><meta property="og:url" content="https://christopher-astfalk.de/use-pouchdb/"/><meta property="og:description" content="Now to Syncing over devices and user accounts."/><meta property="og:image" content="https://christopher-astfalk.de/use-pouchdb/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://christopher-astfalk.de/use-pouchdb/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/use-pouchdb/img/favicon.ico"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="/use-pouchdb/js/scrollSpy.js"></script><link rel="stylesheet" href="/use-pouchdb/css/main.css"/><script src="/use-pouchdb/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/use-pouchdb/"><img class="logo" src="/use-pouchdb/img/favicon.ico" alt="usePouchDB"/><h2 class="headerTitleWithLogo">usePouchDB</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/use-pouchdb/docs/introduction/quick_start" target="_self">Docs</a></li><li class="siteNavGroupActive"><a href="/use-pouchdb/docs/api/provider" target="_self">API</a></li><li class=""><a href="/use-pouchdb/help" target="_self">Help</a></li><li class=""><a href="https://github.com/Terreii/use-pouchdb" target="_self">GitHub</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Basic Tutorial</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Introduction<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/introduction/quick_start">Quick Start</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/introduction/pouchdb_couchdb">PouchDB and CouchDB</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">Basic Tutorial<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/basics/intro">&#x27;Basic Tutorial: Intro&#x27;</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/basics/setup">Setup</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/basics/provider">Add the Provider</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/basics/add-todo">Add Todos</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/basics/list-all">List all Todos</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/basics/update">Update docs</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/use-pouchdb/docs/basics/sync">Syncing</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/basics/testing">Testing</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/basics/more">More</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle collapsible">API<span class="arrow"><svg width="24" height="24" viewBox="0 0 24 24"><path fill="#565656" d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></h3><ul class="hide"><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/api/provider">Provider</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/api/use-pouch">usePouch</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/api/use-doc">useDoc</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/api/use-all-docs">useAllDocs</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/api/use-find">useFind</a></li><li class="navListItem"><a class="navItem" href="/use-pouchdb/docs/api/use-view">useView</a></li></ul></div></div></section></div><script>
             var coll = document.getElementsByClassName('collapsible');
             var checkActiveCategory = true;
             for (var i = 0; i < coll.length; i++) {
@@ -58,14 +58,14 @@
 <p>CouchDB has integrated
 <a href="https://docs.couchdb.org/en/stable/intro/security.html">user authentication and authorization</a>!
 We are going to use it, together with the common setup of one database per user, to enable syncing.</p>
-<p>You should have PouchDB-Server running for this section.</p>
+<p>You must have added <code>express-pouchdb</code> in <a href="/use-pouchdb/docs/basics/setup">basic setup</a> for this section to work.</p>
 <h2><a class="anchor" aria-hidden="true" id="a-word-about-version-3"></a><a href="#a-word-about-version-3" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>A word about Version 3</h2>
 <p>With <a href="https://docs.couchdb.org/en/stable/whatsnew/3.0.html">version 3</a> Apache CouchDB's
 settings became more secure. Now every newly created database is <em>admin only</em> by default.
 You must change the
 <a href="https://docs.couchdb.org/en/stable/api/database/security.html#api-db-security"><code>_security</code> object</a>
 of a database, to allow users to access it. This also affects the <code>_users</code> database.
-Which means, that you need admin rights to create users.</p>
+Which means, that you need admin rights to create and update users.</p>
 <p>Additionally you must change
 <a href="https://docs.couchdb.org/en/stable/config/couchdb.html#couchdb/users_db_security_editable">a config</a>
 to be able to change the <code>_security</code> document of the <code>_users</code> database.
@@ -107,11 +107,12 @@ a setting. If enabled, CouchDB will create for every user a database, pre-config
 <p>But couch_peruser was before version 3 possible, you just had to do everything yourself.</p>
 <p>If you don't setup an admin in PouchDB-Server, then everyone is admin (called <strong>admin-party</strong>)! Which allows the
 client PouchDB to create the user-database.</p>
+<p>And, yes, that is how our app will work.</p>
 </blockquote>
 <h2><a class="anchor" aria-hidden="true" id="basics"></a><a href="#basics" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Basics</h2>
 <p>First some basics about sessions in CouchDB and PouchDB-Server.</p>
 <h3><a class="anchor" aria-hidden="true" id="access-a-remote-database"></a><a href="#access-a-remote-database" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Access a remote Database</h3>
-<p>To access a remote database, create a new instance of PouchDB with a url-string as the name:</p>
+<p>To access a remote database, create a new instance of PouchDB with a url-string (<em>not</em> <code>new URL()</code>) as the name:</p>
 <pre><code class="hljs css language-javascript"><span class="hljs-keyword">const</span> remoteDB = <span class="hljs-keyword">new</span> PouchDB(
   <span class="hljs-string">`http://127.0.0.1:5984/<span class="hljs-subst">${getUserDatabaseName(username)}</span>`</span>,
   { <span class="hljs-attr">skip_setup</span>: <span class="hljs-literal">true</span> }
@@ -133,6 +134,7 @@ client PouchDB to create the user-database.</p>
 <p>To <a href="https://docs.couchdb.org/en/stable/intro/security.html#creating-a-new-user">sign up a new user you <code>put</code></a> a new
 <a href="https://docs.couchdb.org/en/stable/intro/security.html#users-documents">user document</a> to the <code>_users</code> database.</p>
 <pre><code class="hljs css language-javascript"><span class="hljs-comment">// This example uses CouchDB's HTTP API</span>
+<span class="hljs-comment">// we put a document with the ID of `org.couchdb.user:${username}` into _users</span>
 <span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> fetch(
   <span class="hljs-string">`https://couchdb.example.com/_users/org.couchdb.user:<span class="hljs-subst">${username}</span>`</span>,
   {
@@ -142,7 +144,7 @@ client PouchDB to create the user-database.</p>
     },
     <span class="hljs-attr">body</span>: <span class="hljs-built_in">JSON</span>.stringify({
       <span class="hljs-attr">name</span>: username,
-      <span class="hljs-attr">password</span>: password, <span class="hljs-comment">// will be hashed on the server.</span>
+      <span class="hljs-attr">password</span>: password, <span class="hljs-comment">// will be hashed by CouchDB. Isn't CouchDB awesome!</span>
       <span class="hljs-attr">roles</span>: [],
       <span class="hljs-attr">type</span>: <span class="hljs-string">'user'</span>,
     }),
@@ -215,22 +217,47 @@ request a session cookie, and the cookie is then send on every request.</p>
   <span class="hljs-attr">credentials</span>: <span class="hljs-string">'include'</span>, <span class="hljs-comment">// or 'same-origin' if it is</span>
 })
 </code></pre>
-<blockquote>
-<p>Tip: There is a PouchDB-Plugin for handling the Session flow:
-<a href="https://github.com/pouchdb-community/pouchdb-authentication">PouchDB Authentication</a></p>
+<h3><a class="anchor" aria-hidden="true" id="pouchdb-authentication"></a><a href="#pouchdb-authentication" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>PouchDB Authentication</h3>
+<p>To make this tutorial easier to follow, we will be using the
+<a href="https://github.com/pouchdb-community/pouchdb-authentication">PouchDB Authentication</a> plugin.</p>
 <p>It adds
-<a href="https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/api.md#dbloginusername-password--options--callback"><code>db.logIn</code></a>,
-<a href="https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/api.md#dblogoutcallback"><code>db.logOut</code></a>,
-<a href="https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/api.md#dbgetsessionopts--callback"><code>db.getSession</code></a>,
+<a href="https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/api.md#dbloginusername-password--options--callback"><code>remoteDB.logIn</code></a>,
+<a href="https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/api.md#dblogoutcallback"><code>remoteDB.logOut</code></a>,
+<a href="https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/api.md#dbgetsessionopts--callback"><code>remoteDB.getSession</code></a>,
+<a href="https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/api.md#dbsignupusername-password--options--callback"><code>remoteDB.signUp</code></a>,
 and more to a PouchDB instance.</p>
+<p>PouchDB Authentication must be run on a remote db instance.
+But because our remote database is not at the <em>root-path</em> (<code>/</code>) of our domain but on <code>/db/</code>,
+PouchDB Authentication needs a <em>prefix</em>. A <em>prefix</em> is added on the creation of a DB and prefixes its name.</p>
+<p>The db <em>prefix</em> is commonly used with <a href="https://pouchdb.com/api.html#defaults">config defaults</a>.
+PouchDB's <code>defaults()</code> method returns a new constructor. That constructor works like the normal constructor,
+but with the given options added.</p>
+<pre><code class="hljs css language-javascript"><span class="hljs-keyword">const</span> HTTPPouch = PouchDB.defaults({
+  <span class="hljs-attr">prefix</span>: <span class="hljs-string">'https://expample.com/db'</span>,
+})
+
+<span class="hljs-comment">// will be located at https://expample.com/db/myDb</span>
+<span class="hljs-keyword">const</span> remoteDB = <span class="hljs-keyword">new</span> HTTPPouch(<span class="hljs-string">'myDb'</span>)
+</code></pre>
+<blockquote>
+<p>Note! <code>remoteDB.signUp</code> will not work with <strong>CouchDB v3</strong>!
+But it will work for this tutorial.</p>
 </blockquote>
 <h2><a class="anchor" aria-hidden="true" id="the-session-and-sync-component"></a><a href="#the-session-and-sync-component" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>The session and sync component</h2>
 <p>Now let's implement it! You should have a <code>src/setupProxy.js</code> file as described in <a href="/use-pouchdb/docs/basics/setup">Setup</a>.</p>
 <p>In our small tutorial app a single component will handle sessions and syncing!</p>
+<h3><a class="anchor" aria-hidden="true" id="install-pouchdb-authentication"></a><a href="#install-pouchdb-authentication" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Install PouchDB Authentication</h3>
+<div class="tabs"><div class="nav-tabs"><div id="tab-group-7-tab-8" class="nav-link active" data-group="group_7" data-tab="tab-group-7-content-8">npm</div><div id="tab-group-7-tab-9" class="nav-link" data-group="group_7" data-tab="tab-group-7-content-9">yarn</div></div><div class="tab-content"><div id="tab-group-7-content-8" class="tab-pane active" data-group="group_7" tabindex="-1"><div><span><pre><code class="hljs css language-sh">npm i -D pouchdb-authentication<br /></code></pre>
+</span></div></div><div id="tab-group-7-content-9" class="tab-pane" data-group="group_7" tabindex="-1"><div><span><pre><code class="hljs css language-sh">yarn add -D pouchdb-authentication<br /></code></pre>
+</span></div></div></div></div>
 <h3><a class="anchor" aria-hidden="true" id="component"></a><a href="#component" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Component</h3>
 <pre><code class="hljs css language-jsx"><span class="hljs-comment">// Session.js</span>
-<span class="hljs-keyword">import</span> React, { useState, useEffect } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<span class="hljs-keyword">import</span> React, { useState, useEffect, useRef } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
 <span class="hljs-keyword">import</span> { usePouch } <span class="hljs-keyword">from</span> <span class="hljs-string">'use-pouchdb'</span>
+<span class="hljs-keyword">import</span> PouchDB <span class="hljs-keyword">from</span> <span class="hljs-string">'pouchdb-browser'</span>
+<span class="hljs-keyword">import</span> PouchAuth <span class="hljs-keyword">from</span> <span class="hljs-string">'pouchdb-authentication'</span>
+
+PouchDB.plugin(PouchAuth)
 
 <span class="hljs-keyword">const</span> sessionStates = {
   <span class="hljs-attr">loading</span>: <span class="hljs-number">0</span>,
@@ -239,23 +266,27 @@ and more to a PouchDB instance.</p>
 }
 
 <span class="hljs-keyword">const</span> dbBaseUrl = <span class="hljs-keyword">new</span> URL(<span class="hljs-string">'/db/'</span>, <span class="hljs-built_in">window</span>.location.href)
-<span class="hljs-keyword">const</span> sessionUrl = <span class="hljs-keyword">new</span> URL(<span class="hljs-string">'./_session'</span>, dbBaseUrl)
-<span class="hljs-keyword">const</span> usersDB = <span class="hljs-keyword">new</span> URL(<span class="hljs-string">'./_users'</span>, dbBaseUrl)
+<span class="hljs-keyword">const</span> HTTPPouch = PouchDB.defaults({
+  <span class="hljs-attr">prefix</span>: dbBaseUrl.href,
+})
 
 <span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Session</span>(<span class="hljs-params"></span>) </span>{
   <span class="hljs-keyword">const</span> db = usePouch()
+
+  <span class="hljs-keyword">const</span> remoteDbRef = useRef(<span class="hljs-literal">null</span>)
+  <span class="hljs-keyword">if</span> (remoteDbRef.current == <span class="hljs-literal">null</span>) {
+    <span class="hljs-comment">// create a default remote db</span>
+    remoteDbRef.current = <span class="hljs-keyword">new</span> HTTPPouch(<span class="hljs-string">'_users'</span>, {
+      <span class="hljs-attr">skip_setup</span>: <span class="hljs-literal">true</span>, <span class="hljs-comment">// prevents PouchDB from checking if the DB exists.</span>
+    })
+  }
 
   <span class="hljs-keyword">const</span> [sessionState, setSessionState] = useState(sessionStates.loading)
   <span class="hljs-keyword">const</span> [username, setUsername] = useState(<span class="hljs-string">''</span>)
   <span class="hljs-keyword">const</span> [password, setPassword] = useState(<span class="hljs-string">''</span>)
 
-  <span class="hljs-keyword">const</span> checkSessionState = <span class="hljs-keyword">async</span> () =&gt; {
-    <span class="hljs-comment">// we will implement it later</span>
-  }
-
   useEffect(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
     <span class="hljs-comment">// On first render: check if we are logged in</span>
-    checkSessionState()
   }, [])
 
   useEffect(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
@@ -263,7 +294,7 @@ and more to a PouchDB instance.</p>
     <span class="hljs-keyword">if</span> (sessionState === sessionStates.loggedIn) {
       <span class="hljs-comment">// we will implement it later</span>
     }
-  }, [sessionState, username, db])
+  }, [sessionState, db])
 
   <span class="hljs-keyword">const</span> doLogIn = <span class="hljs-keyword">async</span> () =&gt; {
     <span class="hljs-comment">// we will implement it later</span>
@@ -356,40 +387,46 @@ and more to a PouchDB instance.</p>
 <li>User is logged in; It renders the username and a log out button.</li>
 </ul>
 <p>The first <code>useEffect</code> only runs after the first render. It checks if a user is logged in.</p>
-<p>The second <code>useEffect</code> runs every time the sessionState (or username, or the db) changes.
+<p>The second <code>useEffect</code> runs every time the sessionState or the db changes.
 It will be responsible for starting and canceling the sync process.</p>
 <p>Then we have <code>doLogIn</code>, <code>doSignUp</code> and <code>doLogOut</code>.</p>
-<p>Lets implement the functions!</p>
+<p>Let's implement the functions!</p>
 <h3><a class="anchor" aria-hidden="true" id="check-session-state"></a><a href="#check-session-state" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Check session state</h3>
-<p>First lets implement the checking the session:</p>
-<p>Change the <code>checkSessionState</code> to this:</p>
+<p>First lets implement checking the session:</p>
+<p>Change the <code>useEffect</code> hook to this:</p>
 <pre><code class="hljs css language-javascript"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Session</span>(<span class="hljs-params"></span>) </span>{
   <span class="hljs-comment">// ...</span>
 
-  <span class="hljs-keyword">const</span> checkSessionState = <span class="hljs-keyword">async</span> () =&gt; {
-    <span class="hljs-keyword">const</span> request = <span class="hljs-keyword">await</span> fetch(sessionUrl, {
-      <span class="hljs-attr">credentials</span>: <span class="hljs-string">'include'</span>,
-    })
-    <span class="hljs-keyword">const</span> sessionInfo = <span class="hljs-keyword">await</span> request.json()
-    <span class="hljs-keyword">const</span> name = sessionInfo.userCtx.name
-    <span class="hljs-keyword">const</span> isLoggedIn = name != <span class="hljs-literal">null</span>
-
-    <span class="hljs-keyword">if</span> (isLoggedIn) {
-      setSessionState(sessionStates.loggedIn)
-      setUsername(name)
-    } <span class="hljs-keyword">else</span> {
-      setSessionState(sessionStates.loggedOut)
-      setUsername(<span class="hljs-string">''</span>)
-      setPassword(<span class="hljs-string">''</span>)
-    }
-  }
+  useEffect(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+    <span class="hljs-comment">// On first render: check if we are logged in</span>
+    remoteDbRef.current
+      .getSession()
+      .then(<span class="hljs-function"><span class="hljs-params">sessionInfo</span> =&gt;</span> {
+        <span class="hljs-keyword">const</span> name = sessionInfo.userCtx.name
+        <span class="hljs-keyword">if</span> (name) {
+          setSessionState(sessionStates.loggedIn)
+          setUsername(name)
+        } <span class="hljs-keyword">else</span> {
+          setSessionState(sessionStates.loggedOut)
+          setUsername(<span class="hljs-string">''</span>)
+          setPassword(<span class="hljs-string">''</span>)
+        }
+      })
+      .catch(<span class="hljs-function"><span class="hljs-params">err</span> =&gt;</span> {
+        <span class="hljs-built_in">console</span>.error(err)
+        setSessionState(sessionStates.loggedOut)
+        setUsername(<span class="hljs-string">''</span>)
+        setPassword(<span class="hljs-string">''</span>)
+      })
+  }, [])
 
   <span class="hljs-comment">// ...</span>
 }
 </code></pre>
-<p>This function will fetch the <a href="https://docs.couchdb.org/en/stable/api/server/authn.html#get--_session"><code>/_session</code></a>
-endpoint. It will always return an object. But if the name field is <code>null</code> then the user isn't
-logged in.</p>
+<p><a href="https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/api.md#dbgetsessionopts--callback">remoteDB.getSession()</a>
+checks if there is a valid session. It always resolves into an object with an <code>userCtx</code>,
+which has a name field.
+If this name is <code>null</code>, then there is no active session, else it contains the username.</p>
 <h3><a class="anchor" aria-hidden="true" id="sign-up-1"></a><a href="#sign-up-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Sign up</h3>
 <p>Next we implement <code>doSignUp</code>:</p>
 <pre><code class="hljs css language-javascript"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Session</span>(<span class="hljs-params"></span>) </span>{
@@ -398,37 +435,30 @@ logged in.</p>
   <span class="hljs-keyword">const</span> doSignUp = <span class="hljs-keyword">async</span> event =&gt; {
     event.preventDefault()
 
-    <span class="hljs-keyword">if</span> (username.length === <span class="hljs-number">0</span>) <span class="hljs-keyword">return</span>
+    <span class="hljs-keyword">if</span> (username.length === <span class="hljs-number">0</span> || password.length === <span class="hljs-number">0</span>) <span class="hljs-keyword">return</span>
 
-    <span class="hljs-keyword">const</span> request = <span class="hljs-keyword">await</span> fetch(
-      <span class="hljs-string">`<span class="hljs-subst">${usersDB.href}</span>/org.couchdb.user:<span class="hljs-subst">${username}</span>`</span>,
-      {
-        <span class="hljs-attr">method</span>: <span class="hljs-string">'PUT'</span>,
-        <span class="hljs-attr">headers</span>: {
-          <span class="hljs-string">'Content-Type'</span>: <span class="hljs-string">'application/json'</span>,
-        },
-        <span class="hljs-attr">body</span>: <span class="hljs-built_in">JSON</span>.stringify({
-          <span class="hljs-attr">name</span>: username,
-          password,
-          <span class="hljs-attr">roles</span>: [],
-          <span class="hljs-attr">type</span>: <span class="hljs-string">'user'</span>,
-        }),
+    <span class="hljs-keyword">try</span> {
+      <span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> remoteDbRef.current.signUp(username, password)
+      <span class="hljs-keyword">if</span> (response.ok) {
+        doLogIn()
       }
-    )
-    <span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> request.json()
-    <span class="hljs-keyword">if</span> (response.ok) {
-      doLogIn()
+    } <span class="hljs-keyword">catch</span> (err) {
+      <span class="hljs-keyword">if</span> (err.name === <span class="hljs-string">'conflict'</span>) {
+        <span class="hljs-comment">// an user with that username already exists, choose another username</span>
+      } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (err.name === <span class="hljs-string">'forbidden'</span>) {
+        <span class="hljs-comment">// invalid username</span>
+      } <span class="hljs-keyword">else</span> {
+        <span class="hljs-comment">// HTTP error, etc.</span>
+      }
     }
   }
 
   <span class="hljs-comment">// ...</span>
 }
 </code></pre>
-<p>As in <a href="#sign-up">Basics/Sign Up</a> we <code>PUT</code> an user-document into the <code>_users</code>-db.</p>
-<p>Important is, that the username must be in the docs <code>_id</code> (prefixed by <code>&quot;org.couchdb.user:&quot;</code>)
-and in the <code>name</code>-field.</p>
-<p>Don't worry, the <strong>password</strong> will be hashed by CouchDB.
-Isn't CouchDB awesome! It prevents one of the <em>biggest</em> security risks by default!</p>
+<p><a href="https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/api.md#dbsignupusername-password--options--callback"><code>remoteDB.doSignUp</code></a>
+puts an <a href="https://docs.couchdb.org/en/stable/intro/security.html#users-documents">user-document</a>
+into the <code>_users</code> db.</p>
 <p>If the sign up process did succeed, it will return the same response as PouchDB's <code>put</code>-method.
 Here we check for the <code>ok</code> field. If it is <code>true</code>, then we log the user in.</p>
 <p>When <code>doSignUp</code> calls <code>doLogIn</code>, <code>doLogIn</code> is the closure that references the same <code>username</code>
@@ -441,27 +471,34 @@ and <code>password</code> as <code>doSignUp</code> does.</p>
   <span class="hljs-keyword">const</span> doLogIn = <span class="hljs-keyword">async</span> () =&gt; {
     <span class="hljs-keyword">if</span> (username.length === <span class="hljs-number">0</span>) <span class="hljs-keyword">return</span>
 
-    <span class="hljs-keyword">const</span> request = <span class="hljs-keyword">await</span> fetch(sessionUrl, {
-      <span class="hljs-attr">method</span>: <span class="hljs-string">'POST'</span>,
-      <span class="hljs-attr">headers</span>: {
-        <span class="hljs-string">'Content-Type'</span>: <span class="hljs-string">'application/json'</span>,
-      },
-      <span class="hljs-attr">body</span>: <span class="hljs-built_in">JSON</span>.stringify({
-        <span class="hljs-attr">name</span>: username,
-        <span class="hljs-attr">password</span>: password,
-      }),
-    })
-    <span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> request.json()
-    <span class="hljs-keyword">if</span> (response.ok) {
-      checkSessionState()
+    <span class="hljs-keyword">try</span> {
+      <span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> remoteDbRef.current.logIn(username, password)
+      <span class="hljs-keyword">if</span> (response.ok) {
+        <span class="hljs-comment">// Close the active remote db.</span>
+        <span class="hljs-keyword">await</span> remoteDbRef.current.close()
+        <span class="hljs-comment">// Create the users db instance</span>
+        remoteDbRef.current = <span class="hljs-keyword">new</span> HTTPPouch(getUserDatabaseName(response.name))
+
+        setSessionState(sessionStates.loggedIn)
+        setUsername(response.name)
+        setPassword(<span class="hljs-string">''</span>)
+      }
+    } <span class="hljs-keyword">catch</span> (err) {
+      <span class="hljs-keyword">if</span> (err.name === <span class="hljs-string">'unauthorized'</span> || err.name === <span class="hljs-string">'forbidden'</span>) {
+        <span class="hljs-comment">// name or password incorrect</span>
+      } <span class="hljs-keyword">else</span> {
+        <span class="hljs-comment">// HTTP error, etc.</span>
+      }
     }
   }
 
   <span class="hljs-comment">// ...</span>
 }
 </code></pre>
-<p><code>doLogIn</code> <a href="https://docs.couchdb.org/en/stable/api/server/authn.html#post--_session"><code>POST</code> to <code>/_session</code></a>
-the users login data. And if that succeed, then it calls <code>checkSessionState</code> again.</p>
+<p><a href="https://github.com/pouchdb-community/pouchdb-authentication/blob/master/docs/api.md#dbloginusername-password--options--callback"><code>doLogIn</code></a>
+<a href="https://docs.couchdb.org/en/stable/api/server/authn.html#post--_session"><code>POST</code> to <code>/_session</code></a>
+the users login data. If that succeeds, then it closes the placeholder remote db and
+creates an instance of the users remote db.</p>
 <h3><a class="anchor" aria-hidden="true" id="log-out"></a><a href="#log-out" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Log out</h3>
 <p>To end a session, update <code>doLogOut</code>:</p>
 <pre><code class="hljs css language-javascript"><span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Session</span>(<span class="hljs-params"></span>) </span>{
@@ -470,15 +507,25 @@ the users login data. And if that succeed, then it calls <code>checkSessionState
   <span class="hljs-keyword">const</span> doLogOut = <span class="hljs-keyword">async</span> event =&gt; {
     event.preventDefault()
 
-    <span class="hljs-keyword">const</span> request = <span class="hljs-keyword">await</span> fetch(sessionUrl, {
-      <span class="hljs-attr">method</span>: <span class="hljs-string">'DELETE'</span>,
-      <span class="hljs-attr">credentials</span>: <span class="hljs-string">'include'</span>,
-    })
-    <span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> request.json()
-    <span class="hljs-keyword">if</span> (response.ok) {
-      <span class="hljs-comment">// destroy local database, to remove all local data</span>
-      <span class="hljs-keyword">await</span> db.destroy()
-      checkSessionState()
+    <span class="hljs-keyword">try</span> {
+      <span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> remoteDbRef.current.logOut()
+
+      <span class="hljs-keyword">if</span> (response.ok) {
+        <span class="hljs-comment">// Close the active remote db.</span>
+        <span class="hljs-keyword">await</span> remoteDbRef.current.close()
+
+        <span class="hljs-comment">// remove the current remote db.</span>
+        remoteDbRef.current = <span class="hljs-literal">null</span>
+
+        <span class="hljs-comment">// destroy local database, to remove all local data</span>
+        <span class="hljs-keyword">await</span> db.destroy()
+
+        setSessionState(sessionStates.loggedOut)
+        setUsername(<span class="hljs-string">''</span>)
+        setPassword(<span class="hljs-string">''</span>)
+      }
+    } <span class="hljs-keyword">catch</span> (err) {
+      <span class="hljs-comment">// network error</span>
     }
   }
 
@@ -498,13 +545,11 @@ one. This was for logging out.</p>
 
   useEffect(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
     <span class="hljs-comment">// sync effect</span>
-    <span class="hljs-keyword">if</span> (sessionState === sessionStates.loggedIn) {
+    <span class="hljs-keyword">if</span> (sessionState === sessionStates.loggedIn &amp;&amp; remoteDbRef.current) {
       <span class="hljs-comment">// whenever we are logged in: start syncing</span>
 
-      <span class="hljs-comment">// Get the URL of the users remote db</span>
-      <span class="hljs-keyword">const</span> remoteDbUrl = <span class="hljs-keyword">new</span> URL(getUserDatabaseName(username), dbBaseUrl)
       <span class="hljs-comment">// And sync</span>
-      <span class="hljs-keyword">const</span> sync = db.sync(remoteDbUrl.href, {
+      <span class="hljs-keyword">const</span> sync = db.sync(remoteDbRef.current, {
         <span class="hljs-attr">retry</span>: <span class="hljs-literal">true</span>,
         <span class="hljs-attr">live</span>: <span class="hljs-literal">true</span>,
       })
@@ -513,7 +558,7 @@ one. This was for logging out.</p>
         sync.cancel()
       }
     }
-  }, [sessionState, username, db])
+  }, [sessionState, db])
 
   <span class="hljs-comment">// ...</span>
 }
@@ -530,8 +575,12 @@ connection.</p>
 <h3><a class="anchor" aria-hidden="true" id="complete-component"></a><a href="#complete-component" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Complete component</h3>
 <p>Your <code>Session.js</code> should look something like this:</p>
 <pre><code class="hljs css language-jsx"><span class="hljs-comment">// Session.js</span>
-<span class="hljs-keyword">import</span> React, { useState, useEffect } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<span class="hljs-keyword">import</span> React, { useState, useEffect, useRef } <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
 <span class="hljs-keyword">import</span> { usePouch } <span class="hljs-keyword">from</span> <span class="hljs-string">'use-pouchdb'</span>
+<span class="hljs-keyword">import</span> PouchDB <span class="hljs-keyword">from</span> <span class="hljs-string">'pouchdb-browser'</span>
+<span class="hljs-keyword">import</span> PouchAuth <span class="hljs-keyword">from</span> <span class="hljs-string">'pouchdb-authentication'</span>
+
+PouchDB.plugin(PouchAuth)
 
 <span class="hljs-keyword">const</span> sessionStates = {
   <span class="hljs-attr">loading</span>: <span class="hljs-number">0</span>,
@@ -540,48 +589,55 @@ connection.</p>
 }
 
 <span class="hljs-keyword">const</span> dbBaseUrl = <span class="hljs-keyword">new</span> URL(<span class="hljs-string">'/db/'</span>, <span class="hljs-built_in">window</span>.location.href)
-<span class="hljs-keyword">const</span> sessionUrl = <span class="hljs-keyword">new</span> URL(<span class="hljs-string">'./_session'</span>, dbBaseUrl)
-<span class="hljs-keyword">const</span> usersDB = <span class="hljs-keyword">new</span> URL(<span class="hljs-string">'./_users'</span>, dbBaseUrl)
+<span class="hljs-keyword">const</span> HTTPPouch = PouchDB.defaults({
+  <span class="hljs-attr">prefix</span>: dbBaseUrl.href,
+})
 
 <span class="hljs-keyword">export</span> <span class="hljs-keyword">default</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">Session</span>(<span class="hljs-params"></span>) </span>{
   <span class="hljs-keyword">const</span> db = usePouch()
+
+  <span class="hljs-keyword">const</span> remoteDbRef = useRef(<span class="hljs-literal">null</span>)
+  <span class="hljs-keyword">if</span> (remoteDbRef.current == <span class="hljs-literal">null</span>) {
+    <span class="hljs-comment">// create a default remote db</span>
+    remoteDbRef.current = <span class="hljs-keyword">new</span> HTTPPouch(<span class="hljs-string">'_users'</span>, {
+      <span class="hljs-attr">skip_setup</span>: <span class="hljs-literal">true</span>, <span class="hljs-comment">// prevents PouchDB from checking if the DB exists.</span>
+    })
+  }
 
   <span class="hljs-keyword">const</span> [sessionState, setSessionState] = useState(sessionStates.loading)
   <span class="hljs-keyword">const</span> [username, setUsername] = useState(<span class="hljs-string">''</span>)
   <span class="hljs-keyword">const</span> [password, setPassword] = useState(<span class="hljs-string">''</span>)
 
-  <span class="hljs-keyword">const</span> checkSessionState = <span class="hljs-keyword">async</span> () =&gt; {
-    <span class="hljs-keyword">const</span> request = <span class="hljs-keyword">await</span> fetch(sessionUrl, {
-      <span class="hljs-attr">credentials</span>: <span class="hljs-string">'include'</span>,
-    })
-    <span class="hljs-keyword">const</span> sessionInfo = <span class="hljs-keyword">await</span> request.json()
-    <span class="hljs-keyword">const</span> name = sessionInfo.userCtx.name
-    <span class="hljs-keyword">const</span> isLoggedIn = name != <span class="hljs-literal">null</span>
-
-    <span class="hljs-keyword">if</span> (isLoggedIn) {
-      setSessionState(sessionStates.loggedIn)
-      setUsername(name)
-    } <span class="hljs-keyword">else</span> {
-      setSessionState(sessionStates.loggedOut)
-      setUsername(<span class="hljs-string">''</span>)
-      setPassword(<span class="hljs-string">''</span>)
-    }
-  }
-
   useEffect(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
     <span class="hljs-comment">// On first render: check if we are logged in</span>
-    checkSessionState()
+    remoteDbRef.current
+      .getSession()
+      .then(<span class="hljs-function"><span class="hljs-params">sessionInfo</span> =&gt;</span> {
+        <span class="hljs-keyword">const</span> name = sessionInfo.userCtx.name
+        <span class="hljs-keyword">if</span> (name) {
+          setSessionState(sessionStates.loggedIn)
+          setUsername(name)
+        } <span class="hljs-keyword">else</span> {
+          setSessionState(sessionStates.loggedOut)
+          setUsername(<span class="hljs-string">''</span>)
+          setPassword(<span class="hljs-string">''</span>)
+        }
+      })
+      .catch(<span class="hljs-function"><span class="hljs-params">err</span> =&gt;</span> {
+        <span class="hljs-built_in">console</span>.error(err)
+        setSessionState(sessionStates.loggedOut)
+        setUsername(<span class="hljs-string">''</span>)
+        setPassword(<span class="hljs-string">''</span>)
+      })
   }, [])
 
   useEffect(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
     <span class="hljs-comment">// sync effect</span>
-    <span class="hljs-keyword">if</span> (sessionState === sessionStates.loggedIn) {
+    <span class="hljs-keyword">if</span> (sessionState === sessionStates.loggedIn &amp;&amp; remoteDbRef.current) {
       <span class="hljs-comment">// whenever we are logged in: start syncing</span>
 
-      <span class="hljs-comment">// Get the URL of the users remote db</span>
-      <span class="hljs-keyword">const</span> remoteDbUrl = <span class="hljs-keyword">new</span> URL(getUserDatabaseName(username), dbBaseUrl)
       <span class="hljs-comment">// And sync</span>
-      <span class="hljs-keyword">const</span> sync = db.sync(remoteDbUrl.href, {
+      <span class="hljs-keyword">const</span> sync = db.sync(remoteDbRef.current, {
         <span class="hljs-attr">retry</span>: <span class="hljs-literal">true</span>,
         <span class="hljs-attr">live</span>: <span class="hljs-literal">true</span>,
       })
@@ -590,65 +646,75 @@ connection.</p>
         sync.cancel()
       }
     }
-  }, [sessionState, username, db])
+  }, [sessionState, db])
 
   <span class="hljs-keyword">const</span> doLogIn = <span class="hljs-keyword">async</span> () =&gt; {
     <span class="hljs-keyword">if</span> (username.length === <span class="hljs-number">0</span>) <span class="hljs-keyword">return</span>
 
-    <span class="hljs-keyword">const</span> request = <span class="hljs-keyword">await</span> fetch(sessionUrl, {
-      <span class="hljs-attr">method</span>: <span class="hljs-string">'POST'</span>,
-      <span class="hljs-attr">headers</span>: {
-        <span class="hljs-string">'Content-Type'</span>: <span class="hljs-string">'application/json'</span>,
-      },
-      <span class="hljs-attr">body</span>: <span class="hljs-built_in">JSON</span>.stringify({
-        <span class="hljs-attr">name</span>: username,
-        <span class="hljs-attr">password</span>: password,
-      }),
-    })
-    <span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> request.json()
-    <span class="hljs-keyword">if</span> (response.ok) {
-      checkSessionState()
+    <span class="hljs-keyword">try</span> {
+      <span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> remoteDbRef.current.logIn(username, password)
+      <span class="hljs-keyword">if</span> (response.ok) {
+        <span class="hljs-comment">// Close the active remote db.</span>
+        <span class="hljs-keyword">await</span> remoteDbRef.current.close()
+        <span class="hljs-comment">// Create the users db instance</span>
+        remoteDbRef.current = <span class="hljs-keyword">new</span> HTTPPouch(getUserDatabaseName(response.name))
+
+        setSessionState(sessionStates.loggedIn)
+        setUsername(response.name)
+        setPassword(<span class="hljs-string">''</span>)
+      }
+    } <span class="hljs-keyword">catch</span> (err) {
+      <span class="hljs-keyword">if</span> (err.name === <span class="hljs-string">'unauthorized'</span> || err.name === <span class="hljs-string">'forbidden'</span>) {
+        <span class="hljs-comment">// name or password incorrect</span>
+      } <span class="hljs-keyword">else</span> {
+        <span class="hljs-comment">// HTTP error, etc.</span>
+      }
     }
   }
 
   <span class="hljs-keyword">const</span> doSignUp = <span class="hljs-keyword">async</span> event =&gt; {
     event.preventDefault()
 
-    <span class="hljs-keyword">if</span> (username.length === <span class="hljs-number">0</span>) <span class="hljs-keyword">return</span>
+    <span class="hljs-keyword">if</span> (username.length === <span class="hljs-number">0</span> || password.length === <span class="hljs-number">0</span>) <span class="hljs-keyword">return</span>
 
-    <span class="hljs-keyword">const</span> request = <span class="hljs-keyword">await</span> fetch(
-      <span class="hljs-string">`<span class="hljs-subst">${usersDB.href}</span>/org.couchdb.user:<span class="hljs-subst">${username}</span>`</span>,
-      {
-        <span class="hljs-attr">method</span>: <span class="hljs-string">'PUT'</span>,
-        <span class="hljs-attr">headers</span>: {
-          <span class="hljs-string">'Content-Type'</span>: <span class="hljs-string">'application/json'</span>,
-        },
-        <span class="hljs-attr">body</span>: <span class="hljs-built_in">JSON</span>.stringify({
-          <span class="hljs-attr">name</span>: username,
-          password,
-          <span class="hljs-attr">roles</span>: [],
-          <span class="hljs-attr">type</span>: <span class="hljs-string">'user'</span>,
-        }),
+    <span class="hljs-keyword">try</span> {
+      <span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> remoteDbRef.current.signUp(username, password)
+      <span class="hljs-keyword">if</span> (response.ok) {
+        doLogIn()
       }
-    )
-    <span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> request.json()
-    <span class="hljs-keyword">if</span> (response.ok) {
-      doLogIn()
+    } <span class="hljs-keyword">catch</span> (err) {
+      <span class="hljs-keyword">if</span> (err.name === <span class="hljs-string">'conflict'</span>) {
+        <span class="hljs-comment">// an user with that username already exists, choose another username</span>
+      } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (err.name === <span class="hljs-string">'forbidden'</span>) {
+        <span class="hljs-comment">// invalid username</span>
+      } <span class="hljs-keyword">else</span> {
+        <span class="hljs-comment">// HTTP error, etc.</span>
+      }
     }
   }
 
   <span class="hljs-keyword">const</span> doLogOut = <span class="hljs-keyword">async</span> event =&gt; {
     event.preventDefault()
 
-    <span class="hljs-keyword">const</span> request = <span class="hljs-keyword">await</span> fetch(sessionUrl, {
-      <span class="hljs-attr">method</span>: <span class="hljs-string">'DELETE'</span>,
-      <span class="hljs-attr">credentials</span>: <span class="hljs-string">'include'</span>,
-    })
-    <span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> request.json()
-    <span class="hljs-keyword">if</span> (response.ok) {
-      <span class="hljs-comment">// destroy local database, to remove all local data</span>
-      <span class="hljs-keyword">await</span> db.destroy()
-      checkSessionState()
+    <span class="hljs-keyword">try</span> {
+      <span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> remoteDbRef.current.logOut()
+
+      <span class="hljs-keyword">if</span> (response.ok) {
+        <span class="hljs-comment">// Close the active remote db.</span>
+        <span class="hljs-keyword">await</span> remoteDbRef.current.close()
+
+        <span class="hljs-comment">// remote the current remote db.</span>
+        remoteDbRef.current = <span class="hljs-literal">null</span>
+
+        <span class="hljs-comment">// destroy local database, to remove all local data</span>
+        <span class="hljs-keyword">await</span> db.destroy()
+
+        setSessionState(sessionStates.loggedOut)
+        setUsername(<span class="hljs-string">''</span>)
+        setPassword(<span class="hljs-string">''</span>)
+      }
+    } <span class="hljs-keyword">catch</span> (err) {
+      <span class="hljs-comment">// network error</span>
     }
   }
 
@@ -748,4 +814,4 @@ to learn the error responses.</p>
   )
 </code></pre>
 <p>If you now open a different browser, you will be able to sync your Todos between them!</p>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/use-pouchdb/docs/basics/update"><span class="arrow-prev">← </span><span>Update docs</span></a><a class="docs-next button" href="/use-pouchdb/docs/basics/testing"><span>Testing</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#a-word-about-version-3">A word about Version 3</a></li><li><a href="#couch_peruser">couch_peruser</a></li><li><a href="#basics">Basics</a><ul class="toc-headings"><li><a href="#access-a-remote-database">Access a remote Database</a></li><li><a href="#sign-up">Sign up</a></li><li><a href="#log-in-and-out">Log in and out</a></li></ul></li><li><a href="#the-session-and-sync-component">The session and sync component</a><ul class="toc-headings"><li><a href="#component">Component</a></li><li><a href="#check-session-state">Check session state</a></li><li><a href="#sign-up-1">Sign up</a></li><li><a href="#log-in">Log in</a></li><li><a href="#log-out">Log out</a></li><li><a href="#syncing">Syncing</a></li><li><a href="#complete-component">Complete component</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/use-pouchdb/" class="nav-home"><img src="/use-pouchdb/img/favicon.ico" alt="usePouchDB" width="66" height="58"/></a><div><h5>Docs</h5><a href="/use-pouchdb/docs/introduction/quick_start">Getting Started</a><a href="/use-pouchdb/docs/api/provider">API Reference</a></div><div><h5>Contact</h5><a href="https://christopher-astfalk.de/">Blog</a><a href="https://github.com/Terreii/use-pouchdb" rel="noreferrer noopener">GitHub</a><a class="github-button" href="https://github.com/Terreii/use-pouchdb" data-icon="octicon-star" data-count-href="/Terreii/use-pouchdb/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a><div class="social"><a href="../impressum.html">Impressum</a></div></div></section><section class="copyright">Copyright © 2021 Christopher Astfalk</section></footer></div></body></html>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/use-pouchdb/docs/basics/update"><span class="arrow-prev">← </span><span>Update docs</span></a><a class="docs-next button" href="/use-pouchdb/docs/basics/testing"><span>Testing</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#a-word-about-version-3">A word about Version 3</a></li><li><a href="#couch_peruser">couch_peruser</a></li><li><a href="#basics">Basics</a><ul class="toc-headings"><li><a href="#access-a-remote-database">Access a remote Database</a></li><li><a href="#sign-up">Sign up</a></li><li><a href="#log-in-and-out">Log in and out</a></li><li><a href="#pouchdb-authentication">PouchDB Authentication</a></li></ul></li><li><a href="#the-session-and-sync-component">The session and sync component</a><ul class="toc-headings"><li><a href="#install-pouchdb-authentication">Install PouchDB Authentication</a></li><li><a href="#component">Component</a></li><li><a href="#check-session-state">Check session state</a></li><li><a href="#sign-up-1">Sign up</a></li><li><a href="#log-in">Log in</a></li><li><a href="#log-out">Log out</a></li><li><a href="#syncing">Syncing</a></li><li><a href="#complete-component">Complete component</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/use-pouchdb/" class="nav-home"><img src="/use-pouchdb/img/favicon.ico" alt="usePouchDB" width="66" height="58"/></a><div><h5>Docs</h5><a href="/use-pouchdb/docs/introduction/quick_start">Getting Started</a><a href="/use-pouchdb/docs/api/provider">API Reference</a></div><div><h5>Contact</h5><a href="https://christopher-astfalk.de/">Blog</a><a href="https://github.com/Terreii/use-pouchdb" rel="noreferrer noopener">GitHub</a><a class="github-button" href="https://github.com/Terreii/use-pouchdb" data-icon="octicon-star" data-count-href="/Terreii/use-pouchdb/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a><div class="social"><a href="../impressum.html">Impressum</a></div></div></section><section class="copyright">Copyright © 2021 Christopher Astfalk</section></footer></div></body></html>

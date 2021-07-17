@@ -59,8 +59,8 @@ what the user did enter.
 We'll jump over the `handleAddTodo` callback. And go to the JSX return:
 
 We use a `<form>` element with an onSubmit event listener to add the todo, whenever the user presses
-enter/return/submit or the `<button>`. It will also only submit when the input has a length of 1 or more
-`minlength='1'` (Isn't HTML awesome?).
+enter/return/submit or clicks the `<button>`. It will also only submit when the input has a length of
+1 or more `minlength='1'` (Isn't HTML awesome?).
 
 When the user does submit, we handle the event in `handleAddTodo`. The `doc` object is our **Todo-Document**, which
 we will add to the database. It's going be something like this:
@@ -104,7 +104,7 @@ with an `_id` that is the current time with milliseconds, it is unlikely, but st
 
 If `put()` fails, the todo will not be added and the `<input />` not reset. The user could then try again.
 
-> Normally you should _always_ catch and handle an write/update error. PouchDB is a _distributed_ system after all.
+> Normally you should _always_ catch and handle a write/update error. PouchDB is a _distributed_ system after all.
 >
 > Displaying an error message or trying again (with a different id) would be enough for this use case.
 

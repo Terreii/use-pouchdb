@@ -15,18 +15,15 @@ its [vast plugin ecosystem](https://pouchdb.com/external.html 'List of plugins f
 [CouchDB](https://couchdb.apache.org/) as the data backend and [React](https://reactjs.org/) with
 [Hooks](https://reactjs.org/docs/hooks-intro.html), you have everything you need to build a CRUD Web-App.
 
-It is now intended to be a puzzle piece in the replacement of CouchApps (the ones that use the deprecated
-[show](https://docs.couchdb.org/en/stable/ddocs/ddocs.html#show-functions) and
-[list](https://docs.couchdb.org/en/stable/ddocs/ddocs.html#list-functions) functions).
-
-> Note that usePouchDB is, for now, only optimised for local DBs and not for accessing a DB over
+> Note that usePouchDB is, only optimised for local DBs and not for accessing a DB over
 > HTTP! But you can still use it over HTTP.
 >
 > It subscribes to all changes and once for every used view! And every subscription is a HTTP
-> request. It will still work, but when you use views, it could exceed the 4 concurrent request
+> request. It will still work, but when you use views, it could exceed the 6 concurrent request
 > per domain limit on HTTP 1.1.
 >
-> When you restrict you self to not use views, then usePouchDB should work well over HTTP.
+> When you restrict yourself to not use views, then usePouchDB should work well over HTTP.
+> Or if you use **HTTP 2** or newer, that this limitation doesn't matter!
 
 ## Installation
 
@@ -64,7 +61,9 @@ yarn add -D pouchdb-browser
 
 ## Provider
 
-usePouchDB provides a `<Provider />`, to make a PouchDB database available to it's child components.
+usePouchDB provides a `<Provider />`, to make a PouchDB database available to its child components.
+
+Please visit [`<Provider />`'s API docs](../api/provider.md) for its complete API.
 
 ```jsx
 // Single database
@@ -118,6 +117,8 @@ ReactDOM.render(
 usePouchDB provides a `useDoc` hook to access a single document. It automatically subscribes to updates of that
 document.
 
+Please visit [`useDoc`'s API docs](../api/use-doc.md) for more options.
+
 ```jsx
 import React from 'react'
 
@@ -146,6 +147,8 @@ export default function BlogPost({ id }) {
 
 The [allDocs method](https://pouchdb.com/api.html#batch_fetch) is accessible using the `useAllDocs` hook. It, too,
 automatically subscribes to updates of those documents (and new ones).
+
+Please visit the [`useAllDocs` API docs](../api/use-all-docs.md) for more options.
 
 ```jsx
 import React from 'react'
@@ -182,6 +185,9 @@ export default function AllPosts() {
 Access a [Mango query](https://pouchdb.com/guides/mango-queries.html), and if it doesn't exist, create it.
 `useFind` also subscribes to updates to that index.
 
+Please visit the [`useFind` API docs](../api/use-find.md) for more options.
+And CouchDBs [Mango query language docs](https://docs.couchdb.org/en/stable/api/database/find.html#selector-syntax).
+
 ```jsx
 import React from 'react'
 import { useFind } from 'use-pouchdb'
@@ -194,7 +200,7 @@ export default function StoryList() {
     },
     selector: {
       type: 'story',
-      title: { $exists: true },
+      title: { $gt: null },
     },
     sort: ['title'],
     fields: ['_id', 'title'],
@@ -222,6 +228,9 @@ export default function StoryList() {
   )
 }
 ```
+
+> `useFind` requires [`pouchdb-find`](https://www.npmjs.com/package/pouchdb-find) to be
+> installed and setup.
 
 ## useView
 

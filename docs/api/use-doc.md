@@ -13,7 +13,7 @@ To read a single document use `useDoc`. It is the hook version of
 ## Parameters
 
 `useDoc` has the same options as [`db.get()`](https://pouchdb.com/api.html#fetch_document), with the only exception
-of `options.open_revs`. Options descriptions are copied from the PouchDB API page.
+of `options.open_revs` not being supported. Options descriptions are copied from the PouchDB API page.
 
 1. `id: string` - \_id of the document.
 2. `options?: object | null` - [`db.get()`](https://pouchdb.com/api.html#fetch_document) option object. All options
@@ -108,6 +108,10 @@ export function ConflictResolver({ id }) {
 
   if (winningIsLoading || loosingIsLoading) {
     return <div>loading ...</div>
+  }
+
+  if (winning._rev === loosing._rev) {
+    return <div>No conflict!</div>
   }
 
   return (

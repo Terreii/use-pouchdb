@@ -30,8 +30,8 @@ export default function TodoList() {
 ```
 
 `useAllDocs` loads all documents sorted by their _id_. It also subscripts to changes in the database. When ever a
-new document will be added, or an existing one updated, `useAllDocs` will refetch all documents. It can also only
-load a slice of all documents, but we don't need that here.
+new document will be added, or an existing one updated or deleted, `useAllDocs` will update its result.
+It can also only load a slice of all documents, but we don't need that here.
 
 The `rows` field will contain an array of objects.
 

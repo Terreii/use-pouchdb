@@ -88,7 +88,7 @@ descriptions are copied from the PouchDB API page.
   - `key: any | null` - Key that was the first argument passed to `emit` in the `map` function.
   - `value: any` - Value of the row.
     - If no reduce was done: Value that was the second argument passed to `emit` in the `map` function.
-    - Result of the reduce function.
+    - Else: Result of the reduce function.
   - `doc?: PouchDB.Core.Document` - If `options.include_docs` was `true`, this field will contain the document. And
     if `attachments` is also `true`, the document will contain the attachment data in the `"_attachments"` field.
 - `offset?: number` - The `skip` provided.
@@ -234,12 +234,12 @@ var designDoc = {
           // use a complex key. Here an array
           emit(
             [
-              time.getFullYear(),
-              time.getMonth() + 1,
-              time.getDate(),
-              time.getHours(),
-              time.getMinutes(),
-              time.getSeconds(),
+              time.getUTCFullYear(),
+              time.getUTCMonth() + 1,
+              time.getUTCDate(),
+              time.getUTCHours(),
+              time.getUTCMinutes(),
+              time.getUTCSeconds(),
             ],
             doc.amount
           )

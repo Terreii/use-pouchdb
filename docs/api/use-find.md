@@ -56,7 +56,7 @@ Options descriptions are copied from the PouchDB API page.
      The special key `"_default"` selects the _default database_. Defaults to `"_default"`.
 
 > `index`, `selector`, `fields` and `sort` are check for equality with a deep equal algorithm.
-> And only if they differentiate by _value_ will they cause a new query be made.
+> And only if they differentiate by _value_ will they cause a new query to be made.
 
 > Note: `useFind` will call `db.createIndex` every time the `index` object's values changed!
 > It will happily create a new index on every render!
@@ -82,7 +82,7 @@ Options descriptions are copied from the PouchDB API page.
 
 ### Ensure that an index exist
 
-If the index field contains an object with an fields-field, useFind will ensure that that index exist.
+If the index field contains an object with a fields-field, useFind will ensure that that index exist.
 If the index doesn't exist, it will be created.
 
 This is the recommended usage.

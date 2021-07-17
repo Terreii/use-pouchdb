@@ -23,7 +23,7 @@ teaches you how to think in CouchDB (and PouchDB).
 If you like to learn from videos: [IBM Cloudant](https://www.ibm.com/cloud/cloudant)
 (CouchDB as a Service Provider) has a great course:
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/videoseries?list=PLJa_sXrJUZb-Y4Q_5y3yPC8m5RxS5q-_J" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/videoseries?list=PLOspHqNVtKAAXDobTc9kBWwnfgzNV2k_a" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 ## Why CouchDB and PouchDB?
 
@@ -32,7 +32,7 @@ or **replication** as CouchDB calls it. CouchDB and PouchDB are build around the
 
 But not only live sync, but losing the connection, and continuing accessing and changing your data. And once your
 back online, sync it. With PouchDB on the clients browser and CouchDB on the backend your web app can become
-_offline capable_.
+[_offline first_](http://offlinefirst.org/) capable.
 
 Then there is also the **changes feed**, which lists what did change in the order it did. Or that everything is
 stored as **JSON Objects**, or the **HTTP API** of CouchDB, or integrated user authentication and
@@ -49,7 +49,7 @@ If CouchDB is the big sibling, than **PouchDB** is its little sibling. PouchDB i
 It can sync with CouchDB. And you can use it in the browser, or your node app. It also has an
 [extensive plugin ecosystem](https://pouchdb.com/external.html).
 
-Because PouchDB and CouchDB are so alike, and this package uses PouchDB, I will use PouchDB synonymously for
+Because PouchDB and CouchDB are so alike, and this package focuses on PouchDB, I will use PouchDB synonymously for
 PouchDB and CouchDB. If I explicitly mean CouchDB, then I will write CouchDB. If PouchDB is explicitly meant, then
 I will note it so, or if I write about a PouchDB plugin, it will always be PouchDB (the JS package). The biggest
 difference is that CouchDB's API are URLs while PouchDB's API are methods.
@@ -57,7 +57,10 @@ difference is that CouchDB's API are URLs while PouchDB's API are methods.
 > There is a [PouchDB Server](https://github.com/pouchdb/pouchdb-server). It implements more/most
 > of CouchDBs API (like authentication and authorization). And most of what will be marked as
 > CouchDB also works with PouchDB Server. Which makes PouchDB Server an ideal candidate for
-> development. But use CouchDB in production!
+> development.
+>
+> But use CouchDB in production! Like Ruby on Rails uses SQLite in development,
+> but by default PostgreSQL in production.
 
 ### About Databases
 
@@ -72,15 +75,17 @@ Documents have a unique ID (`_id`) per db. But there stops the similarities.
 While tables require you to create a schema, which all rows must confirm to. A database is schemaless. Every doc
 could have a different structure. It is recommended to add a `type` field on every document. Like in
 [Redux Actions](https://redux.js.org/basics/actions).
+You normally store multiple different data types together in a single DB.
 
 In CouchDB access control is handled on a per database level. There is a common setup that gives every user their
 own db, to which only they have access (think of a note or todo app).
 
 It might be better to view databases as a collection of data, that should be synchronised together\*, and have
-access control\* on them. Fewer databases are better.
+the same access control\*\* on them. Fewer databases are better.
 
-> \* You can filter out what will be synced, but not enforce it, and there is also work going on to add access
-> control on a per doc basis to CouchDB.
+> \* You can filter out what will be synced, but not enforce it.
+>
+> \*\* There is also work going on to add access control on a per doc basis to CouchDB.
 
 ### About Documents
 
@@ -91,10 +96,10 @@ document.
 
 Let's give you an example: Tags.
 
-Normally you would store tags in SQL in their own table. Then create a table that links the tags to your to be
-tagged data, using foreign keys.
+Normally you would store tags in SQL in their own table. Then create a join table that links the tags to your
+to be tagged data, using foreign keys.
 
-This could become in a sync environment a hugh problem! What if the linking was changed, but the tagged data didn't
+This could become in a sync environment a huge problem! What if the linking was changed, but the tagged data didn't
 sync yet? Because _networks fail_. Better store the tags in an array in the document. It is JSON after all. And not
 only the id to the tag, the tag _itself_. This way there will never be a link to something that doesn't exist.
 
@@ -127,7 +132,7 @@ possible data collisions.<br/>But Patricia Garcia explains it better in this
 [talk from JSConfEU 2015](https://2015.jsconf.eu/speakers/patricia-garcia-good-tech-for-hard-places-fighting-ebola-with-javascript-offline-apps.html)
 (at 17:13):
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/1sLjWlWvCsc?start=1033" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/1sLjWlWvCsc?start=1032" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 ## Show me some code!
 
@@ -139,7 +144,7 @@ With how PouchDB works out of the way, let's begin with using it! You can experi
 ways:
 
 - Run on pouchdb.com
-- Get from a CDN
+- Get it from a CDN
 - install by npm
 
 [There are more options](https://pouchdb.com/guides/setup-pouchdb.html). But this is a quick start.
@@ -213,15 +218,20 @@ If you want to access a remote database, then change the name to the url of the 
 object, a string:
 
 ```javascript
-const remote = new PouchDB('https://example.com/myDB/')
+const remote = new PouchDB('https://example.com/myDB')
 
 // or with username and password:
 
-const remote2 = new PouchDB('https://example.com/myDB/', {
+const remote2 = new PouchDB('https://example.com/myDB', {
   auth: {
     username: 'tester',
     password: 'geheim',
   },
+})
+
+// or use a prefix
+const remote3 = new PouchDB('myDB', {
+  prefix: 'https://example.com/',
 })
 ```
 
@@ -255,11 +265,13 @@ const syncHandler = localDB
 syncHandler.cancel()
 ```
 
+You can also sync between two local or two remote databases.
+
 If you only what to sync in one direction there is also:
 
 ```javascript
-localDB.replicate.to(remoteDB)
-localDB.replicate.from(remoteDB)
+localDB.replicate.to(remoteDB) // push data from localDB to remoteDB
+localDB.replicate.from(remoteDB) // pull data from remoteDB to localDB
 ```
 
 They have the same options as sync.
@@ -347,14 +359,13 @@ There are two fields that every document in PouchDB has.
 - `_id` (string) is a for the database unique identifier.
 - `_rev` (string) is a version "number".
 
-```javascript
-'1-e78451c157971875ec76860d33e7da93'
-
+```json
+"1-e78451c157971875ec76860d33e7da93"
 ```
 
 The rev consists out of two parts: a **number** and a **hash**, separated by `-`.
 On every update the **number** will be increased by 1. And a new **hash** calculated.
-If you update a document you must include the old `_rev`. You don't change the `_rev`
+If you update a document you must include the old `_rev`. You don't change the `_rev`!
 
 But why do we need `rev` in the first place?
 

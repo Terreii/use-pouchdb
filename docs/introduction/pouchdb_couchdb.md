@@ -20,10 +20,7 @@ To deepen your knowledge use [CouchDBs extensive documentation](https://docs.cou
 from setting it up, all through user management, views, to tips to write effective views. But most importantly, it
 teaches you how to think in CouchDB (and PouchDB).
 
-If you like to learn from videos: [IBM Cloudant](https://www.ibm.com/cloud/cloudant)
-(CouchDB as a Service Provider) has a great course:
-
-<iframe width="560" height="315" src="https://www.youtube.com/embed/videoseries?list=PLOspHqNVtKAAXDobTc9kBWwnfgzNV2k_a" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/aOE90VAVOcU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 ## Why CouchDB and PouchDB?
 

@@ -32,16 +32,9 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: '14.x'
-      - uses: webfactory/ssh-agent@v0.5.0
-        with:
-          ssh-private-key: ${{ secrets.GH_PAGES_DEPLOY }}
       - name: Release to GitHub Pages
-        env:
-          USE_SSH: true
-          GIT_USER: Terreii
         run: |
           git config --global user.email "christopher.astfalk@icloud.com"
           git config --global user.name "Christopher Astfalk"
-          cd website
-          npm ci
-          npm run publish-gh-pages
+          echo "machine github.com login ${secrets.GH_NAME} password ${secrets.GH_TOKEN}" > ~/.netrc
+          cd website && npm ci && GIT_USER="${secrets.GH_NAME}" npm run publish-gh-pages

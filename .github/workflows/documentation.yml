@@ -36,5 +36,5 @@ jobs:
         run: |
           git config --global user.email "christopher.astfalk@icloud.com"
           git config --global user.name "Christopher Astfalk"
-          echo "machine github.com login ${secrets.GH_NAME} password ${secrets.GH_TOKEN}" > ~/.netrc
-          cd website && npm ci && GIT_USER="${secrets.GH_NAME}" npm run publish-gh-pages
+          echo "machine github.com login ${{ secrets.GH_NAME }} password ${{ secrets.GH_TOKEN }}" > ~/.netrc
+          cd website && npm ci && GIT_USER="${{ secrets.GH_NAME }}" npm run publish-gh-pages

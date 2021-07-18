@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { MISSING_DOC } from 'pouchdb-errors'
 
 import { useContext } from './context'
@@ -35,6 +35,8 @@ export default function useView<Content, Result, Model = Content>(
     )
   }
 
+  const lastView = useRef<string | null>(null)
+
   const {
     reduce,
     include_docs,
@@ -48,6 +50,7 @@ export default function useView<Content, Result, Model = Content>(
     group,
     group_level,
     update_seq,
+    stale,
   } = opts || {}
 
   const startkey = useDeepMemo(opts?.startkey)
@@ -79,11 +82,11 @@ export default function useView<Content, Result, Model = Content>(
       endkey,
       key,
       keys,
-      // stale is not yet supported
-      // stale: stale,
+      stale: lastView.current === fun ? undefined : stale,
     }
 
     if (typeof fun === 'string') {
+      lastView.current = fun
       return doDDocQuery(dispatch, pouch, subscriptionManager, fun, options)
     } else {
       return doTemporaryQuery(
@@ -115,6 +118,7 @@ export default function useView<Content, Result, Model = Content>(
     group,
     group_level,
     update_seq,
+    stale,
   ])
 
   return state
@@ -220,9 +224,13 @@ function doDDocQuery<Model, Result>(
         })
       }
     } finally {
+      if (!isMounted) return
       // refresh if change did happen while querying
       isFetching = false
-      if (shouldUpdateAfter && isMounted) {
+      if (option?.stale) {
+        delete option.stale
+        query()
+      } else if (shouldUpdateAfter) {
         query()
       }
     }

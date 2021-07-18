@@ -16,13 +16,17 @@ export interface PouchContextObject {
 
 type ContextObject = { [key: string]: PouchContextObject }
 
-const PouchContext = createContext<{
+const PouchContext = /*#__PURE__*/ createContext<{
   defaultKey: string
   databases: ContextObject
 }>({
   defaultKey: '',
   databases: {},
 })
+
+if (process.env.NODE_ENV !== 'production') {
+  PouchContext.displayName = 'UsePouchDBContext'
+}
 
 /**
  * Provide access to a database.

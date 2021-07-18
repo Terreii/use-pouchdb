@@ -45,7 +45,7 @@
     "@babel/preset-env": "^7.12.1",
     "@babel/preset-react": "^7.12.1",
     "@babel/preset-typescript": "^7.12.1",
-    "@testing-library/react-hooks": "^3.4.2",
+    "@testing-library/react-hooks": "^7.0.1",
     "@tsconfig/node10": "^1.0.7",
     "@types/jest": "^26.0.15",
     "@types/pouchdb-adapter-memory": "^6.1.3",

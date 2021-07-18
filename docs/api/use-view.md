@@ -38,8 +38,7 @@ descriptions are copied from the PouchDB API page.
    - A full CouchDB-style map/reduce view `{map: ..., reduce: ...}`. **Danger! It will scan the _entire database_
      every time a parameter or document did change! Use only for development!**
 2. `options?: object` - An options object. It has the same options as
-   [`db.query()`](https://pouchdb.com/api.html#query_database) with the exception that `options.stale` is not yet
-   implemented.
+   [`db.query()`](https://pouchdb.com/api.html#query_database).
    - `options.reduce?: boolean` - Should the result be reduced by the defined `reduce` function? Defaults to `true`.
      - `true` - Return the result of the reduce function.
      - `false` - Don't use the reduce function.
@@ -70,6 +69,10 @@ descriptions are copied from the PouchDB API page.
      returning a single result. Defaults to `false`.
    - `options.group_level?: number` - Number of elements in a key to group by, assuming the keys are arrays.
      Defaults to the full length of the array.
+   - `options.stale?: 'ok' | 'update_after'` - Only applies to saved views. Can be one of:
+     - unspecified (default): Returns the latest results, waiting for the view to build if necessary.
+     - `'ok' | 'update_after'`: Returns results immediately, even if they’re out-of-date.
+       But starts a new request after the first request did resolved.
    - `options.update_seq?: boolean` - Include an `update_seq` value indicating which sequence id of the underlying
      database the view reflects.
    - `options.db?: string` - Selects the database to be used. The database is selected by it's name/key.

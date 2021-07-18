@@ -870,18 +870,15 @@ describe('pouchdb get options', () => {
       value: 'other',
     })
 
-    const {
-      result,
-      waitForNextUpdate,
-      rerender,
-    } = renderHookWithMultiDbContext(
-      (name?: string) => useDoc('test', { db: name }),
-      {
-        initialProps: undefined,
-        main: myPouch,
-        other: other,
-      }
-    )
+    const { result, waitForNextUpdate, rerender } =
+      renderHookWithMultiDbContext(
+        (name?: string) => useDoc('test', { db: name }),
+        {
+          initialProps: undefined,
+          main: myPouch,
+          other: other,
+        }
+      )
 
     await waitForNextUpdate()
 

@@ -1239,27 +1239,24 @@ describe('options', () => {
       value: 'other',
     })
 
-    const {
-      result,
-      waitForValueToChange,
-      rerender,
-    } = renderHookWithMultiDbContext(
-      (name?: string) =>
-        useFind({
-          index: {
-            fields: ['value'],
-          },
-          selector: {
-            value: { $gt: null },
-          },
-          db: name,
-        }),
-      {
-        initialProps: undefined,
-        main: myPouch,
-        other: other,
-      }
-    )
+    const { result, waitForValueToChange, rerender } =
+      renderHookWithMultiDbContext(
+        (name?: string) =>
+          useFind({
+            index: {
+              fields: ['value'],
+            },
+            selector: {
+              value: { $gt: null },
+            },
+            db: name,
+          }),
+        {
+          initialProps: undefined,
+          main: myPouch,
+          other: other,
+        }
+      )
 
     await waitForValueToChange(() => result.current.loading)
 

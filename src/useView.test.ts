@@ -1057,18 +1057,15 @@ describe('temporary function only views', () => {
         }
       }
 
-      const {
-        result,
-        waitForNextUpdate,
-        rerender,
-      } = renderHookWithMultiDbContext(
-        (name?: string) => useView(view, { db: name }),
-        {
-          initialProps: undefined,
-          main: myPouch,
-          other: other,
-        }
-      )
+      const { result, waitForNextUpdate, rerender } =
+        renderHookWithMultiDbContext(
+          (name?: string) => useView(view, { db: name }),
+          {
+            initialProps: undefined,
+            main: myPouch,
+            other: other,
+          }
+        )
 
       await waitForNextUpdate()
 
@@ -2311,18 +2308,15 @@ describe('temporary views objects', () => {
         },
       }
 
-      const {
-        result,
-        waitForNextUpdate,
-        rerender,
-      } = renderHookWithMultiDbContext(
-        (name?: string) => useView(view, { db: name }),
-        {
-          initialProps: undefined,
-          main: myPouch,
-          other: other,
-        }
-      )
+      const { result, waitForNextUpdate, rerender } =
+        renderHookWithMultiDbContext(
+          (name?: string) => useView(view, { db: name }),
+          {
+            initialProps: undefined,
+            main: myPouch,
+            other: other,
+          }
+        )
 
       await waitForNextUpdate()
 
@@ -3883,18 +3877,15 @@ describe('design documents', () => {
         },
       ])
 
-      const {
-        result,
-        waitForNextUpdate,
-        rerender,
-      } = renderHookWithMultiDbContext(
-        (name?: string) => useView('ddoc/test', { db: name }),
-        {
-          initialProps: undefined,
-          main: myPouch,
-          other: other,
-        }
-      )
+      const { result, waitForNextUpdate, rerender } =
+        renderHookWithMultiDbContext(
+          (name?: string) => useView('ddoc/test', { db: name }),
+          {
+            initialProps: undefined,
+            main: myPouch,
+            other: other,
+          }
+        )
 
       await waitForNextUpdate()
 

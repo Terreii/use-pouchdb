@@ -748,15 +748,12 @@ describe('options', () => {
   })
 
   test('should handle the keys option', async () => {
-    const [
-      { rev: revA },
-      { rev: revB },
-      { rev: revC },
-    ] = await myPouch.bulkDocs([
-      { _id: 'a', test: 'value' },
-      { _id: 'b', test: 'other' },
-      { _id: 'c', test: 'moar' },
-    ])
+    const [{ rev: revA }, { rev: revB }, { rev: revC }] =
+      await myPouch.bulkDocs([
+        { _id: 'a', test: 'value' },
+        { _id: 'b', test: 'other' },
+        { _id: 'c', test: 'moar' },
+      ])
 
     const { result, waitForNextUpdate, rerender } = renderHook(
       (keys: string[]) => useAllDocs({ keys }),
@@ -865,18 +862,15 @@ describe('options', () => {
       value: 'other',
     })
 
-    const {
-      result,
-      waitForNextUpdate,
-      rerender,
-    } = renderHookWithMultiDbContext(
-      (name?: string) => useAllDocs({ db: name, include_docs: true }),
-      {
-        initialProps: undefined,
-        main: myPouch,
-        other: other,
-      }
-    )
+    const { result, waitForNextUpdate, rerender } =
+      renderHookWithMultiDbContext(
+        (name?: string) => useAllDocs({ db: name, include_docs: true }),
+        {
+          initialProps: undefined,
+          main: myPouch,
+          other: other,
+        }
+      )
 
     await waitForNextUpdate()
 

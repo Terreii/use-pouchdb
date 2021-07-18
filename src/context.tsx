@@ -53,10 +53,8 @@ export type ProviderArguments =
  */
 export function Provider(args: ProviderArguments): React.ReactElement {
   const { pouchdb, name } = args as SingleDbProviderArguments
-  const {
-    databases: dbsArg,
-    default: defaultArg,
-  } = args as MultiDbProviderArguments
+  const { databases: dbsArg, default: defaultArg } =
+    args as MultiDbProviderArguments
 
   // collection of databases added in this Provider
   let databases: { [key: string]: PouchDB.Database }

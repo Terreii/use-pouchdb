@@ -201,9 +201,7 @@ function createDocSubscription(pouch: PouchDB.Database): DocsSubscription {
                 subscription.all,
                 false,
                 change.id,
-                (doc as unknown) as PouchDB.Core.Document<
-                  Record<string, unknown>
-                >
+                doc as unknown as PouchDB.Core.Document<Record<string, unknown>>
               )
             }
             if (hasId) {
@@ -214,9 +212,7 @@ function createDocSubscription(pouch: PouchDB.Database): DocsSubscription {
                 >,
                 false,
                 change.id,
-                (doc as unknown) as PouchDB.Core.Document<
-                  Record<string, unknown>
-                >
+                doc as unknown as PouchDB.Core.Document<Record<string, unknown>>
               )
             }
           })

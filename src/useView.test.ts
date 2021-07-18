@@ -603,7 +603,7 @@ describe('temporary function only views', () => {
         {
           initialProps: {
             startkey: ['b'],
-            endkey: ['c'],
+            endkey: ['c'] as [any],
           },
           pouchdb: myPouch,
         }
@@ -1753,7 +1753,7 @@ describe('temporary views objects', () => {
         {
           initialProps: {
             startkey: ['b'],
-            endkey: ['c'],
+            endkey: ['c'] as [any],
           },
           pouchdb: myPouch,
         }
@@ -3193,7 +3193,7 @@ describe('design documents', () => {
         {
           initialProps: {
             startkey: ['b'],
-            endkey: ['c'],
+            endkey: ['c'] as [any],
           },
           pouchdb: myPouch,
         }
@@ -3784,6 +3784,67 @@ describe('design documents', () => {
 
       expect(result.current.state).toBe('done')
       expect(result.current.update_seq).not.toBeUndefined()
+    })
+
+    test('should handle the stale option', async () => {
+      await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'tester' },
+      ])
+
+      const ddoc = {
+        _id: '_design/ddoc',
+        views: {
+          test: {
+            map: function (
+              doc: PouchDB.Core.Document<Record<string, unknown>>
+            ) {
+              if (doc.type === 'tester') {
+                emit([doc._id, doc.test], 42)
+              }
+            }.toString(),
+          },
+        },
+      }
+
+      await myPouch.put(ddoc)
+
+      const baseResult = await myPouch.query('ddoc/test')
+
+      await myPouch.bulkDocs([
+        { _id: 'c', test: 'moar', type: 'tester' },
+        { _id: 'd', test: 'OK', type: 'tester' },
+      ])
+
+      const { result, waitForNextUpdate } = renderHook(
+        (stale?: 'ok') => useView('ddoc/test', { stale }),
+        {
+          initialProps: 'ok',
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForNextUpdate()
+
+      expect(result.current).toEqual({
+        error: null,
+        loading: true,
+        state: 'loading',
+        ...baseResult,
+      })
+
+      await waitForNextUpdate()
+
+      expect(result.current.loading).toBeFalsy()
+      expect(result.current.state).toBe('done')
+      expect(result.current.total_rows).toBe(4)
+      expect(result.current.rows).toHaveLength(4)
+      expect(result.current.rows.map(row => row.id)).toEqual([
+        'a',
+        'b',
+        'c',
+        'd',
+      ])
     })
 
     test('should support the selection of a database in the context to be used', async () => {

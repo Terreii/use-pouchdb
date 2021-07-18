@@ -224,14 +224,15 @@ function doDDocQuery<Model, Result>(
         })
       }
     } finally {
-      if (!isMounted) return
-      // refresh if change did happen while querying
-      isFetching = false
-      if (option?.stale) {
-        delete option.stale
-        query()
-      } else if (shouldUpdateAfter) {
-        query()
+      if (isMounted) {
+        // refresh if change did happen while querying
+        isFetching = false
+        if (option?.stale) {
+          delete option.stale
+          query()
+        } else if (shouldUpdateAfter) {
+          query()
+        }
       }
     }
   }

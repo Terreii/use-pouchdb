@@ -603,7 +603,7 @@ describe('temporary function only views', () => {
         {
           initialProps: {
             startkey: ['b'],
-            endkey: ['c'] as [any],
+            endkey: ['c'] as [string | Record<string, unknown>],
           },
           pouchdb: myPouch,
         }
@@ -1750,7 +1750,7 @@ describe('temporary views objects', () => {
         {
           initialProps: {
             startkey: ['b'],
-            endkey: ['c'] as [any],
+            endkey: ['c'] as [string | Record<string, unknown>],
           },
           pouchdb: myPouch,
         }
@@ -3187,7 +3187,7 @@ describe('design documents', () => {
         {
           initialProps: {
             startkey: ['b'],
-            endkey: ['c'] as [any],
+            endkey: ['c'] as [string | Record<string, unknown>],
           },
           pouchdb: myPouch,
         }

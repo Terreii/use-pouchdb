@@ -1410,6 +1410,100 @@ describe('temporary views objects', () => {
       ])
     })
 
+    test('should update if a doc is removed from the view while reducing', async () => {
+      const [docAInfo, docBInfo] = await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'tester' },
+      ])
+
+      const view = {
+        map: (
+          doc: PouchDB.Core.Document<Record<string, unknown>>,
+          emit: (key: unknown, value?: unknown) => void
+        ) => {
+          if (doc.type === 'tester') {
+            emit(doc.test, 42)
+          }
+        },
+        reduce: '_count',
+      }
+
+      const { result, waitForNextUpdate, waitForValueToChange, rerender } =
+        renderHook((reduce?: boolean) => useView(view, { reduce }), {
+          initialProps: true,
+          pouchdb: myPouch,
+        })
+
+      await waitForValueToChange(() => result.current.rows)
+
+      expect(result.current.rows).toEqual([
+        {
+          key: null,
+          value: 2,
+        },
+      ])
+
+      await myPouch.remove(docBInfo.id, docBInfo.rev)
+
+      await waitForValueToChange(() => result.current.rows)
+
+      expect(result.current.rows).toEqual([
+        {
+          key: null,
+          value: 1,
+        },
+      ])
+
+      await myPouch.put({
+        _id: docAInfo.id,
+        _rev: docAInfo.rev,
+        type: 'other',
+        test: 'moar',
+      })
+
+      await waitForValueToChange(() => result.current.rows)
+
+      expect(result.current.rows).toHaveLength(0)
+
+      rerender()
+
+      const [docCInfo, docDInfo] = await myPouch.bulkDocs([
+        { _id: 'c', test: 'value', type: 'tester' },
+        { _id: 'd', test: 'other', type: 'tester' },
+      ])
+
+      await waitForValueToChange(() => result.current.rows)
+
+      expect(result.current.rows).toEqual([
+        {
+          key: null,
+          value: 2,
+        },
+      ])
+
+      await myPouch.remove(docCInfo.id, docCInfo.rev)
+
+      await waitForValueToChange(() => result.current.rows)
+
+      expect(result.current.rows).toEqual([
+        {
+          key: null,
+          value: 1,
+        },
+      ])
+
+      await myPouch.put({
+        _id: docDInfo.id,
+        _rev: docDInfo.rev,
+        type: 'other',
+        test: 'moar',
+      })
+
+      await waitForValueToChange(() => result.current.rows)
+
+      expect(result.current.rows).toHaveLength(0)
+    })
+
     test('should handle the include_docs option', async () => {
       const putResults = await myPouch.bulkDocs([
         { _id: 'a', test: 'value', type: 'tester' },
@@ -2799,6 +2893,106 @@ describe('design documents', () => {
       expect(result.current.rows).toEqual([
         { id: 'a', key: 'value', value: 42 },
       ])
+    })
+
+    test('should update if a doc is removed from the view while reducing', async () => {
+      const [docAInfo, docBInfo] = await myPouch.bulkDocs([
+        { _id: 'a', test: 'value', type: 'tester' },
+        { _id: 'b', test: 'other', type: 'tester' },
+      ])
+
+      const ddoc = {
+        _id: '_design/ddoc',
+        views: {
+          test: {
+            map: function (
+              doc: PouchDB.Core.Document<Record<string, unknown>>
+            ) {
+              if (doc.type === 'tester') {
+                emit(doc.test, 42)
+              }
+            }.toString(),
+            reduce: '_count',
+          },
+        },
+      }
+
+      await myPouch.put(ddoc)
+
+      const { result, waitForNextUpdate, waitForValueToChange, rerender } =
+        renderHook((reduce?: boolean) => useView('ddoc/test', { reduce }), {
+          initialProps: true,
+          pouchdb: myPouch,
+        })
+
+      await waitForValueToChange(() => result.current.rows)
+
+      expect(result.current.rows).toEqual([
+        {
+          key: null,
+          value: 2,
+        },
+      ])
+
+      await myPouch.remove(docBInfo.id, docBInfo.rev)
+
+      await waitForValueToChange(() => result.current.rows)
+
+      expect(result.current.rows).toEqual([
+        {
+          key: null,
+          value: 1,
+        },
+      ])
+
+      await myPouch.put({
+        _id: docAInfo.id,
+        _rev: docAInfo.rev,
+        type: 'other',
+        test: 'moar',
+      })
+
+      await waitForValueToChange(() => result.current.rows)
+
+      expect(result.current.rows).toHaveLength(0)
+
+      rerender()
+
+      const [docCInfo, docDInfo] = await myPouch.bulkDocs([
+        { _id: 'c', test: 'value', type: 'tester' },
+        { _id: 'd', test: 'other', type: 'tester' },
+      ])
+
+      await waitForValueToChange(() => result.current.rows)
+
+      expect(result.current.rows).toEqual([
+        {
+          key: null,
+          value: 2,
+        },
+      ])
+
+      await myPouch.remove(docCInfo.id, docCInfo.rev)
+
+      await waitForValueToChange(() => result.current.rows)
+
+      expect(result.current.rows).toEqual([
+        {
+          key: null,
+          value: 1,
+        },
+      ])
+
+      await myPouch.put({
+        _id: docDInfo.id,
+        _rev: docDInfo.rev,
+        type: 'other',
+        test: 'moar',
+      })
+
+      await waitForValueToChange(() => result.current.rows)
+
+      expect(result.current.rows).toHaveLength(0)
     })
 
     test('should handle the include_docs option', async () => {

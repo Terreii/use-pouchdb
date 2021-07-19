@@ -1483,6 +1483,7 @@ describe('temporary views objects', () => {
 
       await myPouch.remove(docCInfo.id, docCInfo.rev)
 
+      await waitForNextUpdate()
       await waitForValueToChange(() => result.current.rows)
 
       expect(result.current.rows).toEqual([
@@ -2974,6 +2975,7 @@ describe('design documents', () => {
 
       await myPouch.remove(docCInfo.id, docCInfo.rev)
 
+      await waitForNextUpdate()
       await waitForValueToChange(() => result.current.rows)
 
       expect(result.current.rows).toEqual([

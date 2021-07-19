@@ -143,6 +143,7 @@ function doDDocQuery<Model, Result>(
   let isMounted = true
   let isFetching = false
   let shouldUpdateAfter = false
+  let isReduce = Boolean(option?.reduce)
 
   let unsubscribeFromDocs: (() => void) | null = null
 
@@ -159,7 +160,7 @@ function doDDocQuery<Model, Result>(
     }
 
     unsubscribeFromDocs = subscriptionManager.subscribeToDocs(
-      ids,
+      isReduce ? null : ids,
       (deleted, docId) => {
         if (!isMounted) return
 
@@ -210,15 +211,19 @@ function doDDocQuery<Model, Result>(
         }
       }
       lastResultIds = ids
+      const isThisReduced = ids.size === 0 && result.rows.length > 0
 
-      ids.add(id)
-      createDocSubscription(Array.from(ids))
+      if (!isReduce || isReduce !== isThisReduced) {
+        isReduce = isThisReduced
+        ids.add(id)
+        createDocSubscription(Array.from(ids))
+      }
     } catch (error) {
       if (isMounted) {
         dispatch({
           type: 'loading_error',
           payload: {
-            error: error,
+            error,
             setResult: false,
           },
         })
@@ -276,6 +281,9 @@ function doTemporaryQuery<Model, Result>(
   let isMounted = true
   let isFetching = false
   let shouldUpdateAfter = false
+  const isReduce =
+    typeof option?.reduce === 'string' ||
+    (option?.reduce !== false && typeof fn === 'object' && Boolean(fn.reduce))
   let resultIds: Set<PouchDB.Core.DocumentId | null> | null = null
 
   // Does the query.
@@ -342,9 +350,12 @@ function doTemporaryQuery<Model, Result>(
   const unsubscribe = subscriptionManager.subscribeToDocs<Model>(
     null,
     (_deleted, id, doc) => {
-      let isDocInView = false
-
+      if (isReduce) {
+        query()
+        return
+      }
       try {
+        let isDocInView = false
         if (doc) {
           viewFunction(doc, () => {
             isDocInView = true

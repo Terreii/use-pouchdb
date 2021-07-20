@@ -12,7 +12,3 @@ declare module 'pouchdb-selector-core' {
     selector: PouchDB.Find.Selector
   ): boolean
 }
-
-declare module 'fast-deep-equal' {
-  export default function isEqual<T>(a: T, b: T): boolean
-}

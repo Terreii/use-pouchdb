@@ -10,7 +10,7 @@ on:
     branches: [latest]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
 
     strategy:
@@ -35,7 +35,7 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/latest'
     runs-on: ubuntu-latest
     # Waits for test jobs for each Node.js version to complete
-    needs: build
+    needs: test
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2

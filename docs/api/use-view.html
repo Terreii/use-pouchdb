@@ -84,8 +84,7 @@ Use only for development!</strong></li>
 every time a parameter or document did change! Use only for development!</strong></li>
 </ul></li>
 <li><code>options?: object</code> - An options object. It has the same options as
-<a href="https://pouchdb.com/api.html#query_database"><code>db.query()</code></a> with the exception that <code>options.stale</code> is not yet
-implemented.
+<a href="https://pouchdb.com/api.html#query_database"><code>db.query()</code></a>.
 <ul>
 <li><code>options.reduce?: boolean</code> - Should the result be reduced by the defined <code>reduce</code> function? Defaults to <code>true</code>.
 <ul>
@@ -121,6 +120,12 @@ in the <code>value</code> property.</li>
 returning a single result. Defaults to <code>false</code>.</li>
 <li><code>options.group_level?: number</code> - Number of elements in a key to group by, assuming the keys are arrays.
 Defaults to the full length of the array.</li>
+<li><code>options.stale?: 'ok' | 'update_after'</code> - Only applies to saved views. Can be one of:
+<ul>
+<li>unspecified (default): Returns the latest results, waiting for the view to build if necessary.</li>
+<li><code>'ok' | 'update_after'</code>: Returns results immediately, even if they’re out-of-date.
+But starts a new request after the first request did resolved.</li>
+</ul></li>
 <li><code>options.update_seq?: boolean</code> - Include an <code>update_seq</code> value indicating which sequence id of the underlying
 database the view reflects.</li>
 <li><code>options.db?: string</code> - Selects the database to be used. The database is selected by it's name/key.

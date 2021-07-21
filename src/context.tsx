@@ -16,13 +16,17 @@ export interface PouchContextObject {
 
 type ContextObject = { [key: string]: PouchContextObject }
 
-const PouchContext = createContext<{
+const PouchContext = /*#__PURE__*/ createContext<{
   defaultKey: string
   databases: ContextObject
 }>({
   defaultKey: '',
   databases: {},
 })
+
+if (process.env.NODE_ENV !== 'production') {
+  PouchContext.displayName = 'UsePouchDBContext'
+}
 
 /**
  * Provide access to a database.
@@ -53,10 +57,8 @@ export type ProviderArguments =
  */
 export function Provider(args: ProviderArguments): React.ReactElement {
   const { pouchdb, name } = args as SingleDbProviderArguments
-  const {
-    databases: dbsArg,
-    default: defaultArg,
-  } = args as MultiDbProviderArguments
+  const { databases: dbsArg, default: defaultArg } =
+    args as MultiDbProviderArguments
 
   // collection of databases added in this Provider
   let databases: { [key: string]: PouchDB.Database }

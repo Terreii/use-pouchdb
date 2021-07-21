@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { MISSING_DOC } from 'pouchdb-errors'
 
 import { useContext } from './context'
@@ -35,6 +35,8 @@ export default function useView<Content, Result, Model = Content>(
     )
   }
 
+  const lastView = useRef<string | null>(null)
+
   const {
     reduce,
     include_docs,
@@ -48,6 +50,7 @@ export default function useView<Content, Result, Model = Content>(
     group,
     group_level,
     update_seq,
+    stale,
   } = opts || {}
 
   const startkey = useDeepMemo(opts?.startkey)
@@ -79,11 +82,13 @@ export default function useView<Content, Result, Model = Content>(
       endkey,
       key,
       keys,
-      // stale is not yet supported
-      // stale: stale,
+      // only add the stale option if the view is not the same as last request.
+      // Because the view is already upto date.
+      stale: lastView.current === fun ? undefined : stale,
     }
 
     if (typeof fun === 'string') {
+      lastView.current = fun
       return doDDocQuery(dispatch, pouch, subscriptionManager, fun, options)
     } else {
       return doTemporaryQuery(
@@ -115,6 +120,7 @@ export default function useView<Content, Result, Model = Content>(
     group,
     group_level,
     update_seq,
+    stale,
   ])
 
   return state
@@ -137,8 +143,9 @@ function doDDocQuery<Model, Result>(
   option?: PouchDB.Query.Options<Model, Result>
 ): () => void {
   let isMounted = true
-  let isFetching = false
-  let shouldUpdateAfter = false
+  let isFetching = false // A query is underway.
+  let shouldUpdateAfter = false // A relevant update did happen while fetching.
+  let isReduce = Boolean(option?.reduce)
 
   let unsubscribeFromDocs: (() => void) | null = null
 
@@ -155,7 +162,8 @@ function doDDocQuery<Model, Result>(
     }
 
     unsubscribeFromDocs = subscriptionManager.subscribeToDocs(
-      ids,
+      // when reduce listen to all doc changes. Because reduce doesn't have ids in the result.
+      isReduce ? null : ids,
       (deleted, docId) => {
         if (!isMounted) return
 
@@ -206,24 +214,36 @@ function doDDocQuery<Model, Result>(
         }
       }
       lastResultIds = ids
+      // Reduce doesn't return ids. Only keys and values.
+      // Checked because the reduce option defaults to true.
+      const isThisReduced = ids.size === 0 && result.rows.length > 0
 
-      ids.add(id)
-      createDocSubscription(Array.from(ids))
+      if (!isReduce || isReduce !== isThisReduced) {
+        isReduce = isThisReduced
+        ids.add(id)
+        createDocSubscription(Array.from(ids))
+      }
     } catch (error) {
       if (isMounted) {
         dispatch({
           type: 'loading_error',
           payload: {
-            error: error,
+            error,
             setResult: false,
           },
         })
       }
     } finally {
-      // refresh if change did happen while querying
-      isFetching = false
-      if (shouldUpdateAfter && isMounted) {
-        query()
+      if (isMounted) {
+        // refresh if change did happen while querying
+        isFetching = false
+        if (option?.stale) {
+          // future queries shouldn't be stale
+          delete option.stale
+          query()
+        } else if (shouldUpdateAfter) {
+          query()
+        }
       }
     }
   }
@@ -233,7 +253,7 @@ function doDDocQuery<Model, Result>(
 
   // Subscribe to new entries in the view.
   const unsubscribe = subscriptionManager.subscribeToView(fn, id => {
-    if (isMounted && !lastResultIds.has(id)) {
+    if (isMounted && !isReduce && !lastResultIds.has(id)) {
       query()
     }
   })
@@ -265,8 +285,11 @@ function doTemporaryQuery<Model, Result>(
   option?: PouchDB.Query.Options<Model, Result>
 ): () => void {
   let isMounted = true
-  let isFetching = false
-  let shouldUpdateAfter = false
+  let isFetching = false // A query is underway.
+  let shouldUpdateAfter = false // A relevant update did happen while fetching.
+  const isReduce =
+    typeof option?.reduce === 'string' ||
+    (option?.reduce !== false && typeof fn === 'object' && Boolean(fn.reduce))
   let resultIds: Set<PouchDB.Core.DocumentId | null> | null = null
 
   // Does the query.
@@ -333,9 +356,12 @@ function doTemporaryQuery<Model, Result>(
   const unsubscribe = subscriptionManager.subscribeToDocs<Model>(
     null,
     (_deleted, id, doc) => {
-      let isDocInView = false
-
+      if (isReduce) {
+        query()
+        return
+      }
       try {
+        let isDocInView = false
         if (doc) {
           viewFunction(doc, () => {
             isDocInView = true

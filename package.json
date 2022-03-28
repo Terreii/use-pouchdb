@@ -77,7 +77,7 @@
     "weallcontribute": "^1.0.9"
   },
   "dependencies": {
-    "@types/pouchdb-core": "^7.0.9",
+    "@types/pouchdb-core": "^7.0.10",
     "@types/pouchdb-find": "^6.3.6",
     "@types/pouchdb-mapreduce": "^6.1.6",
     "@types/react": "^17.0.14",

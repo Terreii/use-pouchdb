@@ -11,10 +11,17 @@ import SubscriptionManager from './subscription'
 
 export interface PouchContextObject {
   pouchdb: PouchDB.Database
-  subscriptionManager: SubscriptionManager
+  getSubscriptionManager: () => SubscriptionManager
 }
 
 type ContextObject = { [key: string]: PouchContextObject }
+
+type SubscriptionManagerCache = {
+  [key: string]: {
+    pouchdb: PouchDB.Database
+    subscriptionManager: SubscriptionManager
+  }
+}
 
 const PouchContext = /*#__PURE__*/ createContext<{
   defaultKey: string
@@ -109,51 +116,59 @@ export function Provider(args: ProviderArguments): React.ReactElement {
 function useAddSubscriptionManager(databases: {
   [key: string]: PouchDB.Database
 }): ContextObject {
-  // memory for last DB and SubscriptionManager pairs
-  const lastContextObject = useRef<ContextObject>({})
+  const subscriptionManagers = useRef<SubscriptionManagerCache>({})
+  const contextObjectCache = useRef<ContextObject>({})
 
   useEffect(
     () => () => {
       // unsubscribe all SubscriptionManager when the component un-mounts
-      for (const pair of Object.values(lastContextObject.current)) {
+      for (const [key, pair] of Object.entries(subscriptionManagers.current)) {
         pair.subscriptionManager.unsubscribeAll()
+        delete subscriptionManagers.current[key]
       }
     },
     []
   )
 
-  // Keys of last lastContextObject
-  // All databases that didn't change will be reused and their keys deleted from this Set.
-  // All keys left, the database did change and the SubscriptionManager will be unsubscribed.
-  const lastKeys = new Set(Object.keys(lastContextObject.current))
-
-  const contextObjects: ContextObject = {}
-  let didAddNewDatabase = false
-
-  for (const [key, db] of Object.entries(databases)) {
-    if (lastKeys.has(key) && db === lastContextObject.current[key].pouchdb) {
-      contextObjects[key] = lastContextObject.current[key]
-      lastKeys.delete(key)
-    } else {
-      didAddNewDatabase = true
-      contextObjects[key] = {
-        pouchdb: db,
-        subscriptionManager: new SubscriptionManager(db),
+  const contextObjects = useMemo(() => {
+    // Clean up any stored subscriptionManagers which no longer match the
+    // databases prop.
+    for (const key of Object.keys(subscriptionManagers.current)) {
+      if (
+        !databases.hasOwnProperty(key) ||
+        databases[key] !== subscriptionManagers.current[key].pouchdb
+      ) {
+        subscriptionManagers.current[key].subscriptionManager.unsubscribeAll()
+        delete subscriptionManagers.current[key]
       }
     }
-  }
 
-  // no database was created and no database got removed, or did change --> use the old one
-  if (!didAddNewDatabase && lastKeys.size === 0) {
-    return lastContextObject.current
-  }
+    const objs: ContextObject = {}
+    for (const [key, db] of Object.entries(databases)) {
+      // Use a ref cache to retain referential equality for context objects as
+      // long as the key and database match.
+      const cachedContext = contextObjectCache.current[key]
+      if (db === cachedContext?.pouchdb) {
+        objs[key] = cachedContext
+      } else {
+        objs[key] = {
+          pouchdb: db,
+          getSubscriptionManager: () => {
+            if (!subscriptionManagers.current.hasOwnProperty(key)) {
+              subscriptionManagers.current[key] = {
+                pouchdb: db,
+                subscriptionManager: new SubscriptionManager(db),
+              }
+            }
+            return subscriptionManagers.current[key].subscriptionManager
+          },
+        }
+      }
+    }
+    contextObjectCache.current = objs
+    return objs
+  }, [databases])
 
-  // unsubscribe all SubscriptionManagers who's database did change/got removed.
-  for (const key of lastKeys) {
-    lastContextObject.current[key].subscriptionManager.unsubscribeAll()
-  }
-
-  lastContextObject.current = contextObjects
   return contextObjects
 }
 

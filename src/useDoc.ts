@@ -21,7 +21,7 @@ export default function useDoc<Content>(
 ): DocResultType<Content> {
   type Document = (PouchDB.Core.Document<Content> & PouchDB.Core.GetMeta) | null
 
-  const { pouchdb: pouch, subscriptionManager } = useContext(options?.db)
+  const { pouchdb: pouch, getSubscriptionManager } = useContext(options?.db)
 
   const { rev, revs, revs_info, conflicts, attachments, binary, latest } =
     options || {}
@@ -115,23 +115,26 @@ export default function useDoc<Content>(
         ? () => {
             return
           }
-        : subscriptionManager.subscribeToDocs([id], (deleted, _id, doc) => {
-            if (!isMounted) return
+        : getSubscriptionManager().subscribeToDocs(
+            [id],
+            (deleted, _id, doc) => {
+              if (!isMounted) return
 
-            // If the document got deleted it should change to an 404 error state
-            // or if there is a conflicting version, then it should show the new winning one.
-            if (deleted || revs || revs_info || conflicts || attachments) {
-              fetchDoc()
-            } else {
-              dispatch({
-                type: 'loading_finished',
-                payload: {
-                  doc: doc as PouchDB.Core.Document<Content> &
-                    PouchDB.Core.GetMeta,
-                },
-              })
+              // If the document got deleted it should change to an 404 error state
+              // or if there is a conflicting version, then it should show the new winning one.
+              if (deleted || revs || revs_info || conflicts || attachments) {
+                fetchDoc()
+              } else {
+                dispatch({
+                  type: 'loading_finished',
+                  payload: {
+                    doc: doc as PouchDB.Core.Document<Content> &
+                      PouchDB.Core.GetMeta,
+                  },
+                })
+              }
             }
-          })
+          )
 
     return () => {
       isMounted = false
@@ -140,7 +143,7 @@ export default function useDoc<Content>(
   }, [
     dispatch,
     pouch,
-    subscriptionManager,
+    getSubscriptionManager,
     id,
     rev,
     revs,

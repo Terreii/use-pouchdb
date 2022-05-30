@@ -27,7 +27,7 @@ export default function useView<Content, Result, Model = Content>(
     update_seq?: boolean
   } & CommonOptions
 ): ViewResponse<Result> {
-  const { pouchdb: pouch, subscriptionManager } = useContext(opts?.db)
+  const { pouchdb: pouch, getSubscriptionManager } = useContext(opts?.db)
 
   if (typeof pouch?.query !== 'function') {
     throw new TypeError(
@@ -89,12 +89,12 @@ export default function useView<Content, Result, Model = Content>(
 
     if (typeof fun === 'string') {
       lastView.current = fun
-      return doDDocQuery(dispatch, pouch, subscriptionManager, fun, options)
+      return doDDocQuery(dispatch, pouch, getSubscriptionManager, fun, options)
     } else {
       return doTemporaryQuery(
         dispatch,
         pouch,
-        subscriptionManager,
+        getSubscriptionManager,
         fun,
         options
       )
@@ -102,7 +102,7 @@ export default function useView<Content, Result, Model = Content>(
   }, [
     dispatch,
     pouch,
-    subscriptionManager,
+    getSubscriptionManager,
     fun,
     reduce,
     include_docs,
@@ -138,7 +138,7 @@ export default function useView<Content, Result, Model = Content>(
 function doDDocQuery<Model, Result>(
   dispatch: Dispatch<PouchDB.Query.Response<Result>>,
   pouch: PouchDB.Database<Record<string, unknown>>,
-  subscriptionManager: SubscriptionManager,
+  getSubscriptionManager: () => SubscriptionManager,
   fn: string,
   option?: PouchDB.Query.Options<Model, Result>
 ): () => void {
@@ -161,7 +161,7 @@ function doDDocQuery<Model, Result>(
       unsubscribeFromDocs()
     }
 
-    unsubscribeFromDocs = subscriptionManager.subscribeToDocs(
+    unsubscribeFromDocs = getSubscriptionManager().subscribeToDocs(
       // when reduce listen to all doc changes. Because reduce doesn't have ids in the result.
       isReduce ? null : ids,
       (deleted, docId) => {
@@ -252,7 +252,7 @@ function doDDocQuery<Model, Result>(
   createDocSubscription([id])
 
   // Subscribe to new entries in the view.
-  const unsubscribe = subscriptionManager.subscribeToView(fn, id => {
+  const unsubscribe = getSubscriptionManager().subscribeToView(fn, id => {
     if (isMounted && !isReduce && !lastResultIds.has(id)) {
       query()
     }
@@ -280,7 +280,7 @@ function doDDocQuery<Model, Result>(
 function doTemporaryQuery<Model, Result>(
   dispatch: Dispatch<PouchDB.Query.Response<Result>>,
   pouch: PouchDB.Database<Record<string, unknown>>,
-  subscriptionManager: SubscriptionManager,
+  getSubscriptionManager: () => SubscriptionManager,
   fn: PouchDB.Map<Model, Result> | PouchDB.Filter<Model, Result>,
   option?: PouchDB.Query.Options<Model, Result>
 ): () => void {
@@ -353,7 +353,7 @@ function doTemporaryQuery<Model, Result>(
   }
 
   // Subscribe to updates of the view.
-  const unsubscribe = subscriptionManager.subscribeToDocs<Model>(
+  const unsubscribe = getSubscriptionManager().subscribeToDocs<Model>(
     null,
     (_deleted, id, doc) => {
       if (isReduce) {

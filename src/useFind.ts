@@ -83,7 +83,7 @@ export interface FindHookOptions extends CommonOptions {
 export default function useFind<Content>(
   options: FindHookOptions
 ): ResultType<PouchDB.Find.FindResponse<Content>> {
-  const { pouchdb: pouch, subscriptionManager } = useContext(options.db)
+  const { pouchdb: pouch, getSubscriptionManager } = useContext(options.db)
 
   if (
     typeof pouch?.createIndex !== 'function' ||
@@ -202,7 +202,7 @@ export default function useFind<Content>(
         query()
 
         unsubscribe = subscribe(
-          subscriptionManager,
+          getSubscriptionManager,
           selector,
           query,
           ddocId,
@@ -218,7 +218,7 @@ export default function useFind<Content>(
           query()
 
           unsubscribe = subscribe(
-            subscriptionManager,
+            getSubscriptionManager,
             selector,
             query,
             null,
@@ -233,7 +233,7 @@ export default function useFind<Content>(
     }
   }, [
     pouch,
-    subscriptionManager,
+    getSubscriptionManager,
     dispatch,
     index,
     selector,
@@ -305,14 +305,14 @@ async function findIndex(
 /**
  * Subscribes to updates in the database and re-query
  * when a document did change that matches the selector.
- * @param subscriptionManager - The current subscription manager.
+ * @param getSubscriptionManager - The current subscription manager getter.
  * @param selector - Selector, to filter out changes.
  * @param query - Function to run a query.
  * @param id - Id of the ddoc where the index is stored.
  * @param idsInResult - Object containing a Set of ids in the last result.
  */
 function subscribe(
-  subscriptionManager: SubscriptionManager,
+  getSubscriptionManager: () => SubscriptionManager,
   selector: PouchDB.Find.Selector,
   query: () => void,
   id: PouchDB.Core.DocumentId | null,
@@ -322,7 +322,7 @@ function subscribe(
     ? '_design/' + id.replace(/^_design\//, '') // normalize, user can add a ddoc name
     : undefined
 
-  return subscriptionManager.subscribeToDocs<Record<string, unknown>>(
+  return getSubscriptionManager().subscribeToDocs<Record<string, unknown>>(
     null,
     (_del, id, doc) => {
       if (idsInResult.ids.has(id)) {

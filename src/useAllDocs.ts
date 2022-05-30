@@ -17,7 +17,7 @@ export default function useAllDocs<Content>(
       | PouchDB.Core.AllDocsOptions
     )
 ): ResultType<PouchDB.Core.AllDocsResponse<Content>> {
-  const { pouchdb: pouch, subscriptionManager } = useContext(options?.db)
+  const { pouchdb: pouch, getSubscriptionManager } = useContext(options?.db)
 
   const {
     include_docs,
@@ -112,7 +112,7 @@ export default function useAllDocs<Content>(
       keysToSubscribe = keys
     }
 
-    const unsubscribe = subscriptionManager.subscribeToDocs(
+    const unsubscribe = getSubscriptionManager().subscribeToDocs(
       keysToSubscribe,
       (deleted, id) => {
         if (
@@ -146,7 +146,7 @@ export default function useAllDocs<Content>(
     dispatch,
     replace,
     pouch,
-    subscriptionManager,
+    getSubscriptionManager,
     include_docs,
     conflicts,
     attachments,

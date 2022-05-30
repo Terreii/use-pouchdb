@@ -26,11 +26,11 @@ test('should render a Provider which provide the passed pouchdb database', async
   })
 
   expect(result.current.pouchdb).toBe(myPouch)
-  expect(typeof result.current.subscriptionManager).toBe('object')
-  expect(typeof result.current.subscriptionManager.subscribeToDocs).toBe(
+  expect(typeof result.current.getSubscriptionManager).toBe('function')
+  expect(typeof result.current.getSubscriptionManager().subscribeToDocs).toBe(
     'function'
   )
-  expect(typeof result.current.subscriptionManager.subscribeToView).toBe(
+  expect(typeof result.current.getSubscriptionManager().subscribeToView).toBe(
     'function'
   )
 
@@ -48,7 +48,7 @@ test('should unsubscribe all when the database changes', async () => {
   })
 
   const unsubscribe = jest.fn()
-  result.current.subscriptionManager.unsubscribeAll = unsubscribe
+  result.current.getSubscriptionManager().unsubscribeAll = unsubscribe
 
   db = new PouchDB('test2', { adapter: 'memory' })
 
@@ -74,7 +74,7 @@ test('should unsubscribe all when a database gets destroyed', async () => {
   })
 
   const unsubscribe = jest.fn()
-  result.current.subscriptionManager.unsubscribeAll = unsubscribe
+  result.current.getSubscriptionManager().unsubscribeAll = unsubscribe
 
   await myPouch.destroy()
 
@@ -155,19 +155,21 @@ test('should render a Provider that gives access to multiple databases', async (
 
   expect(result.current.pouchdb).toBe(myPouch)
 
-  const myPouchSubscriptionManager = result.current.subscriptionManager
+  const myPouchSubscriptionManager = result.current.getSubscriptionManager()
 
   rerender('other')
 
   expect(result.current.pouchdb).toBe(other)
-  expect(result.current.subscriptionManager).not.toBe(
+  expect(result.current.getSubscriptionManager()).not.toBe(
     myPouchSubscriptionManager
   )
 
   rerender('myPouch')
 
   expect(result.current.pouchdb).toBe(myPouch)
-  expect(result.current.subscriptionManager).toBe(myPouchSubscriptionManager)
+  expect(result.current.getSubscriptionManager()).toBe(
+    myPouchSubscriptionManager
+  )
 
   await myPouch.destroy()
   await other.destroy()
@@ -189,22 +191,24 @@ test('should combine a parent context into its context', async () => {
   })
 
   expect(result.current.pouchdb).toBe(child)
-  const childSubscriptionManager = result.current.subscriptionManager
+  const childSubscriptionManager = result.current.getSubscriptionManager()
 
   rerender('test')
 
   expect(result.current.pouchdb).toBe(parent)
-  expect(result.current.subscriptionManager).not.toBe(childSubscriptionManager)
+  expect(result.current.getSubscriptionManager()).not.toBe(
+    childSubscriptionManager
+  )
 
   rerender('other')
 
   expect(result.current.pouchdb).toBe(child)
-  expect(result.current.subscriptionManager).toBe(childSubscriptionManager)
+  expect(result.current.getSubscriptionManager()).toBe(childSubscriptionManager)
 
   rerender('_default')
 
   expect(result.current.pouchdb).toBe(child)
-  expect(result.current.subscriptionManager).toBe(childSubscriptionManager)
+  expect(result.current.getSubscriptionManager()).toBe(childSubscriptionManager)
 
   await parent.destroy()
   await child.destroy()
@@ -228,22 +232,24 @@ test('should combine a parent context into its context if the child is multi db'
   })
 
   expect(result.current.pouchdb).toBe(child)
-  const childSubscriptionManager = result.current.subscriptionManager
+  const childSubscriptionManager = result.current.getSubscriptionManager()
 
   rerender('test')
 
   expect(result.current.pouchdb).toBe(parent)
-  expect(result.current.subscriptionManager).not.toBe(childSubscriptionManager)
+  expect(result.current.getSubscriptionManager()).not.toBe(
+    childSubscriptionManager
+  )
 
   rerender('other')
 
   expect(result.current.pouchdb).toBe(child)
-  expect(result.current.subscriptionManager).toBe(childSubscriptionManager)
+  expect(result.current.getSubscriptionManager()).toBe(childSubscriptionManager)
 
   rerender('_default')
 
   expect(result.current.pouchdb).toBe(child)
-  expect(result.current.subscriptionManager).toBe(childSubscriptionManager)
+  expect(result.current.getSubscriptionManager()).toBe(childSubscriptionManager)
 
   await parent.destroy()
   await child.destroy()

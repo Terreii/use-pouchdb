@@ -88,7 +88,7 @@ export default function useAllDocs<Content>(
           dispatch({
             type: 'loading_error',
             payload: {
-              error: err,
+              error: err as PouchDB.Core.Error,
               setResult: false,
             },
           })

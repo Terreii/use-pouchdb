@@ -171,7 +171,7 @@ export default function useFind<Content>(
         if (isActive) {
           dispatch({
             type: 'loading_error',
-            payload: { error, setResult: false },
+            payload: { error: error as PouchDB.Core.Error, setResult: false },
           })
         }
       } finally {

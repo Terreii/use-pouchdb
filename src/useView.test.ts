@@ -2,11 +2,25 @@ import PouchDB from 'pouchdb-core'
 import memory from 'pouchdb-adapter-memory'
 import mapReduce from 'pouchdb-mapreduce'
 
-import { renderHook, renderHookWithMultiDbContext, act } from './test-utils'
+import {
+  renderHook,
+  renderHookWithMultiDbContext,
+  act,
+  DocWithAttachment,
+} from './test-utils'
 import useView from './useView'
 
 PouchDB.plugin(memory)
 PouchDB.plugin(mapReduce)
+
+type TempView = PouchDB.Map<
+  PouchDB.Core.Document<Record<string, unknown>>,
+  unknown
+>
+type TempViewDoc = PouchDB.Filter<
+  PouchDB.Core.Document<Record<string, unknown>>,
+  unknown
+>
 
 let myPouch: PouchDB.Database
 
@@ -27,20 +41,22 @@ test('should throw an error if there is no pouchdb context', () => {
   const { result } = renderHook(() => useView('test'))
 
   expect(result.error).toBeInstanceOf(Error)
-  expect(result.error.message).toBe(
+  expect(result.error?.message).toBe(
     'could not find PouchDB context value; please ensure the component is wrapped in a <Provider>'
   )
 })
 
 test('should return an error if the PouchDB database as no query', () => {
-  myPouch.query = undefined
+  ;(
+    myPouch as unknown as { query: (() => Promise<unknown>) | undefined }
+  ).query = undefined
 
   const { result } = renderHook(() => useView('test'), {
     pouchdb: myPouch,
   })
 
   expect(result.error).toBeInstanceOf(Error)
-  expect(result.error.message).toBe(
+  expect(result.error?.message).toBe(
     'db.query() is not defined. Please install "pouchdb-mapreduce"'
   )
 })
@@ -52,12 +68,9 @@ describe('temporary function only views', () => {
       { _id: 'b', test: 'other', type: 'checker' },
     ])
 
-    const view = (
-      doc: PouchDB.Core.Document<Record<string, unknown>>,
-      emit: (key: unknown, value?: unknown) => void
-    ) => {
+    const view: TempView = (doc, emit) => {
       if (doc.type === 'tester') {
-        emit(doc.test, 42)
+        emit?.(doc.test, 42)
       }
     }
 
@@ -92,12 +105,9 @@ describe('temporary function only views', () => {
       { _id: 'b', test: 'other', type: 'checker' },
     ])
 
-    const view = (
-      doc: PouchDB.Core.Document<Record<string, unknown>>,
-      emit: (key: unknown, value?: unknown) => void
-    ) => {
+    const view: TempView = (doc, emit) => {
       if (doc.type === 'tester') {
-        emit(doc.test, 42)
+        emit?.(doc.test, 42)
       }
     }
 
@@ -181,12 +191,9 @@ describe('temporary function only views', () => {
       { _id: 'b', test: 'other', type: 'checker' },
     ])
 
-    const view = (
-      doc: PouchDB.Core.Document<Record<string, unknown>>,
-      emit: (key: unknown, value?: unknown) => void
-    ) => {
+    const view: TempView = (doc, emit) => {
       if (doc.type === 'tester') {
-        emit(doc.test, 42)
+        emit?.(doc.test, 42)
       }
     }
 
@@ -240,12 +247,9 @@ describe('temporary function only views', () => {
       { _id: 'b', test: 'other', type: 'tester' },
     ])
 
-    const view = (
-      doc: PouchDB.Core.Document<Record<string, unknown>>,
-      emit: (key: unknown, value?: unknown) => void
-    ) => {
+    const view: TempView = (doc, emit) => {
       if (doc.type === 'tester') {
-        emit(doc.test, 42)
+        emit?.(doc.test, 42)
       }
     }
 
@@ -263,7 +267,7 @@ describe('temporary function only views', () => {
     ])
 
     act(() => {
-      myPouch.remove(putResults[0].id, putResults[0].rev)
+      myPouch.remove(putResults[0].id ?? 'fail', putResults[0].rev ?? 'fail')
     })
 
     await waitForNextUpdate()
@@ -283,12 +287,9 @@ describe('temporary function only views', () => {
         { _id: 'b', test: 'other', type: 'checker' },
       ])
 
-      const view = (
-        doc: PouchDB.Core.Document<Record<string, unknown>>,
-        emit: (key: unknown, value?: unknown) => void
-      ) => {
+      const view: TempView = (doc, emit) => {
         if (doc.type === 'tester') {
-          emit(doc.test, 42)
+          emit?.(doc.test, 42)
         }
       }
 
@@ -350,12 +351,9 @@ describe('temporary function only views', () => {
         { force: true }
       )
 
-      const view = (
-        doc: PouchDB.Core.Document<Record<string, unknown>>,
-        emit: (key: unknown, value?: unknown) => void
-      ) => {
+      const view: TempView = (doc, emit) => {
         if (doc.type === 'tester') {
-          emit(doc.test, 42)
+          emit?.(doc.test, 42)
         }
       }
 
@@ -371,15 +369,15 @@ describe('temporary function only views', () => {
       await waitForNextUpdate()
 
       expect(result.current.state).toBe('done')
-      expect(result.current.rows[0].doc._conflicts).toBeUndefined()
+      expect(result.current.rows[0].doc?._conflicts).toBeUndefined()
 
       rerender(true)
 
       await waitForNextUpdate()
 
       expect(result.current.state).toBe('done')
-      expect(result.current.rows[0].doc._conflicts).toEqual(
-        result.current.rows[0].doc._rev === updateResult.rev
+      expect(result.current.rows[0].doc?._conflicts).toEqual(
+        result.current.rows[0].doc?._rev === updateResult.rev
           ? [conflictResult.rev]
           : [updateResult.rev]
       )
@@ -401,12 +399,9 @@ describe('temporary function only views', () => {
         { _id: 'b', test: 'other', type: 'checker' },
       ])
 
-      const view = (
-        doc: PouchDB.Core.Document<Record<string, unknown>>,
-        emit: (key: unknown, value?: unknown) => void
-      ) => {
+      const view: TempView = (doc, emit) => {
         if (doc.type === 'tester') {
-          emit(doc.test, 42)
+          emit?.(doc.test, 42)
         }
       }
 
@@ -422,7 +417,11 @@ describe('temporary function only views', () => {
       await waitForNextUpdate()
 
       expect(result.current.state).toBe('done')
-      expect(result.current.rows[0].doc._attachments['info.txt']).toEqual({
+      expect(
+        (result.current.rows[0].doc as DocWithAttachment)._attachments[
+          'info.txt'
+        ]
+      ).toEqual({
         content_type: 'text/plain',
         digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
         length: 23,
@@ -435,7 +434,11 @@ describe('temporary function only views', () => {
       await waitForNextUpdate()
 
       expect(result.current.state).toBe('done')
-      expect(result.current.rows[0].doc._attachments['info.txt']).toEqual({
+      expect(
+        (result.current.rows[0].doc as DocWithAttachment)._attachments[
+          'info.txt'
+        ]
+      ).toEqual({
         content_type: 'text/plain',
         data: 'SXMgdGhlcmUgbGlmZSBvbiBNYXJzPwo=',
         digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
@@ -459,12 +462,9 @@ describe('temporary function only views', () => {
         { _id: 'b', test: 'other', type: 'checker' },
       ])
 
-      const view = (
-        doc: PouchDB.Core.Document<Record<string, unknown>>,
-        emit: (key: unknown, value?: unknown) => void
-      ) => {
+      const view: TempView = (doc, emit) => {
         if (doc.type === 'tester') {
-          emit(doc.test, 42)
+          emit?.(doc.test, 42)
         }
       }
 
@@ -480,7 +480,11 @@ describe('temporary function only views', () => {
       await waitForNextUpdate()
 
       expect(result.current.state).toBe('done')
-      expect(result.current.rows[0].doc._attachments['info.txt']).toEqual({
+      expect(
+        (result.current.rows[0].doc as DocWithAttachment)._attachments[
+          'info.txt'
+        ]
+      ).toEqual({
         content_type: 'text/plain',
         data: 'SXMgdGhlcmUgbGlmZSBvbiBNYXJzPwo=',
         digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
@@ -492,7 +496,11 @@ describe('temporary function only views', () => {
       await waitForNextUpdate()
 
       expect(result.current.state).toBe('done')
-      expect(result.current.rows[0].doc._attachments['info.txt']).toEqual({
+      expect(
+        (result.current.rows[0].doc as DocWithAttachment)._attachments[
+          'info.txt'
+        ]
+      ).toEqual({
         content_type: 'text/plain',
         data: Buffer.from('Is there life on Mars?\n'),
         digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
@@ -507,12 +515,9 @@ describe('temporary function only views', () => {
         { _id: 'c', test: 'x-value', type: 'tester' },
       ])
 
-      const view = (
-        doc: PouchDB.Core.Document<Record<string, unknown>>,
-        emit: (key: unknown, value?: unknown) => void
-      ) => {
+      const view: TempView = (doc, emit) => {
         if (doc.type === 'tester') {
-          emit(doc.test, 42)
+          emit?.(doc.test, 42)
         }
       }
 
@@ -549,12 +554,9 @@ describe('temporary function only views', () => {
         { _id: 'c', test: 'x-value', type: 'tester' },
       ])
 
-      const view = (
-        doc: PouchDB.Core.Document<Record<string, unknown>>,
-        emit: (key: unknown, value?: unknown) => void
-      ) => {
+      const view: TempView = (doc, emit) => {
         if (doc.type === 'tester') {
-          emit(doc.test, 42)
+          emit?.(doc.test, 42)
         }
       }
 
@@ -588,12 +590,9 @@ describe('temporary function only views', () => {
         { _id: 'c', test: 'x-value', type: 'tester' },
       ])
 
-      const view = (
-        doc: PouchDB.Core.Document<Record<string, unknown>>,
-        emit: (key: unknown, value?: unknown) => void
-      ) => {
+      const view: TempView = (doc, emit) => {
         if (doc.type === 'tester') {
-          emit([doc._id, doc.test], 42)
+          emit?.([doc._id, doc.test], 42)
         }
       }
 
@@ -660,12 +659,9 @@ describe('temporary function only views', () => {
         { _id: 'c', test: 'x-value', type: 'tester' },
       ])
 
-      const view = (
-        doc: PouchDB.Core.Document<Record<string, unknown>>,
-        emit: (key: unknown, value?: unknown) => void
-      ) => {
+      const view: TempView = (doc, emit) => {
         if (doc.type === 'tester') {
-          emit(doc.test, 42)
+          emit?.(doc.test, 42)
         }
       }
 
@@ -703,12 +699,9 @@ describe('temporary function only views', () => {
         { _id: 'c', test: 'x-value', type: 'tester' },
       ])
 
-      const view = (
-        doc: PouchDB.Core.Document<Record<string, unknown>>,
-        emit: (key: unknown, value?: unknown) => void
-      ) => {
+      const view: TempView = (doc, emit) => {
         if (doc.type === 'tester') {
-          emit(doc.test, 42)
+          emit?.(doc.test, 42)
         }
       }
 
@@ -745,12 +738,9 @@ describe('temporary function only views', () => {
         { _id: 'c', test: 'x-value', type: 'tester' },
       ])
 
-      const view = (
-        doc: PouchDB.Core.Document<Record<string, unknown>>,
-        emit: (key: unknown, value?: unknown) => void
-      ) => {
+      const view: TempView = (doc, emit) => {
         if (doc.type === 'tester') {
-          emit(doc.test, 42)
+          emit?.(doc.test, 42)
         }
       }
 
@@ -784,12 +774,9 @@ describe('temporary function only views', () => {
         { _id: 'c', test: 'x-value', type: 'tester' },
       ])
 
-      const view = (
-        doc: PouchDB.Core.Document<Record<string, unknown>>,
-        emit: (key: unknown, value?: unknown) => void
-      ) => {
+      const view: TempView = (doc, emit) => {
         if (doc.type === 'tester') {
-          emit(doc.test, 42)
+          emit?.(doc.test, 42)
         }
       }
 
@@ -827,12 +814,9 @@ describe('temporary function only views', () => {
         { _id: 'c', test: 'x-value', type: 'tester' },
       ])
 
-      const view = (
-        doc: PouchDB.Core.Document<Record<string, unknown>>,
-        emit: (key: unknown, value?: unknown) => void
-      ) => {
+      const view: TempView = (doc, emit) => {
         if (doc.type === 'tester') {
-          emit(doc.test, 42)
+          emit?.(doc.test, 42)
         }
       }
 
@@ -868,12 +852,9 @@ describe('temporary function only views', () => {
         { _id: 'c', test: 'x-value', type: 'tester' },
       ])
 
-      const view = (
-        doc: PouchDB.Core.Document<Record<string, unknown>>,
-        emit: (key: unknown, value?: unknown) => void
-      ) => {
+      const view: TempView = (doc, emit) => {
         if (doc.type === 'tester') {
-          emit(doc.test, 42)
+          emit?.(doc.test, 42)
         }
       }
 
@@ -910,12 +891,9 @@ describe('temporary function only views', () => {
         { _id: 'c', test: 'x-value', type: 'tester' },
       ])
 
-      const view = (
-        doc: PouchDB.Core.Document<Record<string, unknown>>,
-        emit: (key: unknown, value?: unknown) => void
-      ) => {
+      const view: TempView = (doc, emit) => {
         if (doc.type === 'tester') {
-          emit([doc._id, doc.test], 42)
+          emit?.([doc._id, doc.test], 42)
         }
       }
 
@@ -1003,12 +981,9 @@ describe('temporary function only views', () => {
         { _id: 'b', test: 'other', type: 'tester' },
       ])
 
-      const view = (
-        doc: PouchDB.Core.Document<Record<string, unknown>>,
-        emit: (key: unknown, value?: unknown) => void
-      ) => {
+      const view: TempView = (doc, emit) => {
         if (doc.type === 'tester') {
-          emit(doc.test, 42)
+          emit?.(doc.test, 42)
         }
       }
 
@@ -1048,12 +1023,9 @@ describe('temporary function only views', () => {
         value: 'other',
       })
 
-      const view = (
-        doc: PouchDB.Core.Document<Record<string, unknown>>,
-        emit: (key: unknown, value?: unknown) => void
-      ) => {
+      const view: TempView = (doc, emit) => {
         if (doc.type === 'tester') {
-          emit(doc.type, doc.value)
+          emit?.(doc.type, doc.value)
         }
       }
 
@@ -1136,13 +1108,10 @@ describe('temporary views objects', () => {
       { _id: 'b', test: 'other', type: 'checker' },
     ])
 
-    const view = {
-      map: (
-        doc: PouchDB.Core.Document<Record<string, unknown>>,
-        emit: (key: unknown, value?: unknown) => void
-      ) => {
+    const view: TempViewDoc = {
+      map: (doc, emit) => {
         if (doc.type === 'tester') {
-          emit(doc.test, 42)
+          emit?.(doc.test, 42)
         }
       },
     }
@@ -1178,13 +1147,10 @@ describe('temporary views objects', () => {
       { _id: 'b', test: 'other', type: 'checker' },
     ])
 
-    const view = {
-      map: (
-        doc: PouchDB.Core.Document<Record<string, unknown>>,
-        emit: (key: unknown, value?: unknown) => void
-      ) => {
+    const view: TempViewDoc = {
+      map: (doc, emit) => {
         if (doc.type === 'tester') {
-          emit(doc.test, 42)
+          emit?.(doc.test, 42)
         }
       },
     }
@@ -1269,13 +1235,10 @@ describe('temporary views objects', () => {
       { _id: 'b', test: 'other', type: 'checker' },
     ])
 
-    const view = {
-      map: (
-        doc: PouchDB.Core.Document<Record<string, unknown>>,
-        emit: (key: unknown, value?: unknown) => void
-      ) => {
+    const view: TempViewDoc = {
+      map: (doc, emit) => {
         if (doc.type === 'tester') {
-          emit(doc.test, 42)
+          emit?.(doc.test, 42)
         }
       },
     }
@@ -1330,13 +1293,10 @@ describe('temporary views objects', () => {
       { _id: 'b', test: 'other', type: 'tester' },
     ])
 
-    const view = {
-      map: (
-        doc: PouchDB.Core.Document<Record<string, unknown>>,
-        emit: (key: unknown, value?: unknown) => void
-      ) => {
+    const view: TempViewDoc = {
+      map: (doc, emit) => {
         if (doc.type === 'tester') {
-          emit(doc.test, 42)
+          emit?.(doc.test, 42)
         }
       },
     }
@@ -1355,7 +1315,7 @@ describe('temporary views objects', () => {
     ])
 
     act(() => {
-      myPouch.remove(putResults[0].id, putResults[0].rev)
+      myPouch.remove(putResults[0].id ?? 'fail', putResults[0].rev ?? 'fail')
     })
 
     await waitForNextUpdate()
@@ -1375,13 +1335,10 @@ describe('temporary views objects', () => {
         { _id: 'b', test: 'other', type: 'checker' },
       ])
 
-      const view = {
-        map: (
-          doc: PouchDB.Core.Document<Record<string, unknown>>,
-          emit: (key: unknown, value?: unknown) => void
-        ) => {
+      const view: TempViewDoc = {
+        map: (doc, emit) => {
           if (doc.type === 'tester') {
-            emit(doc.test, 42)
+            emit?.(doc.test, 42)
           }
         },
         reduce: '_count',
@@ -1416,13 +1373,10 @@ describe('temporary views objects', () => {
         { _id: 'b', test: 'other', type: 'tester' },
       ])
 
-      const view = {
-        map: (
-          doc: PouchDB.Core.Document<Record<string, unknown>>,
-          emit: (key: unknown, value?: unknown) => void
-        ) => {
+      const view: TempViewDoc = {
+        map: (doc, emit) => {
           if (doc.type === 'tester') {
-            emit(doc.test, 42)
+            emit?.(doc.test, 42)
           }
         },
         reduce: '_count',
@@ -1443,7 +1397,7 @@ describe('temporary views objects', () => {
         },
       ])
 
-      await myPouch.remove(docBInfo.id, docBInfo.rev)
+      await myPouch.remove(docBInfo.id ?? 'fail', docBInfo.rev ?? 'fail')
 
       await waitForValueToChange(() => result.current.rows)
 
@@ -1481,7 +1435,7 @@ describe('temporary views objects', () => {
         },
       ])
 
-      await myPouch.remove(docCInfo.id, docCInfo.rev)
+      await myPouch.remove(docCInfo.id ?? 'fail', docCInfo.rev ?? 'fail')
 
       await waitForNextUpdate()
       await waitForValueToChange(() => result.current.rows)
@@ -1511,13 +1465,10 @@ describe('temporary views objects', () => {
         { _id: 'b', test: 'other', type: 'checker' },
       ])
 
-      const view = {
-        map: (
-          doc: PouchDB.Core.Document<Record<string, unknown>>,
-          emit: (key: unknown, value?: unknown) => void
-        ) => {
+      const view: TempViewDoc = {
+        map: (doc, emit) => {
           if (doc.type === 'tester') {
-            emit(doc.test, 42)
+            emit?.(doc.test, 42)
           }
         },
       }
@@ -1580,13 +1531,10 @@ describe('temporary views objects', () => {
         { force: true }
       )
 
-      const view = {
-        map: (
-          doc: PouchDB.Core.Document<Record<string, unknown>>,
-          emit: (key: unknown, value?: unknown) => void
-        ) => {
+      const view: TempViewDoc = {
+        map: (doc, emit) => {
           if (doc.type === 'tester') {
-            emit(doc.test, 42)
+            emit?.(doc.test, 42)
           }
         },
       }
@@ -1603,15 +1551,15 @@ describe('temporary views objects', () => {
       await waitForNextUpdate()
 
       expect(result.current.state).toBe('done')
-      expect(result.current.rows[0].doc._conflicts).toBeUndefined()
+      expect(result.current.rows[0].doc?._conflicts).toBeUndefined()
 
       rerender(true)
 
       await waitForNextUpdate()
 
       expect(result.current.state).toBe('done')
-      expect(result.current.rows[0].doc._conflicts).toEqual(
-        result.current.rows[0].doc._rev === updateResult.rev
+      expect(result.current.rows[0].doc?._conflicts).toEqual(
+        result.current.rows[0].doc?._rev === updateResult.rev
           ? [conflictResult.rev]
           : [updateResult.rev]
       )
@@ -1633,13 +1581,10 @@ describe('temporary views objects', () => {
         { _id: 'b', test: 'other', type: 'checker' },
       ])
 
-      const view = {
-        map: (
-          doc: PouchDB.Core.Document<Record<string, unknown>>,
-          emit: (key: unknown, value?: unknown) => void
-        ) => {
+      const view: TempViewDoc = {
+        map: (doc, emit) => {
           if (doc.type === 'tester') {
-            emit(doc.test, 42)
+            emit?.(doc.test, 42)
           }
         },
       }
@@ -1656,7 +1601,11 @@ describe('temporary views objects', () => {
       await waitForNextUpdate()
 
       expect(result.current.state).toBe('done')
-      expect(result.current.rows[0].doc._attachments['info.txt']).toEqual({
+      expect(
+        (result.current.rows[0].doc as DocWithAttachment)._attachments[
+          'info.txt'
+        ]
+      ).toEqual({
         content_type: 'text/plain',
         digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
         length: 23,
@@ -1669,7 +1618,11 @@ describe('temporary views objects', () => {
       await waitForNextUpdate()
 
       expect(result.current.state).toBe('done')
-      expect(result.current.rows[0].doc._attachments['info.txt']).toEqual({
+      expect(
+        (result.current.rows[0].doc as DocWithAttachment)._attachments[
+          'info.txt'
+        ]
+      ).toEqual({
         content_type: 'text/plain',
         data: 'SXMgdGhlcmUgbGlmZSBvbiBNYXJzPwo=',
         digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
@@ -1693,13 +1646,10 @@ describe('temporary views objects', () => {
         { _id: 'b', test: 'other', type: 'checker' },
       ])
 
-      const view = {
-        map: (
-          doc: PouchDB.Core.Document<Record<string, unknown>>,
-          emit: (key: unknown, value?: unknown) => void
-        ) => {
+      const view: TempViewDoc = {
+        map: (doc, emit) => {
           if (doc.type === 'tester') {
-            emit(doc.test, 42)
+            emit?.(doc.test, 42)
           }
         },
       }
@@ -1716,7 +1666,11 @@ describe('temporary views objects', () => {
       await waitForNextUpdate()
 
       expect(result.current.state).toBe('done')
-      expect(result.current.rows[0].doc._attachments['info.txt']).toEqual({
+      expect(
+        (result.current.rows[0].doc as DocWithAttachment)._attachments[
+          'info.txt'
+        ]
+      ).toEqual({
         content_type: 'text/plain',
         data: 'SXMgdGhlcmUgbGlmZSBvbiBNYXJzPwo=',
         digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
@@ -1728,7 +1682,11 @@ describe('temporary views objects', () => {
       await waitForNextUpdate()
 
       expect(result.current.state).toBe('done')
-      expect(result.current.rows[0].doc._attachments['info.txt']).toEqual({
+      expect(
+        (result.current.rows[0].doc as DocWithAttachment)._attachments[
+          'info.txt'
+        ]
+      ).toEqual({
         content_type: 'text/plain',
         data: Buffer.from('Is there life on Mars?\n'),
         digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
@@ -1743,13 +1701,10 @@ describe('temporary views objects', () => {
         { _id: 'c', test: 'x-value', type: 'tester' },
       ])
 
-      const view = {
-        map: (
-          doc: PouchDB.Core.Document<Record<string, unknown>>,
-          emit: (key: unknown, value?: unknown) => void
-        ) => {
+      const view: TempViewDoc = {
+        map: (doc, emit) => {
           if (doc.type === 'tester') {
-            emit(doc.test, 42)
+            emit?.(doc.test, 42)
           }
         },
       }
@@ -1787,13 +1742,10 @@ describe('temporary views objects', () => {
         { _id: 'c', test: 'x-value', type: 'tester' },
       ])
 
-      const view = {
-        map: (
-          doc: PouchDB.Core.Document<Record<string, unknown>>,
-          emit: (key: unknown, value?: unknown) => void
-        ) => {
+      const view: TempViewDoc = {
+        map: (doc, emit) => {
           if (doc.type === 'tester') {
-            emit(doc.test, 42)
+            emit?.(doc.test, 42)
           }
         },
       }
@@ -1828,13 +1780,10 @@ describe('temporary views objects', () => {
         { _id: 'c', test: 'x-value', type: 'tester' },
       ])
 
-      const view = {
-        map: (
-          doc: PouchDB.Core.Document<Record<string, unknown>>,
-          emit: (key: unknown, value?: unknown) => void
-        ) => {
+      const view: TempViewDoc = {
+        map: (doc, emit) => {
           if (doc.type === 'tester') {
-            emit([doc._id, doc.test], 42)
+            emit?.([doc._id, doc.test], 42)
           }
         },
       }
@@ -1902,13 +1851,10 @@ describe('temporary views objects', () => {
         { _id: 'c', test: 'x-value', type: 'tester' },
       ])
 
-      const view = {
-        map: (
-          doc: PouchDB.Core.Document<Record<string, unknown>>,
-          emit: (key: unknown, value?: unknown) => void
-        ) => {
+      const view: TempViewDoc = {
+        map: (doc, emit) => {
           if (doc.type === 'tester') {
-            emit(doc.test, 42)
+            emit?.(doc.test, 42)
           }
         },
       }
@@ -1947,13 +1893,10 @@ describe('temporary views objects', () => {
         { _id: 'c', test: 'x-value', type: 'tester' },
       ])
 
-      const view = {
-        map: (
-          doc: PouchDB.Core.Document<Record<string, unknown>>,
-          emit: (key: unknown, value?: unknown) => void
-        ) => {
+      const view: TempViewDoc = {
+        map: (doc, emit) => {
           if (doc.type === 'tester') {
-            emit(doc.test, 42)
+            emit?.(doc.test, 42)
           }
         },
       }
@@ -1991,13 +1934,10 @@ describe('temporary views objects', () => {
         { _id: 'c', test: 'x-value', type: 'tester' },
       ])
 
-      const view = {
-        map: (
-          doc: PouchDB.Core.Document<Record<string, unknown>>,
-          emit: (key: unknown, value?: unknown) => void
-        ) => {
+      const view: TempViewDoc = {
+        map: (doc, emit) => {
           if (doc.type === 'tester') {
-            emit(doc.test, 42)
+            emit?.(doc.test, 42)
           }
         },
       }
@@ -2032,13 +1972,10 @@ describe('temporary views objects', () => {
         { _id: 'c', test: 'x-value', type: 'tester' },
       ])
 
-      const view = {
-        map: (
-          doc: PouchDB.Core.Document<Record<string, unknown>>,
-          emit: (key: unknown, value?: unknown) => void
-        ) => {
+      const view: TempViewDoc = {
+        map: (doc, emit) => {
           if (doc.type === 'tester') {
-            emit(doc.test, 42)
+            emit?.(doc.test, 42)
           }
         },
       }
@@ -2077,13 +2014,10 @@ describe('temporary views objects', () => {
         { _id: 'c', test: 'x-value', type: 'tester' },
       ])
 
-      const view = {
-        map: (
-          doc: PouchDB.Core.Document<Record<string, unknown>>,
-          emit: (key: unknown, value?: unknown) => void
-        ) => {
+      const view: TempViewDoc = {
+        map: (doc, emit) => {
           if (doc.type === 'tester') {
-            emit(doc.test, 42)
+            emit?.(doc.test, 42)
           }
         },
       }
@@ -2120,13 +2054,10 @@ describe('temporary views objects', () => {
         { _id: 'c', test: 'x-value', type: 'tester' },
       ])
 
-      const view = {
-        map: (
-          doc: PouchDB.Core.Document<Record<string, unknown>>,
-          emit: (key: unknown, value?: unknown) => void
-        ) => {
+      const view: TempViewDoc = {
+        map: (doc, emit) => {
           if (doc.type === 'tester') {
-            emit(doc.test, 42)
+            emit?.(doc.test, 42)
           }
         },
       }
@@ -2164,13 +2095,10 @@ describe('temporary views objects', () => {
         { _id: 'c', test: 'x-value', type: 'tester' },
       ])
 
-      const view = {
-        map: (
-          doc: PouchDB.Core.Document<Record<string, unknown>>,
-          emit: (key: unknown, value?: unknown) => void
-        ) => {
+      const view: TempViewDoc = {
+        map: (doc, emit) => {
           if (doc.type === 'tester') {
-            emit(doc.test, 42)
+            emit?.(doc.test, 42)
           }
         },
         reduce: '_count',
@@ -2207,13 +2135,10 @@ describe('temporary views objects', () => {
         { _id: 'c', test: 'x-value', type: 'tester' },
       ])
 
-      const view = {
-        map: (
-          doc: PouchDB.Core.Document<Record<string, unknown>>,
-          emit: (key: unknown, value?: unknown) => void
-        ) => {
+      const view: TempViewDoc = {
+        map: (doc, emit) => {
           if (doc.type === 'tester') {
-            emit([13, doc.test], 42)
+            emit?.([13, doc.test], 42)
           }
         },
         reduce: '_count',
@@ -2250,13 +2175,10 @@ describe('temporary views objects', () => {
         { _id: 'c', test: 'x-value', type: 'tester' },
       ])
 
-      const view = {
-        map: (
-          doc: PouchDB.Core.Document<Record<string, unknown>>,
-          emit: (key: unknown, value?: unknown) => void
-        ) => {
+      const view: TempViewDoc = {
+        map: (doc, emit) => {
           if (doc.type === 'tester') {
-            emit([doc._id, doc.test], 42)
+            emit?.([doc._id, doc.test], 42)
           }
         },
       }
@@ -2345,13 +2267,10 @@ describe('temporary views objects', () => {
         { _id: 'b', test: 'other', type: 'tester' },
       ])
 
-      const view = {
-        map: (
-          doc: PouchDB.Core.Document<Record<string, unknown>>,
-          emit: (key: unknown, value?: unknown) => void
-        ) => {
+      const view: TempViewDoc = {
+        map: (doc, emit) => {
           if (doc.type === 'tester') {
-            emit([doc._id, doc.test], 42)
+            emit?.([doc._id, doc.test], 42)
           }
         },
       }
@@ -2392,13 +2311,10 @@ describe('temporary views objects', () => {
         value: 'other',
       })
 
-      const view = {
-        map: (
-          doc: PouchDB.Core.Document<Record<string, unknown>>,
-          emit: (key: unknown, value?: unknown) => void
-        ) => {
+      const view: TempViewDoc = {
+        map: (doc, emit) => {
           if (doc.type === 'tester') {
-            emit(doc.type, doc.value)
+            emit?.(doc.type, doc.value)
           }
         },
       }
@@ -2539,8 +2455,8 @@ describe('design documents', () => {
 
     expect(result.current.state).toBe('error')
     expect(result.current.error).toBeInstanceOf(Error)
-    expect(result.current.error.status).toBe(404)
-    expect(result.current.error.message).toBe('missing')
+    expect(result.current.error?.status).toBe(404)
+    expect(result.current.error?.message).toBe('missing')
     expect(result.current.rows).toEqual([])
   })
 
@@ -2679,8 +2595,8 @@ describe('design documents', () => {
 
     expect(result.current.state).toBe('error')
     expect(result.current.error).toBeInstanceOf(Error)
-    expect(result.current.error.status).toBe(404)
-    expect(result.current.error.message).toBe('missing')
+    expect(result.current.error?.status).toBe(404)
+    expect(result.current.error?.message).toBe('missing')
     expect(result.current.rows).toEqual([])
   })
 
@@ -2835,7 +2751,7 @@ describe('design documents', () => {
     ])
 
     act(() => {
-      myPouch.remove(putResults[0].id, putResults[0].rev)
+      myPouch.remove(putResults[0].id ?? 'fail', putResults[0].rev ?? 'fail')
     })
 
     await waitForNextUpdate()
@@ -2935,7 +2851,7 @@ describe('design documents', () => {
         },
       ])
 
-      await myPouch.remove(docBInfo.id, docBInfo.rev)
+      await myPouch.remove(docBInfo.id ?? 'fail', docBInfo.rev ?? 'fail')
 
       await waitForValueToChange(() => result.current.rows)
 
@@ -2973,7 +2889,7 @@ describe('design documents', () => {
         },
       ])
 
-      await myPouch.remove(docCInfo.id, docCInfo.rev)
+      await myPouch.remove(docCInfo.id ?? 'fail', docCInfo.rev ?? 'fail')
 
       await waitForNextUpdate()
       await waitForValueToChange(() => result.current.rows)
@@ -3107,15 +3023,15 @@ describe('design documents', () => {
       await waitForNextUpdate()
 
       expect(result.current.state).toBe('done')
-      expect(result.current.rows[0].doc._conflicts).toBeUndefined()
+      expect(result.current.rows[0].doc?._conflicts).toBeUndefined()
 
       rerender(true)
 
       await waitForNextUpdate()
 
       expect(result.current.state).toBe('done')
-      expect(result.current.rows[0].doc._conflicts).toEqual(
-        result.current.rows[0].doc._rev === updateResult.rev
+      expect(result.current.rows[0].doc?._conflicts).toEqual(
+        result.current.rows[0].doc?._rev === updateResult.rev
           ? [conflictResult.rev]
           : [updateResult.rev]
       )
@@ -3166,7 +3082,11 @@ describe('design documents', () => {
       await waitForNextUpdate()
 
       expect(result.current.state).toBe('done')
-      expect(result.current.rows[0].doc._attachments['info.txt']).toEqual({
+      expect(
+        (result.current.rows[0].doc as DocWithAttachment)._attachments[
+          'info.txt'
+        ]
+      ).toEqual({
         content_type: 'text/plain',
         digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
         length: 23,
@@ -3179,7 +3099,11 @@ describe('design documents', () => {
       await waitForNextUpdate()
 
       expect(result.current.state).toBe('done')
-      expect(result.current.rows[0].doc._attachments['info.txt']).toEqual({
+      expect(
+        (result.current.rows[0].doc as DocWithAttachment)._attachments[
+          'info.txt'
+        ]
+      ).toEqual({
         content_type: 'text/plain',
         data: 'SXMgdGhlcmUgbGlmZSBvbiBNYXJzPwo=',
         digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
@@ -3236,7 +3160,11 @@ describe('design documents', () => {
       await waitForNextUpdate()
 
       expect(result.current.state).toBe('done')
-      expect(result.current.rows[0].doc._attachments['info.txt']).toEqual({
+      expect(
+        (result.current.rows[0].doc as DocWithAttachment)._attachments[
+          'info.txt'
+        ]
+      ).toEqual({
         content_type: 'text/plain',
         data: 'SXMgdGhlcmUgbGlmZSBvbiBNYXJzPwo=',
         digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
@@ -3248,7 +3176,11 @@ describe('design documents', () => {
       await waitForNextUpdate()
 
       expect(result.current.state).toBe('done')
-      expect(result.current.rows[0].doc._attachments['info.txt']).toEqual({
+      expect(
+        (result.current.rows[0].doc as DocWithAttachment)._attachments[
+          'info.txt'
+        ]
+      ).toEqual({
         content_type: 'text/plain',
         data: Buffer.from('Is there life on Mars?\n'),
         digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',

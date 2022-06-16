@@ -11,7 +11,7 @@ test('should throw an error if there is no pouchdb context', () => {
   const { result } = renderHook(() => useContext())
 
   expect(result.error).toBeInstanceOf(Error)
-  expect(result.error.message).toBe(
+  expect(result.error?.message).toBe(
     'could not find PouchDB context value; please ensure the component is wrapped in a <Provider>'
   )
 })
@@ -90,7 +90,7 @@ test('should throw an error if a wrong name is passed to useContext', async () =
 
   const { result, rerender } = renderHook((name?: string) => useContext(name), {
     initialProps: undefined,
-    wrapper: function Wrapper({ children }: { children: React.ReactChildren }) {
+    wrapper: function Wrapper({ children }) {
       return <Provider pouchdb={myPouch}>{children}</Provider>
     },
   })
@@ -100,7 +100,7 @@ test('should throw an error if a wrong name is passed to useContext', async () =
   rerender('not-existing')
 
   expect(result.error).toBeInstanceOf(Error)
-  expect(result.error.message).toBe(
+  expect(result.error?.message).toBe(
     'could not find a PouchDB database with name of "not-existing"'
   )
 
@@ -120,7 +120,7 @@ test('should use the optional name argument', async () => {
 
   const { result, rerender } = renderHook((name: string) => useContext(name), {
     initialProps: 'other',
-    wrapper: function Wrapper({ children }: { children: React.ReactChildren }) {
+    wrapper: function Wrapper({ children }) {
       return (
         <Provider pouchdb={myPouch} name="other">
           {children}
@@ -144,7 +144,7 @@ test('should render a Provider that gives access to multiple databases', async (
 
   const { result, rerender } = renderHook((name?: string) => useContext(name), {
     initialProps: undefined,
-    wrapper: function Wrapper({ children }: { children: React.ReactChildren }) {
+    wrapper: function Wrapper({ children }) {
       return (
         <Provider databases={{ myPouch, other }} default="myPouch">
           {children}
@@ -179,7 +179,7 @@ test('should combine a parent context into its context', async () => {
 
   const { result, rerender } = renderHook((name?: string) => useContext(name), {
     initialProps: undefined,
-    wrapper: function Wrapper({ children }: { children: React.ReactChildren }) {
+    wrapper: function Wrapper({ children }) {
       return (
         <Provider pouchdb={parent}>
           <Provider pouchdb={child}>{children}</Provider>
@@ -216,7 +216,7 @@ test('should combine a parent context into its context if the child is multi db'
 
   const { result, rerender } = renderHook((name?: string) => useContext(name), {
     initialProps: undefined,
-    wrapper: function Wrapper({ children }: { children: React.ReactChildren }) {
+    wrapper: function Wrapper({ children }) {
       return (
         <Provider pouchdb={parent}>
           <Provider databases={{ other: child }} default="other">
@@ -255,7 +255,7 @@ test('should allow the use of a parent context database name in default', async 
 
   const { result } = renderHook((name?: string) => useContext(name), {
     initialProps: undefined,
-    wrapper: function Wrapper({ children }: { children: React.ReactChildren }) {
+    wrapper: function Wrapper({ children }) {
       return (
         <Provider pouchdb={parent}>
           <Provider databases={{ other: child }} default="test">
@@ -278,7 +278,7 @@ test('should handle a database name of default', async () => {
 
   const { result, rerender } = renderHook((name?: string) => useContext(name), {
     initialProps: undefined,
-    wrapper: function Wrapper({ children }: { children: React.ReactChildren }) {
+    wrapper: function Wrapper({ children }) {
       return (
         <Provider databases={{ default: myPouch, other }} default="other">
           {children}

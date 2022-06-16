@@ -324,7 +324,7 @@ test('should subscribe to destroy events', async () => {
 })
 
 test('should clone the documents that are passed to document callbacks', async () => {
-  const docs = []
+  const docs: (PouchDB.Core.IdMeta | undefined)[] = []
 
   const subscriptionManager = new SubscriptionManager(myPouch)
 
@@ -349,12 +349,11 @@ test('should clone the documents that are passed to document callbacks', async (
   await new Promise(resolve => {
     setTimeout(resolve, 10)
   })
-
-  docs[0].value = 43
+  ;(docs[0] as PouchDB.Core.IdMeta & { value: number }).value = 43
 
   expect(docs).toHaveLength(2)
-  expect(docs[0].value).toBe(43)
-  expect(docs[1].value).toBe(42)
+  expect((docs[0] as PouchDB.Core.IdMeta & { value: number }).value).toBe(43)
+  expect((docs[1] as PouchDB.Core.IdMeta & { value: number }).value).toBe(42)
 
   unsubscribe1()
   unsubscribe2()
@@ -367,7 +366,7 @@ test('should subscribe to all docs if null is passed to doc subscription', async
 
   const unsubscribe = subscriptionManager.subscribeToDocs(null, callback)
 
-  const docs = []
+  const docs: Array<PouchDB.Core.IdMeta & { value: number }> = []
   for (let i = 0; i < 15; ++i) {
     docs.push({
       _id: 'doc_' + Math.random(),

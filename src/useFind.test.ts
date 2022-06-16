@@ -52,13 +52,15 @@ test('should throw an error if there is no pouchdb context', () => {
   )
 
   expect(result.error).toBeInstanceOf(Error)
-  expect(result.error.message).toBe(
+  expect(result.error?.message).toBe(
     'could not find PouchDB context value; please ensure the component is wrapped in a <Provider>'
   )
 })
 
 test('should return an error if the PouchDB database as no createIndex', () => {
-  myPouch.createIndex = undefined
+  ;(
+    myPouch as { createIndex: (() => Promise<unknown>) | undefined }
+  ).createIndex = undefined
 
   const { result } = renderHook(
     () =>
@@ -73,13 +75,13 @@ test('should return an error if the PouchDB database as no createIndex', () => {
   )
 
   expect(result.error).toBeInstanceOf(Error)
-  expect(result.error.message).toBe(
+  expect(result.error?.message).toBe(
     'db.createIndex() or/and db.find() are not defined. Please install "pouchdb-find"'
   )
 })
 
 test('should return an error if the PouchDB database as no find', () => {
-  myPouch.find = undefined
+  ;(myPouch as { find: (() => Promise<unknown>) | undefined }).find = undefined
 
   const { result } = renderHook(
     () =>
@@ -94,7 +96,7 @@ test('should return an error if the PouchDB database as no find', () => {
   )
 
   expect(result.error).toBeInstanceOf(Error)
-  expect(result.error.message).toBe(
+  expect(result.error?.message).toBe(
     'db.createIndex() or/and db.find() are not defined. Please install "pouchdb-find"'
   )
 })
@@ -531,7 +533,7 @@ describe('index', () => {
     await waitForValueToChange(() => result.current.loading)
 
     expect(typeof result.current.warning).toBe('string')
-    expect(result.current.warning.length).toBeGreaterThan(0)
+    expect(result.current.warning?.length).toBeGreaterThan(0)
     expect(result.current.docs).toHaveLength(5)
   })
 
@@ -726,7 +728,7 @@ describe('index', () => {
           sort: ['captain'],
         }),
       {
-        initialProps: { ddoc: 'star_trak', name: 'captains' },
+        initialProps: { ddoc: 'star_trek', name: 'captains' },
         pouchdb: myPouch,
       }
     )
@@ -735,7 +737,7 @@ describe('index', () => {
 
     expect(result.current.loading).toBeFalsy()
 
-    rerender({ ddoc: 'star_trak', name: 'other' })
+    rerender({ ddoc: 'star_trek', name: 'other' })
 
     expect(result.current.loading).toBeTruthy()
 
@@ -753,12 +755,14 @@ describe('index', () => {
     expect(result.current.loading).toBeFalsy()
     expect(result.current.docs).toHaveLength(5)
 
-    const starTrak = await myPouch.get<Record<string, unknown>>(
-      '_design/star_trak'
+    const starTrek = await myPouch.get<Record<string, Record<string, unknown>>>(
+      '_design/star_trek'
     )
-    expect(Object.keys(starTrak.views)).toEqual(['captains', 'other'])
+    expect(Object.keys(starTrek.views)).toEqual(['captains', 'other'])
 
-    const starDDoc = await myPouch.get<Record<string, unknown>>('_design/star')
+    const starDDoc = await myPouch.get<Record<string, Record<string, unknown>>>(
+      '_design/star'
+    )
     expect(Object.keys(starDDoc.views)).toEqual(['other'])
   })
 
@@ -958,7 +962,7 @@ describe('index', () => {
           sort: ['captain'],
         }),
       {
-        initialProps: null,
+        initialProps: null as null | string,
         pouchdb: myPouch,
       }
     )

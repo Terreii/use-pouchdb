@@ -2,7 +2,12 @@ import PouchDB from 'pouchdb-core'
 import memory from 'pouchdb-adapter-memory'
 import mapReduce from 'pouchdb-mapreduce'
 
-import { renderHook, renderHookWithMultiDbContext, act } from './test-utils'
+import {
+  renderHook,
+  renderHookWithMultiDbContext,
+  act,
+  DocWithAttachment,
+} from './test-utils'
 import useAllDocs from './useAllDocs'
 
 PouchDB.plugin(memory)
@@ -22,7 +27,7 @@ test('should throw an error if there is no pouchdb context', () => {
   const { result } = renderHook(() => useAllDocs())
 
   expect(result.error).toBeInstanceOf(Error)
-  expect(result.error.message).toBe(
+  expect(result.error?.message).toBe(
     'could not find PouchDB context value; please ensure the component is wrapped in a <Provider>'
   )
 })
@@ -80,8 +85,8 @@ test('should subscribe to changes', async () => {
   ])
   expect(result.current.total_rows).toBe(2)
 
-  let revC: string
-  let revD: string
+  let revC = 'fail'
+  let revD = 'fail'
   act(() => {
     myPouch
       .bulkDocs([
@@ -89,8 +94,8 @@ test('should subscribe to changes', async () => {
         { _id: 'd', test: 'world!' },
       ])
       .then(result => {
-        revC = result[0].rev
-        revD = result[1].rev
+        revC = result[0].rev ?? 'fail'
+        revD = result[1].rev ?? 'fail'
       })
   })
 
@@ -139,7 +144,7 @@ test('should subscribe to changes', async () => {
   expect(result.current.total_rows).toBe(4)
 
   act(() => {
-    myPouch.remove('b', revB)
+    myPouch.remove('b', revB ?? 'fail')
   })
 
   await waitForNextUpdate()
@@ -171,8 +176,8 @@ test('should reload if a change did happen while a query is running', async () =
     { id: 'b', key: 'b', value: { rev: revB } },
   ])
 
-  let revC: string
-  let revD: string
+  let revC = 'fail'
+  let revD = 'fail'
   act(() => {
     myPouch
       .bulkDocs([
@@ -180,8 +185,8 @@ test('should reload if a change did happen while a query is running', async () =
         { _id: 'd', test: 'world!' },
       ])
       .then(result => {
-        revC = result[0].rev
-        revD = result[1].rev
+        revC = result[0].rev ?? 'fail'
+        revD = result[1].rev ?? 'fail'
       })
   })
 
@@ -193,7 +198,7 @@ test('should reload if a change did happen while a query is running', async () =
     { id: 'b', key: 'b', value: { rev: revB } },
   ])
 
-  let revE: string
+  let revE = 'fail'
   act(() => {
     myPouch.put({ _id: 'e', test: 'Hallo!' }).then(result => {
       revE = result.rev
@@ -302,19 +307,19 @@ describe('options', () => {
     await waitForNextUpdate()
 
     expect(result.current.state).toBe('done')
-    expect(result.current.rows[0].doc._conflicts).toBeUndefined()
+    expect(result.current.rows[0].doc?._conflicts).toBeUndefined()
 
     rerender(true)
 
     await waitForNextUpdate()
 
     expect(result.current.state).toBe('done')
-    expect(result.current.rows[0].doc._conflicts).toEqual(
-      result.current.rows[0].doc._rev === updateResult.rev
+    expect(result.current.rows[0].doc?._conflicts).toEqual(
+      result.current.rows[0].doc?._rev === updateResult.rev
         ? [conflictResult.rev]
         : [updateResult.rev]
     )
-    expect(result.current.rows[1].doc._conflicts).toBeUndefined()
+    expect(result.current.rows[1].doc?._conflicts).toBeUndefined()
   })
 
   test('should handle the attachments option', async () => {
@@ -343,7 +348,9 @@ describe('options', () => {
     await waitForNextUpdate()
 
     expect(result.current.state).toBe('done')
-    expect(result.current.rows[0].doc._attachments['info.txt']).toEqual({
+    expect(
+      (result.current.rows[0].doc as DocWithAttachment)._attachments['info.txt']
+    ).toEqual({
       content_type: 'text/plain',
       digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
       length: 23,
@@ -356,7 +363,9 @@ describe('options', () => {
     await waitForNextUpdate()
 
     expect(result.current.state).toBe('done')
-    expect(result.current.rows[0].doc._attachments['info.txt']).toEqual({
+    expect(
+      (result.current.rows[0].doc as DocWithAttachment)._attachments['info.txt']
+    ).toEqual({
       content_type: 'text/plain',
       data: 'SXMgdGhlcmUgbGlmZSBvbiBNYXJzPwo=',
       digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
@@ -396,7 +405,9 @@ describe('options', () => {
     await waitForNextUpdate()
 
     expect(result.current.state).toBe('done')
-    expect(result.current.rows[0].doc._attachments['info.txt']).toEqual({
+    expect(
+      (result.current.rows[0].doc as DocWithAttachment)._attachments['info.txt']
+    ).toEqual({
       content_type: 'text/plain',
       data: 'SXMgdGhlcmUgbGlmZSBvbiBNYXJzPwo=',
       digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
@@ -408,7 +419,9 @@ describe('options', () => {
     await waitForNextUpdate()
 
     expect(result.current.state).toBe('done')
-    expect(result.current.rows[0].doc._attachments['info.txt']).toEqual({
+    expect(
+      (result.current.rows[0].doc as DocWithAttachment)._attachments['info.txt']
+    ).toEqual({
       content_type: 'text/plain',
       data: Buffer.from('Is there life on Mars?\n'),
       digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
@@ -437,7 +450,7 @@ describe('options', () => {
       { id: 'b', key: 'b', value: { rev: revB } },
     ])
 
-    let revAA: string
+    let revAA = 'fail'
     act(() => {
       myPouch.put({ _id: 'aa' }).then(result => {
         revAA = result.rev
@@ -682,7 +695,7 @@ describe('options', () => {
       { id: 'a', key: 'a', value: { rev: revA } },
     ])
 
-    let revC: string
+    let revC = 'fail'
     act(() => {
       myPouch.put({ _id: 'c', test: 'moar' }).then(result => {
         revC = result.rev

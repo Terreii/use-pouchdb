@@ -1,7 +1,12 @@
 import PouchDB from 'pouchdb-core'
 import memory from 'pouchdb-adapter-memory'
 
-import { renderHook, renderHookWithMultiDbContext, act } from './test-utils'
+import {
+  renderHook,
+  renderHookWithMultiDbContext,
+  act,
+  DocWithAttachment,
+} from './test-utils'
 import useDoc from './useDoc'
 
 PouchDB.plugin(memory)
@@ -20,7 +25,7 @@ test('should throw an error if there is no pouchdb context', () => {
   const { result } = renderHook(() => useDoc('test'))
 
   expect(result.error).toBeInstanceOf(Error)
-  expect(result.error.message).toBe(
+  expect(result.error?.message).toBe(
     'could not find PouchDB context value; please ensure the component is wrapped in a <Provider>'
   )
 })
@@ -41,7 +46,7 @@ test('should return a doc', async () => {
 
   expect(result.current.doc).toBeTruthy()
   expect(result.current.error).toBeNull()
-  expect(result.current.doc._id).toBe('test')
+  expect(result.current.doc?._id).toBe('test')
   expect(result.current.loading).toBeFalsy()
   expect(result.current.state).toBe('done')
 })
@@ -71,8 +76,8 @@ test('should return a default value while first loading', async () => {
 
   expect(result.current.state).toBe('done')
   expect(result.current.error).toBeNull()
-  expect(result.current.doc._id).toBe('test')
-  expect(result.current.doc.value).toBe(42)
+  expect(result.current.doc?._id).toBe('test')
+  expect(result.current.doc?.value).toBe(42)
 })
 
 test('should return a default value from a function while first loading', async () => {
@@ -100,8 +105,8 @@ test('should return a default value from a function while first loading', async 
 
   expect(result.current.state).toBe('done')
   expect(result.current.error).toBeNull()
-  expect(result.current.doc._id).toBe('test')
-  expect(result.current.doc.value).toBe(42)
+  expect(result.current.doc?._id).toBe('test')
+  expect(result.current.doc?.value).toBe(42)
 })
 
 test("should return a error if the doc doesn't exist", async () => {
@@ -118,7 +123,7 @@ test("should return a error if the doc doesn't exist", async () => {
   expect(result.current.doc).toBeFalsy()
   expect(result.current.state).toBe('error')
   expect(result.current.error).toBeInstanceOf(Error)
-  expect(result.current.error.status).toBe(404)
+  expect(result.current.error?.status).toBe(404)
 })
 
 test('should continue to return the default value in error-state', async () => {
@@ -146,7 +151,7 @@ test('should continue to return the default value in error-state', async () => {
   })
   expect(result.current.state).toBe('error')
   expect(result.current.error).toBeInstanceOf(Error)
-  expect(result.current.error.status).toBe(404)
+  expect(result.current.error?.status).toBe(404)
 })
 
 test('should subscribe to updates of the document', async () => {
@@ -169,8 +174,8 @@ test('should subscribe to updates of the document', async () => {
   await waitForNextUpdate()
 
   expect(result.current.state).toBe('done')
-  expect(result.current.doc._id).toBe('test')
-  expect(result.current.doc.value).toBe(42)
+  expect(result.current.doc?._id).toBe('test')
+  expect(result.current.doc?.value).toBe(42)
 
   act(() => {
     myPouch.put({
@@ -184,9 +189,9 @@ test('should subscribe to updates of the document', async () => {
   await waitForNextUpdate()
 
   expect(result.current.state).toBe('done')
-  expect(result.current.doc._id).toBe('test')
-  expect(result.current.doc.value).toBe(43)
-  expect(result.current.doc.greetings).toBe('to you, too!')
+  expect(result.current.doc?._id).toBe('test')
+  expect(result.current.doc?.value).toBe(43)
+  expect(result.current.doc?.greetings).toBe('to you, too!')
 })
 
 test('should ignore updates to other docs', async () => {
@@ -205,8 +210,8 @@ test('should ignore updates to other docs', async () => {
   await waitForNextUpdate()
 
   expect(result.current.state).toBe('done')
-  expect(result.current.doc._id).toBe('test')
-  expect(result.current.doc.value).toBe(42)
+  expect(result.current.doc?._id).toBe('test')
+  expect(result.current.doc?.value).toBe(42)
 
   act(() => {
     myPouch.bulkDocs([
@@ -225,8 +230,8 @@ test('should ignore updates to other docs', async () => {
   await waitForNextUpdate()
 
   expect(result.current.state).toBe('done')
-  expect(result.current.doc._id).toBe('test')
-  expect(result.current.doc.value).toBe(43)
+  expect(result.current.doc?._id).toBe('test')
+  expect(result.current.doc?.value).toBe(43)
 })
 
 test('should update when a none existing document is created', async () => {
@@ -245,7 +250,7 @@ test('should update when a none existing document is created', async () => {
   expect(result.current.doc).toBeFalsy()
   expect(result.current.state).toBe('error')
   expect(result.current.error).toBeInstanceOf(Error)
-  expect(result.current.error.status).toBe(404)
+  expect(result.current.error?.status).toBe(404)
 
   act(() => {
     myPouch.put({
@@ -259,9 +264,9 @@ test('should update when a none existing document is created', async () => {
 
   expect(result.current.state).toBe('done')
   expect(result.current.error).toBeNull()
-  expect(result.current.doc._id).toBe('test')
-  expect(result.current.doc.value).toBe(42)
-  expect(result.current.doc.greetings).toBe('Hello You!')
+  expect(result.current.doc?._id).toBe('test')
+  expect(result.current.doc?.value).toBe(42)
+  expect(result.current.doc?.greetings).toBe('Hello You!')
 })
 
 test('should return the last doc when id did change and no initial value is passed', async () => {
@@ -281,18 +286,18 @@ test('should return the last doc when id did change and no initial value is pass
 
   await waitForNextUpdate()
 
-  expect(result.current.doc._id).toBe('test')
+  expect(result.current.doc?._id).toBe('test')
 
   rerender('other')
 
   expect(result.current.state).toBe('loading')
-  expect(result.current.doc._id).toBe('test')
+  expect(result.current.doc?._id).toBe('test')
 
   await waitForNextUpdate()
 
   expect(result.current.state).toBe('done')
-  expect(result.current.doc._id).toBe('other')
-  expect(result.current.doc.value).toBe('changed')
+  expect(result.current.doc?._id).toBe('other')
+  expect(result.current.doc?.value).toBe('changed')
 })
 
 test('should return the initial value when id did change', async () => {
@@ -314,16 +319,16 @@ test('should return the initial value when id did change', async () => {
 
   await waitForNextUpdate()
 
-  expect(result.current.doc._id).toBe('test')
-  expect(result.current.doc.value).toBe(42)
+  expect(result.current.doc?._id).toBe('test')
+  expect(result.current.doc?.value).toBe(42)
 
   rerender('other')
 
   await waitForNextUpdate()
 
   expect(result.current.state).toBe('done')
-  expect(result.current.doc._id).toBe('other')
-  expect(result.current.doc.value).toBe('changed')
+  expect(result.current.doc?._id).toBe('other')
+  expect(result.current.doc?.value).toBe('changed')
 })
 
 test('should return a 404 error if the doc was deleted while it is shown', async () => {
@@ -346,8 +351,8 @@ test('should return a 404 error if the doc was deleted while it is shown', async
   await waitForNextUpdate()
 
   expect(result.current.state).toBe('done')
-  expect(result.current.doc._id).toBe('test')
-  expect(result.current.doc.value).toBe(42)
+  expect(result.current.doc?._id).toBe('test')
+  expect(result.current.doc?.value).toBe(42)
 
   act(() => {
     myPouch.remove(putResult.id, putResult.rev)
@@ -358,7 +363,7 @@ test('should return a 404 error if the doc was deleted while it is shown', async
   expect(result.current.state).toBe('error')
   expect(result.current.doc).toBeNull()
   expect(result.current.error).toBeInstanceOf(Error)
-  expect(result.current.error.status).toBe(404)
+  expect(result.current.error?.status).toBe(404)
 })
 
 test('should return the new winning rev doc was deleted while it is shown and has a conflicting version', async () => {
@@ -392,13 +397,13 @@ test('should return the new winning rev doc was deleted while it is shown and ha
   await waitForNextUpdate()
 
   const [winningRev, conflictRev, winningValue, conflictValue] =
-    result.current.doc._rev === resultUpdate.rev
+    result.current.doc?._rev === resultUpdate.rev
       ? [resultUpdate.rev, conflictResult.rev, 'update', 'conflict']
       : [conflictResult.rev, resultUpdate.rev, 'conflict', 'update']
 
   expect(result.current.state).toBe('done')
-  expect(result.current.doc._id).toBe('test')
-  expect(result.current.doc.value).toBe(winningValue)
+  expect(result.current.doc?._id).toBe('test')
+  expect(result.current.doc?.value).toBe(winningValue)
 
   act(() => {
     myPouch.remove(putResult.id, winningRev)
@@ -407,8 +412,8 @@ test('should return the new winning rev doc was deleted while it is shown and ha
   await waitForNextUpdate()
 
   expect(result.current.state).toBe('done')
-  expect(result.current.doc._rev).toBe(conflictRev)
-  expect(result.current.doc.value).toBe(conflictValue)
+  expect(result.current.doc?._rev).toBe(conflictRev)
+  expect(result.current.doc?.value).toBe(conflictValue)
 })
 
 describe('pouchdb get options', () => {
@@ -515,7 +520,7 @@ describe('pouchdb get options', () => {
 
     await waitForNextUpdate()
 
-    expect(result.current.doc._revisions).toEqual({
+    expect(result.current.doc?._revisions).toEqual({
       ids: [updateResult.rev, firstPutResult.rev].map(rev => rev.split('-')[1]),
       start: 2,
     })
@@ -532,7 +537,7 @@ describe('pouchdb get options', () => {
 
     await waitForNextUpdate()
 
-    expect(result.current.doc._revisions).toEqual({
+    expect(result.current.doc?._revisions).toEqual({
       ids: [secondUpdate.rev, updateResult.rev, firstPutResult.rev].map(
         rev => rev.split('-')[1]
       ),
@@ -562,7 +567,7 @@ describe('pouchdb get options', () => {
 
     await waitForNextUpdate()
 
-    expect(result.current.doc._revs_info).toEqual([
+    expect(result.current.doc?._revs_info).toEqual([
       { rev: updateResult.rev, status: 'available' },
       { rev: firstPutResult.rev, status: 'available' },
     ])
@@ -579,7 +584,7 @@ describe('pouchdb get options', () => {
 
     await waitForNextUpdate()
 
-    expect(result.current.doc._revs_info).toEqual([
+    expect(result.current.doc?._revs_info).toEqual([
       { rev: secondUpdate.rev, status: 'available' },
       { rev: updateResult.rev, status: 'available' },
       { rev: firstPutResult.rev, status: 'available' },
@@ -618,11 +623,11 @@ describe('pouchdb get options', () => {
     await waitForNextUpdate()
 
     const [loosing, winning] =
-      result.current.doc._rev === resultUpdate.rev
+      result.current.doc?._rev === resultUpdate.rev
         ? [conflictResult.rev, resultUpdate.rev]
         : [resultUpdate.rev, conflictResult.rev]
 
-    expect(result.current.doc._conflicts).toEqual([loosing])
+    expect(result.current.doc?._conflicts).toEqual([loosing])
 
     await myPouch.put({
       _id: 'test',
@@ -636,7 +641,7 @@ describe('pouchdb get options', () => {
 
     await waitForNextUpdate()
 
-    expect(result.current.doc._conflicts).toEqual([loosing])
+    expect(result.current.doc?._conflicts).toEqual([loosing])
   })
 
   test('should include attachments if attachments is set to true', async () => {
@@ -662,8 +667,10 @@ describe('pouchdb get options', () => {
 
     await waitForNextUpdate()
 
-    expect(typeof result.current.doc._attachments).toBe('object')
-    expect(result.current.doc._attachments['info.txt']).toEqual({
+    expect(typeof result.current.doc?._attachments).toBe('object')
+    expect(
+      (result.current.doc as DocWithAttachment)._attachments['info.txt']
+    ).toEqual({
       content_type: 'text/plain',
       digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
       length: 23,
@@ -675,7 +682,9 @@ describe('pouchdb get options', () => {
 
     await waitForNextUpdate()
 
-    expect(result.current.doc._attachments['info.txt']).toEqual({
+    expect(
+      (result.current.doc as DocWithAttachment)._attachments['info.txt']
+    ).toEqual({
       content_type: 'text/plain',
       data: 'SXMgdGhlcmUgbGlmZSBvbiBNYXJzPwo=',
       digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
@@ -685,7 +694,7 @@ describe('pouchdb get options', () => {
     await myPouch.putAttachment(
       'test',
       'moar.txt',
-      result.current.doc._rev,
+      result.current.doc?._rev ?? 'fail',
       'aGVsbG8gd29ybGQ=',
       'text/plain'
     )
@@ -696,13 +705,17 @@ describe('pouchdb get options', () => {
 
     await waitForNextUpdate()
 
-    expect(result.current.doc._attachments['info.txt']).toEqual({
+    expect(
+      (result.current.doc as DocWithAttachment)._attachments['info.txt']
+    ).toEqual({
       content_type: 'text/plain',
       data: 'SXMgdGhlcmUgbGlmZSBvbiBNYXJzPwo=',
       digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
       revpos: 1,
     })
-    expect(result.current.doc._attachments['moar.txt']).toEqual({
+    expect(
+      (result.current.doc as DocWithAttachment)._attachments['moar.txt']
+    ).toEqual({
       content_type: 'text/plain',
       data: 'aGVsbG8gd29ybGQ=',
       digest: 'md5-XrY7u+Ae7tCTyyK7j1rNww==',
@@ -719,14 +732,18 @@ describe('pouchdb get options', () => {
 
     await waitForNextUpdate()
 
-    expect(result.current.doc.value).toBe('moreData')
-    expect(result.current.doc._attachments['info.txt']).toEqual({
+    expect(result.current.doc?.value).toBe('moreData')
+    expect(
+      (result.current.doc as DocWithAttachment)._attachments['info.txt']
+    ).toEqual({
       content_type: 'text/plain',
       data: 'SXMgdGhlcmUgbGlmZSBvbiBNYXJzPwo=',
       digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
       revpos: 1,
     })
-    expect(result.current.doc._attachments['moar.txt']).toEqual({
+    expect(
+      (result.current.doc as DocWithAttachment)._attachments['moar.txt']
+    ).toEqual({
       content_type: 'text/plain',
       data: 'aGVsbG8gd29ybGQ=',
       digest: 'md5-XrY7u+Ae7tCTyyK7j1rNww==',
@@ -759,8 +776,10 @@ describe('pouchdb get options', () => {
 
     await waitForNextUpdate()
 
-    expect(result.current.doc._attachments).toBeTruthy()
-    expect(result.current.doc._attachments['info.txt']).toEqual({
+    expect(result.current.doc?._attachments).toBeTruthy()
+    expect(
+      (result.current.doc as DocWithAttachment)._attachments['info.txt']
+    ).toEqual({
       content_type: 'text/plain',
       data: Buffer.from('Is there life on Mars?\n'),
       digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
@@ -770,7 +789,7 @@ describe('pouchdb get options', () => {
     await myPouch.putAttachment(
       'test',
       'moar.txt',
-      result.current.doc._rev,
+      result.current.doc?._rev ?? 'fail',
       Buffer.from('hello world'),
       'text/plain'
     )
@@ -781,13 +800,17 @@ describe('pouchdb get options', () => {
 
     await waitForNextUpdate()
 
-    expect(result.current.doc._attachments['info.txt']).toEqual({
+    expect(
+      (result.current.doc as DocWithAttachment)._attachments['info.txt']
+    ).toEqual({
       content_type: 'text/plain',
       data: Buffer.from('Is there life on Mars?\n'),
       digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
       revpos: 1,
     })
-    expect(result.current.doc._attachments['moar.txt']).toEqual({
+    expect(
+      (result.current.doc as DocWithAttachment)._attachments['moar.txt']
+    ).toEqual({
       content_type: 'text/plain',
       data: Buffer.from('hello world'),
       digest: 'md5-XrY7u+Ae7tCTyyK7j1rNww==',
@@ -804,14 +827,18 @@ describe('pouchdb get options', () => {
 
     await waitForNextUpdate()
 
-    expect(result.current.doc.value).toBe('moreData')
-    expect(result.current.doc._attachments['info.txt']).toEqual({
+    expect(result.current.doc?.value).toBe('moreData')
+    expect(
+      (result.current.doc as DocWithAttachment)._attachments['info.txt']
+    ).toEqual({
       content_type: 'text/plain',
       data: Buffer.from('Is there life on Mars?\n'),
       digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
       revpos: 1,
     })
-    expect(result.current.doc._attachments['moar.txt']).toEqual({
+    expect(
+      (result.current.doc as DocWithAttachment)._attachments['moar.txt']
+    ).toEqual({
       content_type: 'text/plain',
       data: Buffer.from('hello world'),
       digest: 'md5-XrY7u+Ae7tCTyyK7j1rNww==',
@@ -844,7 +871,7 @@ describe('pouchdb get options', () => {
 
     await waitForNextUpdate()
 
-    expect(result.current.doc._rev).toBe(updateResult.rev)
+    expect(result.current.doc?._rev).toBe(updateResult.rev)
 
     const secondUpdateResult = await myPouch.put({
       _id: 'test',
@@ -854,7 +881,7 @@ describe('pouchdb get options', () => {
 
     await waitForNextUpdate()
 
-    expect(result.current.doc._rev).toBe(secondUpdateResult.rev)
+    expect(result.current.doc?._rev).toBe(secondUpdateResult.rev)
   })
 
   test('should support the selection of a database in the context to be used', async () => {

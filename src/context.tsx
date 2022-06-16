@@ -2,7 +2,6 @@ import React, {
   createContext,
   useContext as useReactContext,
   useMemo,
-  useEffect,
   useRef,
   ReactNode,
 } from 'react'
@@ -111,16 +110,6 @@ function useAddSubscriptionManager(databases: {
 }): ContextObject {
   // memory for last DB and SubscriptionManager pairs
   const lastContextObject = useRef<ContextObject>({})
-
-  useEffect(
-    () => () => {
-      // unsubscribe all SubscriptionManager when the component un-mounts
-      for (const pair of Object.values(lastContextObject.current)) {
-        pair.subscriptionManager.unsubscribeAll()
-      }
-    },
-    []
-  )
 
   // Keys of last lastContextObject
   // All databases that didn't change will be reused and their keys deleted from this Set.

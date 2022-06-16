@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { StrictMode } from 'react'
 import {
   renderHook as testingLibraryRenderHook,
   waitFor,
@@ -35,7 +35,11 @@ export function renderHook<P, R>(
       ? {
           initialProps: options.initialProps,
           wrapper: function Wrapper({ children }) {
-            return <Provider pouchdb={options.pouchdb}>{children}</Provider>
+            return (
+              <StrictMode>
+                <Provider pouchdb={options.pouchdb}>{children}</Provider>
+              </StrictMode>
+            )
           },
         }
       : undefined
@@ -51,12 +55,14 @@ export function renderHookWithMultiDbContext<P, R>(
     initialProps: options.initialProps,
     wrapper: function Wrapper({ children }) {
       return (
-        <Provider
-          databases={{ main: options.main, other: options.other }}
-          default="main"
-        >
-          {children}
-        </Provider>
+        <StrictMode>
+          <Provider
+            databases={{ main: options.main, other: options.other }}
+            default="main"
+          >
+            {children}
+          </Provider>
+        </StrictMode>
       )
     },
   }

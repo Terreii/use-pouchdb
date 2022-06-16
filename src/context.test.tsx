@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react'
-import React from 'react'
+import React, { StrictMode } from 'react'
 import PouchDB from 'pouchdb-core'
 import memory from 'pouchdb-adapter-memory'
 
@@ -12,7 +12,11 @@ test('should render a Provider which provide the passed pouchdb database', async
 
   const { result } = renderHook(() => useContext(), {
     wrapper: function Wrapper({ children }) {
-      return <Provider pouchdb={myPouch}>{children}</Provider>
+      return (
+        <StrictMode>
+          <Provider pouchdb={myPouch}>{children}</Provider>
+        </StrictMode>
+      )
     },
   })
 
@@ -34,7 +38,11 @@ test('should unsubscribe all when the database changes', async () => {
 
   const { result, rerender } = renderHook(() => useContext(), {
     wrapper: function Wrapper({ children }) {
-      return <Provider pouchdb={db}>{children}</Provider>
+      return (
+        <StrictMode>
+          <Provider pouchdb={db}>{children}</Provider>
+        </StrictMode>
+      )
     },
   })
 
@@ -60,7 +68,11 @@ test('should unsubscribe all when a database gets destroyed', async () => {
 
   const { result } = renderHook(() => useContext(), {
     wrapper: function Wrapper({ children }) {
-      return <Provider pouchdb={myPouch}>{children}</Provider>
+      return (
+        <StrictMode>
+          <Provider pouchdb={myPouch}>{children}</Provider>
+        </StrictMode>
+      )
     },
   })
 
@@ -83,9 +95,11 @@ test('should use the optional name argument', async () => {
     initialProps: 'other',
     wrapper: function Wrapper({ children }) {
       return (
-        <Provider pouchdb={myPouch} name="other">
-          {children}
-        </Provider>
+        <StrictMode>
+          <Provider pouchdb={myPouch} name="other">
+            {children}
+          </Provider>
+        </StrictMode>
       )
     },
   })
@@ -103,9 +117,11 @@ test('should render a Provider that gives access to multiple databases', async (
     initialProps: undefined,
     wrapper: function Wrapper({ children }) {
       return (
-        <Provider databases={{ myPouch, other }} default="myPouch">
-          {children}
-        </Provider>
+        <StrictMode>
+          <Provider databases={{ myPouch, other }} default="myPouch">
+            {children}
+          </Provider>
+        </StrictMode>
       )
     },
   })
@@ -138,9 +154,11 @@ test('should combine a parent context into its context', async () => {
     initialProps: undefined,
     wrapper: function Wrapper({ children }) {
       return (
-        <Provider pouchdb={parent}>
-          <Provider pouchdb={child}>{children}</Provider>
-        </Provider>
+        <StrictMode>
+          <Provider pouchdb={parent}>
+            <Provider pouchdb={child}>{children}</Provider>
+          </Provider>
+        </StrictMode>
       )
     },
   })
@@ -175,11 +193,13 @@ test('should combine a parent context into its context if the child is multi db'
     initialProps: undefined,
     wrapper: function Wrapper({ children }) {
       return (
-        <Provider pouchdb={parent}>
-          <Provider databases={{ other: child }} default="other">
-            {children}
+        <StrictMode>
+          <Provider pouchdb={parent}>
+            <Provider databases={{ other: child }} default="other">
+              {children}
+            </Provider>
           </Provider>
-        </Provider>
+        </StrictMode>
       )
     },
   })
@@ -214,11 +234,13 @@ test('should allow the use of a parent context database name in default', async 
     initialProps: undefined,
     wrapper: function Wrapper({ children }) {
       return (
-        <Provider pouchdb={parent}>
-          <Provider databases={{ other: child }} default="test">
-            {children}
+        <StrictMode>
+          <Provider pouchdb={parent}>
+            <Provider databases={{ other: child }} default="test">
+              {children}
+            </Provider>
           </Provider>
-        </Provider>
+        </StrictMode>
       )
     },
   })
@@ -237,9 +259,11 @@ test('should handle a database name of default', async () => {
     initialProps: undefined,
     wrapper: function Wrapper({ children }) {
       return (
-        <Provider databases={{ default: myPouch, other }} default="other">
-          {children}
-        </Provider>
+        <StrictMode>
+          <Provider databases={{ default: myPouch, other }} default="other">
+            {children}
+          </Provider>
+        </StrictMode>
       )
     },
   })

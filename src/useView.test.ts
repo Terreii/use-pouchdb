@@ -6,6 +6,7 @@ import {
   renderHook,
   renderHookWithMultiDbContext,
   act,
+  waitForNextUpdate,
   DocWithAttachment,
 } from './test-utils'
 import useView from './useView'
@@ -37,30 +38,6 @@ afterEach(async () => {
   await myPouch.destroy()
 })
 
-test('should throw an error if there is no pouchdb context', () => {
-  const { result } = renderHook(() => useView('test'))
-
-  expect(result.error).toBeInstanceOf(Error)
-  expect(result.error?.message).toBe(
-    'could not find PouchDB context value; please ensure the component is wrapped in a <Provider>'
-  )
-})
-
-test('should return an error if the PouchDB database as no query', () => {
-  ;(
-    myPouch as unknown as { query: (() => Promise<unknown>) | undefined }
-  ).query = undefined
-
-  const { result } = renderHook(() => useView('test'), {
-    pouchdb: myPouch,
-  })
-
-  expect(result.error).toBeInstanceOf(Error)
-  expect(result.error?.message).toBe(
-    'db.query() is not defined. Please install "pouchdb-mapreduce"'
-  )
-})
-
 describe('temporary function only views', () => {
   test("should query a view and return it's result", async () => {
     await myPouch.bulkDocs([
@@ -74,7 +51,7 @@ describe('temporary function only views', () => {
       }
     }
 
-    const { result, waitForNextUpdate } = renderHook(() => useView(view), {
+    const { result } = renderHook(() => useView(view), {
       pouchdb: myPouch,
     })
 
@@ -87,7 +64,7 @@ describe('temporary function only views', () => {
       total_rows: 0,
     })
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current).toEqual({
       error: null,
@@ -111,11 +88,11 @@ describe('temporary function only views', () => {
       }
     }
 
-    const { result, waitForNextUpdate } = renderHook(() => useView(view), {
+    const { result } = renderHook(() => useView(view), {
       pouchdb: myPouch,
     })
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([{ id: 'a', key: 'value', value: 42 }])
@@ -127,12 +104,9 @@ describe('temporary function only views', () => {
       ])
     })
 
-    await waitForNextUpdate()
-
-    expect(result.current.state).toBe('loading')
     expect(result.current.rows).toEqual([{ id: 'a', key: 'value', value: 42 }])
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([
@@ -154,11 +128,7 @@ describe('temporary function only views', () => {
         })
     })
 
-    await waitForNextUpdate()
-
-    expect(result.current.loading).toBeTruthy()
-
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([
@@ -175,11 +145,7 @@ describe('temporary function only views', () => {
       })
     })
 
-    await waitForNextUpdate()
-
-    expect(result.current.loading).toBeTruthy()
-
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([{ id: 'c', key: 'Hallo!', value: 42 }])
@@ -197,11 +163,11 @@ describe('temporary function only views', () => {
       }
     }
 
-    const { result, waitForNextUpdate } = renderHook(() => useView(view), {
+    const { result } = renderHook(() => useView(view), {
       pouchdb: myPouch,
     })
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([{ id: 'a', key: 'value', value: 42 }])
@@ -213,25 +179,13 @@ describe('temporary function only views', () => {
       ])
     })
 
-    await waitForNextUpdate()
-
-    expect(result.current.state).toBe('loading')
     expect(result.current.rows).toEqual([{ id: 'a', key: 'value', value: 42 }])
 
     act(() => {
       myPouch.bulkDocs([{ _id: 'e', test: 'Hallo!', type: 'tester' }])
     })
 
-    await waitForNextUpdate()
-
-    expect(result.current.state).toBe('loading')
-    expect(result.current.rows).toEqual([
-      { id: 'c', key: 'Hallo!', value: 42 },
-      { id: 'e', key: 'Hallo!', value: 42 },
-      { id: 'a', key: 'value', value: 42 },
-    ])
-
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([
@@ -253,12 +207,12 @@ describe('temporary function only views', () => {
       }
     }
 
-    const { result, waitForNextUpdate } = renderHook(() => useView(view), {
+    const { result } = renderHook(() => useView(view), {
       initialProps: false,
       pouchdb: myPouch,
     })
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([
@@ -270,11 +224,7 @@ describe('temporary function only views', () => {
       myPouch.remove(putResults[0].id ?? 'fail', putResults[0].rev ?? 'fail')
     })
 
-    await waitForNextUpdate()
-
-    expect(result.current.state).toBe('loading')
-
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([{ id: 'b', key: 'other', value: 42 }])
@@ -293,7 +243,7 @@ describe('temporary function only views', () => {
         }
       }
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (include_docs: boolean) => useView(view, { include_docs }),
         {
           initialProps: false,
@@ -301,7 +251,7 @@ describe('temporary function only views', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -310,7 +260,7 @@ describe('temporary function only views', () => {
 
       rerender(true)
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -357,7 +307,7 @@ describe('temporary function only views', () => {
         }
       }
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (conflicts: boolean) =>
           useView(view, { include_docs: true, conflicts }),
         {
@@ -366,14 +316,14 @@ describe('temporary function only views', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows[0].doc?._conflicts).toBeUndefined()
 
       rerender(true)
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows[0].doc?._conflicts).toEqual(
@@ -405,7 +355,7 @@ describe('temporary function only views', () => {
         }
       }
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (attachments: boolean) =>
           useView(view, { include_docs: true, attachments }),
         {
@@ -414,7 +364,7 @@ describe('temporary function only views', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(
@@ -431,7 +381,7 @@ describe('temporary function only views', () => {
 
       rerender(true)
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(
@@ -468,7 +418,7 @@ describe('temporary function only views', () => {
         }
       }
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (binary: boolean) =>
           useView(view, { include_docs: true, attachments: true, binary }),
         {
@@ -477,7 +427,7 @@ describe('temporary function only views', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(
@@ -493,7 +443,7 @@ describe('temporary function only views', () => {
 
       rerender(true)
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(
@@ -521,7 +471,7 @@ describe('temporary function only views', () => {
         }
       }
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (startkey: unknown) => useView(view, { startkey }),
         {
           initialProps: 'x',
@@ -529,7 +479,7 @@ describe('temporary function only views', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -538,7 +488,7 @@ describe('temporary function only views', () => {
 
       rerender('a')
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -560,7 +510,7 @@ describe('temporary function only views', () => {
         }
       }
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (endkey: unknown) => useView(view, { endkey }),
         {
           initialProps: 'value\uffff',
@@ -568,7 +518,7 @@ describe('temporary function only views', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -577,7 +527,7 @@ describe('temporary function only views', () => {
 
       rerender('a')
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([])
@@ -596,7 +546,7 @@ describe('temporary function only views', () => {
         }
       }
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         ({ startkey, endkey }: { startkey: unknown; endkey: unknown }) =>
           useView(view, { startkey, endkey }),
         {
@@ -608,7 +558,7 @@ describe('temporary function only views', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -628,7 +578,7 @@ describe('temporary function only views', () => {
       })
 
       expect(result.current.loading).toBe(true)
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -642,7 +592,7 @@ describe('temporary function only views', () => {
       })
 
       expect(result.current.loading).toBe(true)
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -665,7 +615,7 @@ describe('temporary function only views', () => {
         }
       }
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (inclusive_end: boolean) =>
           useView(view, { endkey: 'x-value', inclusive_end }),
         {
@@ -674,7 +624,7 @@ describe('temporary function only views', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -684,7 +634,7 @@ describe('temporary function only views', () => {
 
       rerender(false)
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -705,7 +655,7 @@ describe('temporary function only views', () => {
         }
       }
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (limit?: number) => useView(view, { limit }),
         {
           initialProps: 1,
@@ -713,7 +663,7 @@ describe('temporary function only views', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -722,7 +672,7 @@ describe('temporary function only views', () => {
 
       rerender(5)
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -744,7 +694,7 @@ describe('temporary function only views', () => {
         }
       }
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (skip?: number) => useView(view, { skip }),
         {
           initialProps: 1,
@@ -752,7 +702,7 @@ describe('temporary function only views', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -761,7 +711,7 @@ describe('temporary function only views', () => {
 
       rerender(5)
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([])
@@ -780,7 +730,7 @@ describe('temporary function only views', () => {
         }
       }
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (descending: boolean) => useView(view, { descending }),
         {
           initialProps: false,
@@ -788,7 +738,7 @@ describe('temporary function only views', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -798,7 +748,7 @@ describe('temporary function only views', () => {
 
       rerender(true)
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -820,7 +770,7 @@ describe('temporary function only views', () => {
         }
       }
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (key: unknown) => useView(view, { key }),
         {
           initialProps: 'value',
@@ -828,7 +778,7 @@ describe('temporary function only views', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -837,7 +787,7 @@ describe('temporary function only views', () => {
 
       rerender('x-value')
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -858,7 +808,7 @@ describe('temporary function only views', () => {
         }
       }
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (keys: unknown[]) => useView(view, { keys }),
         {
           initialProps: ['value'],
@@ -866,7 +816,7 @@ describe('temporary function only views', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -875,7 +825,7 @@ describe('temporary function only views', () => {
 
       rerender(['x-value', 'value'])
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -897,7 +847,7 @@ describe('temporary function only views', () => {
         }
       }
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (option: { key?: unknown; keys?: unknown[] }) => useView(view, option),
         {
           initialProps: {
@@ -907,7 +857,7 @@ describe('temporary function only views', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -925,7 +875,7 @@ describe('temporary function only views', () => {
       })
 
       expect(result.current.loading).toBe(true)
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -940,7 +890,7 @@ describe('temporary function only views', () => {
       })
 
       expect(result.current.loading).toBe(true)
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -966,7 +916,7 @@ describe('temporary function only views', () => {
 
       expect(result.current.loading).toBe(true)
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -987,7 +937,7 @@ describe('temporary function only views', () => {
         }
       }
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (update_seq: boolean) => useView(view, { update_seq }),
         {
           initialProps: false,
@@ -995,14 +945,14 @@ describe('temporary function only views', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.update_seq).toBeUndefined()
 
       rerender(true)
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.update_seq).not.toBeUndefined()
@@ -1029,17 +979,16 @@ describe('temporary function only views', () => {
         }
       }
 
-      const { result, waitForNextUpdate, rerender } =
-        renderHookWithMultiDbContext(
-          (name?: string) => useView(view, { db: name }),
-          {
-            initialProps: undefined,
-            main: myPouch,
-            other: other,
-          }
-        )
+      const { result, rerender } = renderHookWithMultiDbContext(
+        (name?: string) => useView(view, { db: name }),
+        {
+          initialProps: undefined,
+          main: myPouch,
+          other: other,
+        }
+      )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       // No db selection
       expect(result.current.loading).toBeFalsy()
@@ -1054,7 +1003,7 @@ describe('temporary function only views', () => {
       // selecting a database that is not the default
       rerender('other')
       expect(result.current.loading).toBeTruthy()
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.loading).toBeFalsy()
       expect(result.current.rows).toEqual([
@@ -1068,7 +1017,7 @@ describe('temporary function only views', () => {
       // selecting the default db by it's name
       rerender('main')
       expect(result.current.loading).toBeTruthy()
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.loading).toBeFalsy()
       expect(result.current.rows).toEqual([
@@ -1082,11 +1031,11 @@ describe('temporary function only views', () => {
       // reset to other db
       rerender('other')
       expect(result.current.loading).toBeTruthy()
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       // selecting by special _default key
       rerender('_default')
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.rows).toEqual([
         {
@@ -1116,7 +1065,7 @@ describe('temporary views objects', () => {
       },
     }
 
-    const { result, waitForNextUpdate } = renderHook(() => useView(view), {
+    const { result } = renderHook(() => useView(view), {
       pouchdb: myPouch,
     })
 
@@ -1129,7 +1078,7 @@ describe('temporary views objects', () => {
       total_rows: 0,
     })
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current).toEqual({
       error: null,
@@ -1155,11 +1104,11 @@ describe('temporary views objects', () => {
       },
     }
 
-    const { result, waitForNextUpdate } = renderHook(() => useView(view), {
+    const { result } = renderHook(() => useView(view), {
       pouchdb: myPouch,
     })
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([{ id: 'a', key: 'value', value: 42 }])
@@ -1171,12 +1120,7 @@ describe('temporary views objects', () => {
       ])
     })
 
-    await waitForNextUpdate()
-
-    expect(result.current.state).toBe('loading')
-    expect(result.current.rows).toEqual([{ id: 'a', key: 'value', value: 42 }])
-
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([
@@ -1198,11 +1142,7 @@ describe('temporary views objects', () => {
         })
     })
 
-    await waitForNextUpdate()
-
-    expect(result.current.loading).toBeTruthy()
-
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([
@@ -1219,11 +1159,7 @@ describe('temporary views objects', () => {
       })
     })
 
-    await waitForNextUpdate()
-
-    expect(result.current.loading).toBeTruthy()
-
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([{ id: 'c', key: 'Hallo!', value: 42 }])
@@ -1243,11 +1179,11 @@ describe('temporary views objects', () => {
       },
     }
 
-    const { result, waitForNextUpdate } = renderHook(() => useView(view), {
+    const { result } = renderHook(() => useView(view), {
       pouchdb: myPouch,
     })
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([{ id: 'a', key: 'value', value: 42 }])
@@ -1259,25 +1195,13 @@ describe('temporary views objects', () => {
       ])
     })
 
-    await waitForNextUpdate()
-
-    expect(result.current.state).toBe('loading')
     expect(result.current.rows).toEqual([{ id: 'a', key: 'value', value: 42 }])
 
     act(() => {
       myPouch.bulkDocs([{ _id: 'e', test: 'Hallo!', type: 'tester' }])
     })
 
-    await waitForNextUpdate()
-
-    expect(result.current.state).toBe('loading')
-    expect(result.current.rows).toEqual([
-      { id: 'c', key: 'Hallo!', value: 42 },
-      { id: 'e', key: 'Hallo!', value: 42 },
-      { id: 'a', key: 'value', value: 42 },
-    ])
-
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([
@@ -1301,12 +1225,12 @@ describe('temporary views objects', () => {
       },
     }
 
-    const { result, waitForNextUpdate } = renderHook(() => useView(view), {
+    const { result } = renderHook(() => useView(view), {
       initialProps: false,
       pouchdb: myPouch,
     })
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([
@@ -1318,11 +1242,7 @@ describe('temporary views objects', () => {
       myPouch.remove(putResults[0].id ?? 'fail', putResults[0].rev ?? 'fail')
     })
 
-    await waitForNextUpdate()
-
-    expect(result.current.state).toBe('loading')
-
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([{ id: 'b', key: 'other', value: 42 }])
@@ -1344,7 +1264,7 @@ describe('temporary views objects', () => {
         reduce: '_count',
       }
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (reduce: boolean) => useView(view, { reduce }),
         {
           initialProps: true,
@@ -1352,14 +1272,14 @@ describe('temporary views objects', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([{ key: null, value: 1 }])
 
       rerender(false)
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -1382,13 +1302,15 @@ describe('temporary views objects', () => {
         reduce: '_count',
       }
 
-      const { result, waitForNextUpdate, waitForValueToChange, rerender } =
-        renderHook((reduce?: boolean) => useView(view, { reduce }), {
+      const { result, rerender } = renderHook(
+        (reduce?: boolean) => useView(view, { reduce }),
+        {
           initialProps: true,
           pouchdb: myPouch,
-        })
+        }
+      )
 
-      await waitForValueToChange(() => result.current.rows)
+      await waitForNextUpdate(result)
 
       expect(result.current.rows).toEqual([
         {
@@ -1399,7 +1321,7 @@ describe('temporary views objects', () => {
 
       await myPouch.remove(docBInfo.id ?? 'fail', docBInfo.rev ?? 'fail')
 
-      await waitForValueToChange(() => result.current.rows)
+      await waitForNextUpdate(result)
 
       expect(result.current.rows).toEqual([
         {
@@ -1415,7 +1337,7 @@ describe('temporary views objects', () => {
         test: 'moar',
       })
 
-      await waitForValueToChange(() => result.current.rows)
+      await waitForNextUpdate(result)
 
       expect(result.current.rows).toHaveLength(0)
 
@@ -1426,7 +1348,7 @@ describe('temporary views objects', () => {
         { _id: 'd', test: 'other', type: 'tester' },
       ])
 
-      await waitForValueToChange(() => result.current.rows)
+      await waitForNextUpdate(result)
 
       expect(result.current.rows).toEqual([
         {
@@ -1437,8 +1359,7 @@ describe('temporary views objects', () => {
 
       await myPouch.remove(docCInfo.id ?? 'fail', docCInfo.rev ?? 'fail')
 
-      await waitForNextUpdate()
-      await waitForValueToChange(() => result.current.rows)
+      await waitForNextUpdate(result)
 
       expect(result.current.rows).toEqual([
         {
@@ -1454,7 +1375,7 @@ describe('temporary views objects', () => {
         test: 'moar',
       })
 
-      await waitForValueToChange(() => result.current.rows)
+      await waitForNextUpdate(result)
 
       expect(result.current.rows).toHaveLength(0)
     })
@@ -1473,7 +1394,7 @@ describe('temporary views objects', () => {
         },
       }
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (include_docs: boolean) => useView(view, { include_docs }),
         {
           initialProps: false,
@@ -1481,7 +1402,7 @@ describe('temporary views objects', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -1490,7 +1411,7 @@ describe('temporary views objects', () => {
 
       rerender(true)
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -1539,7 +1460,7 @@ describe('temporary views objects', () => {
         },
       }
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (conflicts: boolean) =>
           useView(view, { include_docs: true, conflicts }),
         {
@@ -1548,14 +1469,14 @@ describe('temporary views objects', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows[0].doc?._conflicts).toBeUndefined()
 
       rerender(true)
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows[0].doc?._conflicts).toEqual(
@@ -1589,7 +1510,7 @@ describe('temporary views objects', () => {
         },
       }
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (attachments: boolean) =>
           useView(view, { include_docs: true, attachments }),
         {
@@ -1598,7 +1519,7 @@ describe('temporary views objects', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(
@@ -1615,7 +1536,7 @@ describe('temporary views objects', () => {
 
       rerender(true)
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(
@@ -1654,7 +1575,7 @@ describe('temporary views objects', () => {
         },
       }
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (binary: boolean) =>
           useView(view, { include_docs: true, attachments: true, binary }),
         {
@@ -1663,7 +1584,7 @@ describe('temporary views objects', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(
@@ -1679,7 +1600,7 @@ describe('temporary views objects', () => {
 
       rerender(true)
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(
@@ -1709,7 +1630,7 @@ describe('temporary views objects', () => {
         },
       }
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (startkey: unknown) => useView(view, { startkey }),
         {
           initialProps: 'x',
@@ -1717,7 +1638,7 @@ describe('temporary views objects', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -1726,7 +1647,7 @@ describe('temporary views objects', () => {
 
       rerender('a')
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -1750,7 +1671,7 @@ describe('temporary views objects', () => {
         },
       }
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (endkey: unknown) => useView(view, { endkey }),
         {
           initialProps: 'value\uffff',
@@ -1758,7 +1679,7 @@ describe('temporary views objects', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -1767,7 +1688,7 @@ describe('temporary views objects', () => {
 
       rerender('a')
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([])
@@ -1788,7 +1709,7 @@ describe('temporary views objects', () => {
         },
       }
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         ({ startkey, endkey }: { startkey: unknown; endkey: unknown }) =>
           useView(view, { startkey, endkey }),
         {
@@ -1800,7 +1721,7 @@ describe('temporary views objects', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -1820,7 +1741,7 @@ describe('temporary views objects', () => {
       })
 
       expect(result.current.loading).toBe(true)
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -1834,7 +1755,7 @@ describe('temporary views objects', () => {
       })
 
       expect(result.current.loading).toBe(true)
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -1859,7 +1780,7 @@ describe('temporary views objects', () => {
         },
       }
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (inclusive_end: boolean) =>
           useView(view, { endkey: 'x-value', inclusive_end }),
         {
@@ -1868,7 +1789,7 @@ describe('temporary views objects', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -1878,7 +1799,7 @@ describe('temporary views objects', () => {
 
       rerender(false)
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -1901,7 +1822,7 @@ describe('temporary views objects', () => {
         },
       }
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (limit?: number) => useView(view, { limit }),
         {
           initialProps: 1,
@@ -1909,7 +1830,7 @@ describe('temporary views objects', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -1918,7 +1839,7 @@ describe('temporary views objects', () => {
 
       rerender(5)
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -1942,7 +1863,7 @@ describe('temporary views objects', () => {
         },
       }
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (skip?: number) => useView(view, { skip }),
         {
           initialProps: 1,
@@ -1950,7 +1871,7 @@ describe('temporary views objects', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -1959,7 +1880,7 @@ describe('temporary views objects', () => {
 
       rerender(5)
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([])
@@ -1980,7 +1901,7 @@ describe('temporary views objects', () => {
         },
       }
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (descending: boolean) => useView(view, { descending }),
         {
           initialProps: false,
@@ -1988,7 +1909,7 @@ describe('temporary views objects', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -1998,7 +1919,7 @@ describe('temporary views objects', () => {
 
       rerender(true)
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -2022,7 +1943,7 @@ describe('temporary views objects', () => {
         },
       }
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (key: unknown) => useView(view, { key }),
         {
           initialProps: 'value',
@@ -2030,7 +1951,7 @@ describe('temporary views objects', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -2039,7 +1960,7 @@ describe('temporary views objects', () => {
 
       rerender('x-value')
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -2062,7 +1983,7 @@ describe('temporary views objects', () => {
         },
       }
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (keys: unknown[]) => useView(view, { keys }),
         {
           initialProps: ['value'],
@@ -2070,7 +1991,7 @@ describe('temporary views objects', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -2079,7 +2000,7 @@ describe('temporary views objects', () => {
 
       rerender(['x-value', 'value'])
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -2104,7 +2025,7 @@ describe('temporary views objects', () => {
         reduce: '_count',
       }
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (group: boolean) => useView(view, { group }),
         {
           initialProps: false,
@@ -2112,14 +2033,14 @@ describe('temporary views objects', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([{ key: null, value: 3 }])
 
       rerender(true)
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -2144,7 +2065,7 @@ describe('temporary views objects', () => {
         reduce: '_count',
       }
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (group_level: number) => useView(view, { group_level }),
         {
           initialProps: 1,
@@ -2152,14 +2073,14 @@ describe('temporary views objects', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([{ key: [13], value: 3 }])
 
       rerender(2)
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -2183,7 +2104,7 @@ describe('temporary views objects', () => {
         },
       }
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (option: { key?: unknown; keys?: unknown[] }) => useView(view, option),
         {
           initialProps: {
@@ -2193,7 +2114,7 @@ describe('temporary views objects', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -2211,7 +2132,7 @@ describe('temporary views objects', () => {
       })
 
       expect(result.current.loading).toBe(true)
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -2226,7 +2147,7 @@ describe('temporary views objects', () => {
       })
 
       expect(result.current.loading).toBe(true)
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -2252,7 +2173,7 @@ describe('temporary views objects', () => {
 
       expect(result.current.loading).toBe(true)
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -2275,7 +2196,7 @@ describe('temporary views objects', () => {
         },
       }
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (update_seq: boolean) => useView(view, { update_seq }),
         {
           initialProps: false,
@@ -2283,14 +2204,14 @@ describe('temporary views objects', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.update_seq).toBeUndefined()
 
       rerender(true)
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.update_seq).not.toBeUndefined()
@@ -2319,17 +2240,16 @@ describe('temporary views objects', () => {
         },
       }
 
-      const { result, waitForNextUpdate, rerender } =
-        renderHookWithMultiDbContext(
-          (name?: string) => useView(view, { db: name }),
-          {
-            initialProps: undefined,
-            main: myPouch,
-            other: other,
-          }
-        )
+      const { result, rerender } = renderHookWithMultiDbContext(
+        (name?: string) => useView(view, { db: name }),
+        {
+          initialProps: undefined,
+          main: myPouch,
+          other: other,
+        }
+      )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       // No db selection
       expect(result.current.loading).toBeFalsy()
@@ -2344,7 +2264,7 @@ describe('temporary views objects', () => {
       // selecting a database that is not the default
       rerender('other')
       expect(result.current.loading).toBeTruthy()
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.loading).toBeFalsy()
       expect(result.current.rows).toEqual([
@@ -2358,7 +2278,7 @@ describe('temporary views objects', () => {
       // selecting the default db by it's name
       rerender('main')
       expect(result.current.loading).toBeTruthy()
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.loading).toBeFalsy()
       expect(result.current.rows).toEqual([
@@ -2372,11 +2292,11 @@ describe('temporary views objects', () => {
       // reset to other db
       rerender('other')
       expect(result.current.loading).toBeTruthy()
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       // selecting by special _default key
       rerender('_default')
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.rows).toEqual([
         {
@@ -2413,12 +2333,9 @@ describe('design documents', () => {
 
     await myPouch.put(ddoc)
 
-    const { result, waitForNextUpdate } = renderHook(
-      () => useView('ddoc/test'),
-      {
-        pouchdb: myPouch,
-      }
-    )
+    const { result } = renderHook(() => useView('ddoc/test'), {
+      pouchdb: myPouch,
+    })
 
     expect(result.current).toEqual({
       error: null,
@@ -2429,7 +2346,7 @@ describe('design documents', () => {
       total_rows: 0,
     })
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current).toEqual({
       error: null,
@@ -2447,11 +2364,11 @@ describe('design documents', () => {
       { _id: 'b', test: 'other', type: 'checker' },
     ])
 
-    const { result, waitForNextUpdate } = renderHook(() => useView('view'), {
+    const { result } = renderHook(() => useView('view'), {
       pouchdb: myPouch,
     })
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('error')
     expect(result.current.error).toBeInstanceOf(Error)
@@ -2481,14 +2398,11 @@ describe('design documents', () => {
 
     await myPouch.put(ddoc)
 
-    const { result, waitForNextUpdate } = renderHook(
-      () => useView('ddoc/test'),
-      {
-        pouchdb: myPouch,
-      }
-    )
+    const { result } = renderHook(() => useView('ddoc/test'), {
+      pouchdb: myPouch,
+    })
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([{ id: 'a', key: 'value', value: 42 }])
@@ -2500,11 +2414,7 @@ describe('design documents', () => {
       ])
     })
 
-    await waitForNextUpdate()
-
-    expect(result.current.loading).toBeTruthy()
-
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([
@@ -2526,11 +2436,7 @@ describe('design documents', () => {
         })
     })
 
-    await waitForNextUpdate()
-
-    expect(result.current.loading).toBeTruthy()
-
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([
@@ -2547,11 +2453,7 @@ describe('design documents', () => {
       })
     })
 
-    await waitForNextUpdate()
-
-    expect(result.current.loading).toBeTruthy()
-
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([{ id: 'c', key: 'Hallo!', value: 42 }])
@@ -2578,20 +2480,17 @@ describe('design documents', () => {
 
     const ddocResult = await myPouch.put(ddoc)
 
-    const { result, waitForNextUpdate } = renderHook(
-      () => useView('ddoc/test'),
-      {
-        pouchdb: myPouch,
-      }
-    )
+    const { result } = renderHook(() => useView('ddoc/test'), {
+      pouchdb: myPouch,
+    })
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     act(() => {
       myPouch.remove(ddocResult.id, ddocResult.rev)
     })
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('error')
     expect(result.current.error).toBeInstanceOf(Error)
@@ -2619,22 +2518,15 @@ describe('design documents', () => {
       },
     }
 
-    const { result, waitForNextUpdate } = renderHook(
-      () => useView('ddoc/test'),
-      {
-        pouchdb: myPouch,
-      }
-    )
+    const { result } = renderHook(() => useView('ddoc/test'), {
+      pouchdb: myPouch,
+    })
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     await myPouch.put(ddoc)
 
-    await waitForNextUpdate()
-
-    expect(result.current.state).toBe('loading')
-
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current).toEqual({
       error: null,
@@ -2667,14 +2559,11 @@ describe('design documents', () => {
 
     await myPouch.put(ddoc)
 
-    const { result, waitForNextUpdate } = renderHook(
-      () => useView('ddoc/test'),
-      {
-        pouchdb: myPouch,
-      }
-    )
+    const { result } = renderHook(() => useView('ddoc/test'), {
+      pouchdb: myPouch,
+    })
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([{ id: 'a', key: 'value', value: 42 }])
@@ -2686,24 +2575,13 @@ describe('design documents', () => {
       ])
     })
 
-    await waitForNextUpdate()
-
-    expect(result.current.state).toBe('loading')
-    expect(result.current.rows).toEqual([{ id: 'a', key: 'value', value: 42 }])
+    await waitForNextUpdate(result)
 
     act(() => {
       myPouch.bulkDocs([{ _id: 'e', test: 'Hallo!', type: 'tester' }])
     })
 
-    await waitForNextUpdate()
-
-    expect(result.current.state).toBe('loading')
-    expect(result.current.rows).toEqual([
-      { id: 'c', key: 'Hallo!', value: 42 },
-      { id: 'a', key: 'value', value: 42 },
-    ])
-
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([
@@ -2734,15 +2612,12 @@ describe('design documents', () => {
 
     await myPouch.put(ddoc)
 
-    const { result, waitForNextUpdate } = renderHook(
-      () => useView('ddoc/test'),
-      {
-        initialProps: false,
-        pouchdb: myPouch,
-      }
-    )
+    const { result } = renderHook(() => useView('ddoc/test'), {
+      initialProps: false,
+      pouchdb: myPouch,
+    })
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([
@@ -2754,11 +2629,7 @@ describe('design documents', () => {
       myPouch.remove(putResults[0].id ?? 'fail', putResults[0].rev ?? 'fail')
     })
 
-    await waitForNextUpdate()
-
-    expect(result.current.state).toBe('loading')
-
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([{ id: 'b', key: 'other', value: 42 }])
@@ -2789,7 +2660,7 @@ describe('design documents', () => {
 
       await myPouch.put(ddoc)
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (reduce: boolean) => useView('ddoc/test', { reduce }),
         {
           initialProps: true,
@@ -2797,14 +2668,14 @@ describe('design documents', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([{ key: null, value: 1 }])
 
       rerender(false)
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -2836,13 +2707,15 @@ describe('design documents', () => {
 
       await myPouch.put(ddoc)
 
-      const { result, waitForNextUpdate, waitForValueToChange, rerender } =
-        renderHook((reduce?: boolean) => useView('ddoc/test', { reduce }), {
+      const { result, rerender } = renderHook(
+        (reduce?: boolean) => useView('ddoc/test', { reduce }),
+        {
           initialProps: true,
           pouchdb: myPouch,
-        })
+        }
+      )
 
-      await waitForValueToChange(() => result.current.rows)
+      await waitForNextUpdate(result)
 
       expect(result.current.rows).toEqual([
         {
@@ -2853,7 +2726,7 @@ describe('design documents', () => {
 
       await myPouch.remove(docBInfo.id ?? 'fail', docBInfo.rev ?? 'fail')
 
-      await waitForValueToChange(() => result.current.rows)
+      await waitForNextUpdate(result)
 
       expect(result.current.rows).toEqual([
         {
@@ -2869,7 +2742,7 @@ describe('design documents', () => {
         test: 'moar',
       })
 
-      await waitForValueToChange(() => result.current.rows)
+      await waitForNextUpdate(result)
 
       expect(result.current.rows).toHaveLength(0)
 
@@ -2880,7 +2753,7 @@ describe('design documents', () => {
         { _id: 'd', test: 'other', type: 'tester' },
       ])
 
-      await waitForValueToChange(() => result.current.rows)
+      await waitForNextUpdate(result)
 
       expect(result.current.rows).toEqual([
         {
@@ -2891,8 +2764,7 @@ describe('design documents', () => {
 
       await myPouch.remove(docCInfo.id ?? 'fail', docCInfo.rev ?? 'fail')
 
-      await waitForNextUpdate()
-      await waitForValueToChange(() => result.current.rows)
+      await waitForNextUpdate(result)
 
       expect(result.current.rows).toEqual([
         {
@@ -2908,7 +2780,7 @@ describe('design documents', () => {
         test: 'moar',
       })
 
-      await waitForValueToChange(() => result.current.rows)
+      await waitForNextUpdate(result)
 
       expect(result.current.rows).toHaveLength(0)
     })
@@ -2936,7 +2808,7 @@ describe('design documents', () => {
 
       await myPouch.put(ddoc)
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (include_docs: boolean) => useView('ddoc/test', { include_docs }),
         {
           initialProps: false,
@@ -2944,7 +2816,7 @@ describe('design documents', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -2953,7 +2825,7 @@ describe('design documents', () => {
 
       rerender(true)
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -3011,7 +2883,7 @@ describe('design documents', () => {
 
       await myPouch.put(ddoc)
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (conflicts: boolean) =>
           useView('ddoc/test', { include_docs: true, conflicts }),
         {
@@ -3020,14 +2892,14 @@ describe('design documents', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows[0].doc?._conflicts).toBeUndefined()
 
       rerender(true)
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows[0].doc?._conflicts).toEqual(
@@ -3070,7 +2942,7 @@ describe('design documents', () => {
 
       await myPouch.put(ddoc)
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (attachments: boolean) =>
           useView('ddoc/test', { include_docs: true, attachments }),
         {
@@ -3079,7 +2951,7 @@ describe('design documents', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(
@@ -3096,7 +2968,7 @@ describe('design documents', () => {
 
       rerender(true)
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(
@@ -3144,7 +3016,7 @@ describe('design documents', () => {
 
       await myPouch.put(ddoc)
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (binary: boolean) =>
           useView('ddoc/test', {
             include_docs: true,
@@ -3157,7 +3029,7 @@ describe('design documents', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(
@@ -3173,7 +3045,7 @@ describe('design documents', () => {
 
       rerender(true)
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(
@@ -3212,7 +3084,7 @@ describe('design documents', () => {
 
       await myPouch.put(ddoc)
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (startkey: unknown) => useView('ddoc/test', { startkey }),
         {
           initialProps: 'x',
@@ -3220,7 +3092,7 @@ describe('design documents', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -3229,7 +3101,7 @@ describe('design documents', () => {
 
       rerender('a')
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -3262,7 +3134,7 @@ describe('design documents', () => {
 
       await myPouch.put(ddoc)
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (endkey: unknown) => useView('ddoc/test', { endkey }),
         {
           initialProps: 'value\uffff',
@@ -3270,7 +3142,7 @@ describe('design documents', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -3279,7 +3151,7 @@ describe('design documents', () => {
 
       rerender('a')
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([])
@@ -3309,7 +3181,7 @@ describe('design documents', () => {
 
       await myPouch.put(ddoc)
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         ({ startkey, endkey }: { startkey: unknown; endkey: unknown }) =>
           useView('ddoc/test', { startkey, endkey }),
         {
@@ -3321,7 +3193,7 @@ describe('design documents', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -3341,7 +3213,7 @@ describe('design documents', () => {
       })
 
       expect(result.current.loading).toBe(true)
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -3355,7 +3227,7 @@ describe('design documents', () => {
       })
 
       expect(result.current.loading).toBe(true)
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -3389,7 +3261,7 @@ describe('design documents', () => {
 
       await myPouch.put(ddoc)
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (inclusive_end: boolean) =>
           useView('ddoc/test', { endkey: 'x-value', inclusive_end }),
         {
@@ -3398,7 +3270,7 @@ describe('design documents', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -3408,7 +3280,7 @@ describe('design documents', () => {
 
       rerender(false)
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -3440,7 +3312,7 @@ describe('design documents', () => {
 
       await myPouch.put(ddoc)
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (limit?: number) => useView('ddoc/test', { limit }),
         {
           initialProps: 1,
@@ -3448,7 +3320,7 @@ describe('design documents', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -3457,7 +3329,7 @@ describe('design documents', () => {
 
       rerender(5)
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -3490,7 +3362,7 @@ describe('design documents', () => {
 
       await myPouch.put(ddoc)
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (skip?: number) => useView('ddoc/test', { skip }),
         {
           initialProps: 1,
@@ -3498,7 +3370,7 @@ describe('design documents', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -3507,7 +3379,7 @@ describe('design documents', () => {
 
       rerender(5)
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([])
@@ -3537,7 +3409,7 @@ describe('design documents', () => {
 
       await myPouch.put(ddoc)
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (descending: boolean) => useView('ddoc/test', { descending }),
         {
           initialProps: false,
@@ -3545,7 +3417,7 @@ describe('design documents', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -3555,7 +3427,7 @@ describe('design documents', () => {
 
       rerender(true)
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -3588,7 +3460,7 @@ describe('design documents', () => {
 
       await myPouch.put(ddoc)
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (key: unknown) => useView('ddoc/test', { key }),
         {
           initialProps: 'value',
@@ -3596,7 +3468,7 @@ describe('design documents', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -3605,7 +3477,7 @@ describe('design documents', () => {
 
       rerender('x-value')
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -3637,7 +3509,7 @@ describe('design documents', () => {
 
       await myPouch.put(ddoc)
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (keys: unknown[]) => useView('ddoc/test', { keys }),
         {
           initialProps: ['value'],
@@ -3645,7 +3517,7 @@ describe('design documents', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -3654,7 +3526,7 @@ describe('design documents', () => {
 
       rerender(['x-value', 'value'])
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -3688,7 +3560,7 @@ describe('design documents', () => {
 
       await myPouch.put(ddoc)
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (group: boolean) => useView('ddoc/test', { group }),
         {
           initialProps: false,
@@ -3696,14 +3568,14 @@ describe('design documents', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([{ key: null, value: 3 }])
 
       rerender(true)
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -3737,7 +3609,7 @@ describe('design documents', () => {
 
       await myPouch.put(ddoc)
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (group_level: number) => useView('ddoc/test', { group_level }),
         {
           initialProps: 1,
@@ -3745,14 +3617,14 @@ describe('design documents', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([{ key: [13], value: 3 }])
 
       rerender(2)
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -3785,7 +3657,7 @@ describe('design documents', () => {
 
       await myPouch.put(ddoc)
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (option: { key?: unknown; keys?: unknown[] }) =>
           useView('ddoc/test', option),
         {
@@ -3796,7 +3668,7 @@ describe('design documents', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -3814,7 +3686,7 @@ describe('design documents', () => {
       })
 
       expect(result.current.loading).toBe(true)
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -3829,7 +3701,7 @@ describe('design documents', () => {
       })
 
       expect(result.current.loading).toBe(true)
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -3855,7 +3727,7 @@ describe('design documents', () => {
 
       expect(result.current.loading).toBe(true)
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.rows).toEqual([
@@ -3887,7 +3759,7 @@ describe('design documents', () => {
 
       await myPouch.put(ddoc)
 
-      const { result, waitForNextUpdate, rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (update_seq: boolean) => useView('ddoc/test', { update_seq }),
         {
           initialProps: false,
@@ -3895,14 +3767,14 @@ describe('design documents', () => {
         }
       )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.update_seq).toBeUndefined()
 
       rerender(true)
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.state).toBe('done')
       expect(result.current.update_seq).not.toBeUndefined()
@@ -3931,14 +3803,12 @@ describe('design documents', () => {
 
       await myPouch.put(ddoc)
 
-      const baseResult = await myPouch.query('ddoc/test')
-
       await myPouch.bulkDocs([
         { _id: 'c', test: 'moar', type: 'tester' },
         { _id: 'd', test: 'OK', type: 'tester' },
       ])
 
-      const { result, waitForNextUpdate } = renderHook(
+      const { result } = renderHook(
         (stale?: 'ok') => useView('ddoc/test', { stale }),
         {
           initialProps: 'ok',
@@ -3946,16 +3816,7 @@ describe('design documents', () => {
         }
       )
 
-      await waitForNextUpdate()
-
-      expect(result.current).toEqual({
-        error: null,
-        loading: true,
-        state: 'loading',
-        ...baseResult,
-      })
-
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.loading).toBeFalsy()
       expect(result.current.state).toBe('done')
@@ -4005,17 +3866,16 @@ describe('design documents', () => {
         },
       ])
 
-      const { result, waitForNextUpdate, rerender } =
-        renderHookWithMultiDbContext(
-          (name?: string) => useView('ddoc/test', { db: name }),
-          {
-            initialProps: undefined,
-            main: myPouch,
-            other: other,
-          }
-        )
+      const { result, rerender } = renderHookWithMultiDbContext(
+        (name?: string) => useView('ddoc/test', { db: name }),
+        {
+          initialProps: undefined,
+          main: myPouch,
+          other: other,
+        }
+      )
 
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       // No db selection
       expect(result.current.loading).toBeFalsy()
@@ -4030,7 +3890,7 @@ describe('design documents', () => {
       // selecting a database that is not the default
       rerender('other')
       expect(result.current.loading).toBeTruthy()
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.loading).toBeFalsy()
       expect(result.current.rows).toEqual([
@@ -4044,7 +3904,7 @@ describe('design documents', () => {
       // selecting the default db by it's name
       rerender('main')
       expect(result.current.loading).toBeTruthy()
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.loading).toBeFalsy()
       expect(result.current.rows).toEqual([
@@ -4058,11 +3918,11 @@ describe('design documents', () => {
       // reset to other db
       rerender('other')
       expect(result.current.loading).toBeTruthy()
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       // selecting by special _default key
       rerender('_default')
-      await waitForNextUpdate()
+      await waitForNextUpdate(result)
 
       expect(result.current.rows).toEqual([
         {

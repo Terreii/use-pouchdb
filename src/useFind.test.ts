@@ -1144,6 +1144,51 @@ describe('options', () => {
     })
   })
 
+  test('should support partial_filter_selector', async () => {
+    await createDocs()
+
+    const { result, rerender } = renderHook(
+      (year: number) =>
+        useFind({
+          index: {
+            fields: ['aired'],
+            partial_filter_selector: {
+              aired: {
+                $gt: year,
+              },
+            },
+          },
+          selector: {
+            aired: { $gt: null },
+          },
+          fields: ['_id', 'aired'],
+        }),
+      {
+        initialProps: 1990,
+        pouchdb: myPouch,
+      }
+    )
+
+    await waitForLoadingChange(result, false)
+
+    expect(result.current.docs).toEqual([
+      { _id: 'DS9', aired: 1993 },
+      { _id: 'VOY', aired: 1995 },
+      { _id: 'ENT', aired: 2001 },
+    ])
+
+    rerender(1980)
+
+    await waitForLoadingChange(result, false)
+
+    expect(result.current.docs).toEqual([
+      { _id: 'TNG', aired: 1987 },
+      { _id: 'DS9', aired: 1993 },
+      { _id: 'VOY', aired: 1995 },
+      { _id: 'ENT', aired: 2001 },
+    ])
+  })
+
   test('should support the selection of a database in the context to be used', async () => {
     const other = new PouchDB('other', { adapter: 'memory' })
 

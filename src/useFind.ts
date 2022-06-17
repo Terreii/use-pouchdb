@@ -37,6 +37,13 @@ export type FindHookIndexOption =
        * Only supports 'json', and it's also the default
        */
       type?: string
+
+      /**
+       * A selector used to filter the set of documents included in the index.
+       * Requires PouchDB v7.3.0 or newer.
+       * Use [Find selectors](https://docs.couchdb.org/en/stable/api/database/find.html#find-selectors).
+       */
+      partial_filter_selector?: PouchDB.Find.Selector
     }
 
 export interface FindHookOptions extends CommonOptions {
@@ -51,6 +58,8 @@ export interface FindHookOptions extends CommonOptions {
 
   /**
    * Defines a selector to filter the results. Required
+   *
+   * Use [Find selectors](https://docs.couchdb.org/en/stable/api/database/find.html#find-selectors).
    */
   selector: PouchDB.Find.Selector
 

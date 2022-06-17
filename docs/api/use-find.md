@@ -44,6 +44,9 @@ Options descriptions are copied from the PouchDB API page.
          auto-generated if you don’t include it
        - `options.index.type?: string` - Type of the index. Only `json` is supported,
          which is also the default.
+       - `options.index.partial_filter_selector?: PouchDB.Find.Selector` - A selector used to
+         filter the set of documents included in the index.
+         [Read more in the CouchDB docs](https://docs.couchdb.org/en/stable/api/database/find.html#partial-indexes).
    - `options.selector: PouchDB.Find.Selector` - The selector to filter the results. Required.
      It uses [Mango Selector Syntax](https://docs.couchdb.org/en/stable/api/database/find.html#selector-syntax).
    - `options.fields?: string[]` - List of fields that you want to receive.

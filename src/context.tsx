@@ -2,8 +2,7 @@ import React, {
   createContext,
   useContext as useReactContext,
   useMemo,
-  useEffect,
-  useRef,
+  useState,
   ReactNode,
 } from 'react'
 
@@ -110,31 +109,25 @@ function useAddSubscriptionManager(databases: {
   [key: string]: PouchDB.Database
 }): ContextObject {
   // memory for last DB and SubscriptionManager pairs
-  const lastContextObject = useRef<ContextObject>({})
+  const [lastDatabases, setLastDatabases] = useState(databases)
+  const [lastContextObject, setLastContextObject] =
+    useState<ContextObject | null>(null)
 
-  useEffect(
-    () => () => {
-      // unsubscribe all SubscriptionManager when the component un-mounts
-      for (const pair of Object.values(lastContextObject.current)) {
-        pair.subscriptionManager.unsubscribeAll()
-      }
-    },
-    []
-  )
-
-  // Keys of last lastContextObject
-  // All databases that didn't change will be reused and their keys deleted from this Set.
-  // All keys left, the database did change and the SubscriptionManager will be unsubscribed.
-  const lastKeys = new Set(Object.keys(lastContextObject.current))
+  // This is for re-renders, which happens when setState is called while rendering.
+  // https://beta.reactjs.org/apis/usestate#storing-information-from-previous-renders
+  if (lastContextObject && databases === lastDatabases) return lastContextObject
 
   const contextObjects: ContextObject = {}
+  const dbToUnsubscribe = new Set(Object.keys(lastContextObject ?? {}))
   let didAddNewDatabase = false
 
   for (const [key, db] of Object.entries(databases)) {
-    if (lastKeys.has(key) && db === lastContextObject.current[key].pouchdb) {
-      contextObjects[key] = lastContextObject.current[key]
-      lastKeys.delete(key)
+    if (lastContextObject && lastDatabases[key] === db) {
+      // DB didn't change
+      contextObjects[key] = lastContextObject[key]
+      dbToUnsubscribe.delete(key)
     } else {
+      // It is a new or changed DB
       didAddNewDatabase = true
       contextObjects[key] = {
         pouchdb: db,
@@ -143,17 +136,19 @@ function useAddSubscriptionManager(databases: {
     }
   }
 
-  // no database was created and no database got removed, or did change --> use the old one
-  if (!didAddNewDatabase && lastKeys.size === 0) {
-    return lastContextObject.current
+  if (didAddNewDatabase || dbToUnsubscribe.size > 0) {
+    setLastDatabases(databases)
+    setLastContextObject(contextObjects)
+  } else if (lastContextObject) {
+    return lastContextObject // nothing did change and not first render: use last
   }
 
-  // unsubscribe all SubscriptionManagers who's database did change/got removed.
-  for (const key of lastKeys) {
-    lastContextObject.current[key].subscriptionManager.unsubscribeAll()
+  if (lastContextObject) {
+    for (const key of dbToUnsubscribe) {
+      lastContextObject[key].subscriptionManager.unsubscribeAll()
+    }
   }
 
-  lastContextObject.current = contextObjects
   return contextObjects
 }
 

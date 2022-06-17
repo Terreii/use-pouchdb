@@ -16,7 +16,7 @@ type DocResultType<T> = ResultType<{
  */
 export default function useDoc<Content>(
   id: PouchDB.Core.DocumentId,
-  options?: PouchDB.Core.GetOptions & CommonOptions,
+  options?: (PouchDB.Core.GetOptions & CommonOptions) | null,
   initialValue?: (() => Content) | Content
 ): DocResultType<Content> {
   type Document = (PouchDB.Core.Document<Content> & PouchDB.Core.GetMeta) | null
@@ -98,7 +98,7 @@ export default function useDoc<Content>(
           dispatch({
             type: 'loading_error',
             payload: {
-              error: err,
+              error: err as PouchDB.Core.Error,
               setResult: true,
               result: getInitialValueRef.current(),
             },

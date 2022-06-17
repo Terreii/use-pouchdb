@@ -1,7 +1,13 @@
 import PouchDB from 'pouchdb-core'
 import memory from 'pouchdb-adapter-memory'
 
-import { renderHook, renderHookWithMultiDbContext, act } from './test-utils'
+import {
+  renderHook,
+  renderHookWithMultiDbContext,
+  act,
+  waitForNextUpdate,
+  DocWithAttachment,
+} from './test-utils'
 import useDoc from './useDoc'
 
 PouchDB.plugin(memory)
@@ -16,19 +22,10 @@ afterEach(async () => {
   await myPouch.destroy()
 })
 
-test('should throw an error if there is no pouchdb context', () => {
-  const { result } = renderHook(() => useDoc('test'))
-
-  expect(result.error).toBeInstanceOf(Error)
-  expect(result.error.message).toBe(
-    'could not find PouchDB context value; please ensure the component is wrapped in a <Provider>'
-  )
-})
-
 test('should return a doc', async () => {
   await myPouch.put({ _id: 'test', value: 42, greetings: 'Hello You!' })
 
-  const { result, waitForNextUpdate } = renderHook(() => useDoc('test'), {
+  const { result } = renderHook(() => useDoc('test'), {
     pouchdb: myPouch,
   })
 
@@ -37,11 +34,11 @@ test('should return a doc', async () => {
   expect(result.current.loading).toBeTruthy()
   expect(result.current.state).toBe('loading')
 
-  await waitForNextUpdate()
+  await waitForNextUpdate(result)
 
   expect(result.current.doc).toBeTruthy()
   expect(result.current.error).toBeNull()
-  expect(result.current.doc._id).toBe('test')
+  expect(result.current.doc?._id).toBe('test')
   expect(result.current.loading).toBeFalsy()
   expect(result.current.state).toBe('done')
 })
@@ -49,7 +46,7 @@ test('should return a doc', async () => {
 test('should return a default value while first loading', async () => {
   await myPouch.put({ _id: 'test', value: 42, greetings: 'Hello You!' })
 
-  const { result, waitForNextUpdate } = renderHook(
+  const { result } = renderHook(
     () =>
       useDoc<{ _id?: string; value: number | string }>('test', null, {
         value: 'doc',
@@ -67,18 +64,18 @@ test('should return a default value while first loading', async () => {
   expect(result.current.error).toBeNull()
   expect(result.current.state).toBe('loading')
 
-  await waitForNextUpdate()
+  await waitForNextUpdate(result)
 
   expect(result.current.state).toBe('done')
   expect(result.current.error).toBeNull()
-  expect(result.current.doc._id).toBe('test')
-  expect(result.current.doc.value).toBe(42)
+  expect(result.current.doc?._id).toBe('test')
+  expect(result.current.doc?.value).toBe(42)
 })
 
 test('should return a default value from a function while first loading', async () => {
   await myPouch.put({ _id: 'test', value: 42, greetings: 'Hello You!' })
 
-  const { result, waitForNextUpdate } = renderHook(
+  const { result } = renderHook(
     () =>
       useDoc<{ _id?: string; value: number | string }>('test', null, () => ({
         value: 'doc',
@@ -96,16 +93,16 @@ test('should return a default value from a function while first loading', async 
   expect(result.current.error).toBeNull()
   expect(result.current.state).toBe('loading')
 
-  await waitForNextUpdate()
+  await waitForNextUpdate(result)
 
   expect(result.current.state).toBe('done')
   expect(result.current.error).toBeNull()
-  expect(result.current.doc._id).toBe('test')
-  expect(result.current.doc.value).toBe(42)
+  expect(result.current.doc?._id).toBe('test')
+  expect(result.current.doc?.value).toBe(42)
 })
 
 test("should return a error if the doc doesn't exist", async () => {
-  const { result, waitForNextUpdate } = renderHook(() => useDoc('test'), {
+  const { result } = renderHook(() => useDoc('test'), {
     pouchdb: myPouch,
   })
 
@@ -113,16 +110,16 @@ test("should return a error if the doc doesn't exist", async () => {
   expect(result.current.error).toBeNull()
   expect(result.current.state).toBe('loading')
 
-  await waitForNextUpdate()
+  await waitForNextUpdate(result)
 
   expect(result.current.doc).toBeFalsy()
   expect(result.current.state).toBe('error')
   expect(result.current.error).toBeInstanceOf(Error)
-  expect(result.current.error.status).toBe(404)
+  expect(result.current.error?.status).toBe(404)
 })
 
 test('should continue to return the default value in error-state', async () => {
-  const { result, waitForNextUpdate } = renderHook(
+  const { result } = renderHook(
     () => useDoc('test', null, () => ({ other: 'doc' })),
     {
       pouchdb: myPouch,
@@ -137,7 +134,7 @@ test('should continue to return the default value in error-state', async () => {
   expect(result.current.error).toBeNull()
   expect(result.current.state).toBe('loading')
 
-  await waitForNextUpdate()
+  await waitForNextUpdate(result)
 
   expect(result.current.doc).toEqual({
     _id: 'test',
@@ -146,7 +143,7 @@ test('should continue to return the default value in error-state', async () => {
   })
   expect(result.current.state).toBe('error')
   expect(result.current.error).toBeInstanceOf(Error)
-  expect(result.current.error.status).toBe(404)
+  expect(result.current.error?.status).toBe(404)
 })
 
 test('should subscribe to updates of the document', async () => {
@@ -156,7 +153,7 @@ test('should subscribe to updates of the document', async () => {
     greetings: 'Hello You!',
   })
 
-  const { result, waitForNextUpdate } = renderHook(
+  const { result } = renderHook(
     () =>
       useDoc<{ _id?: string; value: number | string; greetings: string }>(
         'test'
@@ -166,11 +163,11 @@ test('should subscribe to updates of the document', async () => {
     }
   )
 
-  await waitForNextUpdate()
+  await waitForNextUpdate(result)
 
   expect(result.current.state).toBe('done')
-  expect(result.current.doc._id).toBe('test')
-  expect(result.current.doc.value).toBe(42)
+  expect(result.current.doc?._id).toBe('test')
+  expect(result.current.doc?.value).toBe(42)
 
   act(() => {
     myPouch.put({
@@ -181,12 +178,12 @@ test('should subscribe to updates of the document', async () => {
     })
   })
 
-  await waitForNextUpdate()
+  await waitForNextUpdate(result)
 
   expect(result.current.state).toBe('done')
-  expect(result.current.doc._id).toBe('test')
-  expect(result.current.doc.value).toBe(43)
-  expect(result.current.doc.greetings).toBe('to you, too!')
+  expect(result.current.doc?._id).toBe('test')
+  expect(result.current.doc?.value).toBe(43)
+  expect(result.current.doc?.greetings).toBe('to you, too!')
 })
 
 test('should ignore updates to other docs', async () => {
@@ -195,18 +192,18 @@ test('should ignore updates to other docs', async () => {
     value: 42,
   })
 
-  const { result, waitForNextUpdate } = renderHook(
+  const { result } = renderHook(
     () => useDoc<{ _id?: string; value: number | string }>('test'),
     {
       pouchdb: myPouch,
     }
   )
 
-  await waitForNextUpdate()
+  await waitForNextUpdate(result)
 
   expect(result.current.state).toBe('done')
-  expect(result.current.doc._id).toBe('test')
-  expect(result.current.doc.value).toBe(42)
+  expect(result.current.doc?._id).toBe('test')
+  expect(result.current.doc?.value).toBe(42)
 
   act(() => {
     myPouch.bulkDocs([
@@ -222,15 +219,15 @@ test('should ignore updates to other docs', async () => {
     ])
   })
 
-  await waitForNextUpdate()
+  await waitForNextUpdate(result)
 
   expect(result.current.state).toBe('done')
-  expect(result.current.doc._id).toBe('test')
-  expect(result.current.doc.value).toBe(43)
+  expect(result.current.doc?._id).toBe('test')
+  expect(result.current.doc?.value).toBe(43)
 })
 
 test('should update when a none existing document is created', async () => {
-  const { result, waitForNextUpdate } = renderHook(
+  const { result } = renderHook(
     () =>
       useDoc<{ _id?: string; value: number | string; greetings: string }>(
         'test'
@@ -240,12 +237,12 @@ test('should update when a none existing document is created', async () => {
     }
   )
 
-  await waitForNextUpdate()
+  await waitForNextUpdate(result)
 
   expect(result.current.doc).toBeFalsy()
   expect(result.current.state).toBe('error')
   expect(result.current.error).toBeInstanceOf(Error)
-  expect(result.current.error.status).toBe(404)
+  expect(result.current.error?.status).toBe(404)
 
   act(() => {
     myPouch.put({
@@ -255,13 +252,13 @@ test('should update when a none existing document is created', async () => {
     })
   })
 
-  await waitForNextUpdate()
+  await waitForNextUpdate(result)
 
   expect(result.current.state).toBe('done')
   expect(result.current.error).toBeNull()
-  expect(result.current.doc._id).toBe('test')
-  expect(result.current.doc.value).toBe(42)
-  expect(result.current.doc.greetings).toBe('Hello You!')
+  expect(result.current.doc?._id).toBe('test')
+  expect(result.current.doc?.value).toBe(42)
+  expect(result.current.doc?.greetings).toBe('Hello You!')
 })
 
 test('should return the last doc when id did change and no initial value is passed', async () => {
@@ -270,7 +267,7 @@ test('should return the last doc when id did change and no initial value is pass
     { _id: 'other', value: 'changed' },
   ])
 
-  const { result, waitForNextUpdate, rerender } = renderHook(
+  const { result, rerender } = renderHook(
     id =>
       useDoc<{ _id?: string; value: number | string; greetings: string }>(id),
     {
@@ -279,20 +276,20 @@ test('should return the last doc when id did change and no initial value is pass
     }
   )
 
-  await waitForNextUpdate()
+  await waitForNextUpdate(result)
 
-  expect(result.current.doc._id).toBe('test')
+  expect(result.current.doc?._id).toBe('test')
 
   rerender('other')
 
   expect(result.current.state).toBe('loading')
-  expect(result.current.doc._id).toBe('test')
+  expect(result.current.doc?._id).toBe('test')
 
-  await waitForNextUpdate()
+  await waitForNextUpdate(result)
 
   expect(result.current.state).toBe('done')
-  expect(result.current.doc._id).toBe('other')
-  expect(result.current.doc.value).toBe('changed')
+  expect(result.current.doc?._id).toBe('other')
+  expect(result.current.doc?.value).toBe('changed')
 })
 
 test('should return the initial value when id did change', async () => {
@@ -301,7 +298,7 @@ test('should return the initial value when id did change', async () => {
     { _id: 'other', value: 'changed' },
   ])
 
-  const { result, waitForNextUpdate, rerender } = renderHook(
+  const { result, rerender } = renderHook(
     id =>
       useDoc<{ _id?: string; value: number | string }>(id, null, () => ({
         value: 'initial',
@@ -312,18 +309,18 @@ test('should return the initial value when id did change', async () => {
     }
   )
 
-  await waitForNextUpdate()
+  await waitForNextUpdate(result)
 
-  expect(result.current.doc._id).toBe('test')
-  expect(result.current.doc.value).toBe(42)
+  expect(result.current.doc?._id).toBe('test')
+  expect(result.current.doc?.value).toBe(42)
 
   rerender('other')
 
-  await waitForNextUpdate()
+  await waitForNextUpdate(result)
 
   expect(result.current.state).toBe('done')
-  expect(result.current.doc._id).toBe('other')
-  expect(result.current.doc.value).toBe('changed')
+  expect(result.current.doc?._id).toBe('other')
+  expect(result.current.doc?.value).toBe('changed')
 })
 
 test('should return a 404 error if the doc was deleted while it is shown', async () => {
@@ -333,7 +330,7 @@ test('should return a 404 error if the doc was deleted while it is shown', async
     greetings: 'Hello You!',
   })
 
-  const { result, waitForNextUpdate } = renderHook(
+  const { result } = renderHook(
     () =>
       useDoc<{ _id?: string; value: number | string; greetings: string }>(
         'test'
@@ -343,22 +340,22 @@ test('should return a 404 error if the doc was deleted while it is shown', async
     }
   )
 
-  await waitForNextUpdate()
+  await waitForNextUpdate(result)
 
   expect(result.current.state).toBe('done')
-  expect(result.current.doc._id).toBe('test')
-  expect(result.current.doc.value).toBe(42)
+  expect(result.current.doc?._id).toBe('test')
+  expect(result.current.doc?.value).toBe(42)
 
   act(() => {
     myPouch.remove(putResult.id, putResult.rev)
   })
 
-  await waitForNextUpdate()
+  await waitForNextUpdate(result)
 
   expect(result.current.state).toBe('error')
   expect(result.current.doc).toBeNull()
   expect(result.current.error).toBeInstanceOf(Error)
-  expect(result.current.error.status).toBe(404)
+  expect(result.current.error?.status).toBe(404)
 })
 
 test('should return the new winning rev doc was deleted while it is shown and has a conflicting version', async () => {
@@ -382,33 +379,33 @@ test('should return the new winning rev doc was deleted while it is shown and ha
     { force: true }
   )
 
-  const { result, waitForNextUpdate } = renderHook(
+  const { result } = renderHook(
     () => useDoc<{ _id?: string; value: number | string }>('test'),
     {
       pouchdb: myPouch,
     }
   )
 
-  await waitForNextUpdate()
+  await waitForNextUpdate(result)
 
   const [winningRev, conflictRev, winningValue, conflictValue] =
-    result.current.doc._rev === resultUpdate.rev
+    result.current.doc?._rev === resultUpdate.rev
       ? [resultUpdate.rev, conflictResult.rev, 'update', 'conflict']
       : [conflictResult.rev, resultUpdate.rev, 'conflict', 'update']
 
   expect(result.current.state).toBe('done')
-  expect(result.current.doc._id).toBe('test')
-  expect(result.current.doc.value).toBe(winningValue)
+  expect(result.current.doc?._id).toBe('test')
+  expect(result.current.doc?.value).toBe(winningValue)
 
   act(() => {
     myPouch.remove(putResult.id, winningRev)
   })
 
-  await waitForNextUpdate()
+  await waitForNextUpdate(result)
 
   expect(result.current.state).toBe('done')
-  expect(result.current.doc._rev).toBe(conflictRev)
-  expect(result.current.doc.value).toBe(conflictValue)
+  expect(result.current.doc?._rev).toBe(conflictRev)
+  expect(result.current.doc?.value).toBe(conflictValue)
 })
 
 describe('pouchdb get options', () => {
@@ -433,7 +430,7 @@ describe('pouchdb get options', () => {
       { force: true }
     )
 
-    const { result, waitForNextUpdate, rerender } = renderHook(
+    const { result, rerender } = renderHook(
       (rev: string) => useDoc<{ _id?: string; value: string }>('test', { rev }),
       {
         initialProps: resultUpdate.rev,
@@ -441,7 +438,7 @@ describe('pouchdb get options', () => {
       }
     )
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.doc).toEqual({
       _id: 'test',
@@ -451,7 +448,7 @@ describe('pouchdb get options', () => {
 
     rerender(conflictResult.rev)
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.doc).toEqual({
       _id: 'test',
@@ -466,7 +463,7 @@ describe('pouchdb get options', () => {
       value: 'first',
     })
 
-    const { result, waitForNextUpdate } = renderHook(
+    const { result } = renderHook(
       (rev: string) => useDoc<{ _id?: string; value: string }>('test', { rev }),
       {
         initialProps: firstPutResult.rev,
@@ -474,7 +471,7 @@ describe('pouchdb get options', () => {
       }
     )
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     await myPouch.put({
       _id: 'test',
@@ -506,16 +503,16 @@ describe('pouchdb get options', () => {
       value: 'update',
     })
 
-    const { result, waitForNextUpdate } = renderHook(
+    const { result } = renderHook(
       () => useDoc<{ _id?: string; value: string }>('test', { revs: true }),
       {
         pouchdb: myPouch,
       }
     )
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
-    expect(result.current.doc._revisions).toEqual({
+    expect(result.current.doc?._revisions).toEqual({
       ids: [updateResult.rev, firstPutResult.rev].map(rev => rev.split('-')[1]),
       start: 2,
     })
@@ -526,13 +523,9 @@ describe('pouchdb get options', () => {
       value: 'update2',
     })
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
-    expect(result.current.state).toBe('loading')
-
-    await waitForNextUpdate()
-
-    expect(result.current.doc._revisions).toEqual({
+    expect(result.current.doc?._revisions).toEqual({
       ids: [secondUpdate.rev, updateResult.rev, firstPutResult.rev].map(
         rev => rev.split('-')[1]
       ),
@@ -552,7 +545,7 @@ describe('pouchdb get options', () => {
       value: 'update',
     })
 
-    const { result, waitForNextUpdate } = renderHook(
+    const { result } = renderHook(
       () =>
         useDoc<{ _id?: string; value: string }>('test', { revs_info: true }),
       {
@@ -560,9 +553,9 @@ describe('pouchdb get options', () => {
       }
     )
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
-    expect(result.current.doc._revs_info).toEqual([
+    expect(result.current.doc?._revs_info).toEqual([
       { rev: updateResult.rev, status: 'available' },
       { rev: firstPutResult.rev, status: 'available' },
     ])
@@ -573,13 +566,9 @@ describe('pouchdb get options', () => {
       value: 'update2',
     })
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
-    expect(result.current.state).toBe('loading')
-
-    await waitForNextUpdate()
-
-    expect(result.current.doc._revs_info).toEqual([
+    expect(result.current.doc?._revs_info).toEqual([
       { rev: secondUpdate.rev, status: 'available' },
       { rev: updateResult.rev, status: 'available' },
       { rev: firstPutResult.rev, status: 'available' },
@@ -607,7 +596,7 @@ describe('pouchdb get options', () => {
       { force: true }
     )
 
-    const { result, waitForNextUpdate } = renderHook(
+    const { result } = renderHook(
       () =>
         useDoc<{ _id?: string; value: string }>('test', { conflicts: true }),
       {
@@ -615,14 +604,14 @@ describe('pouchdb get options', () => {
       }
     )
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     const [loosing, winning] =
-      result.current.doc._rev === resultUpdate.rev
+      result.current.doc?._rev === resultUpdate.rev
         ? [conflictResult.rev, resultUpdate.rev]
         : [resultUpdate.rev, conflictResult.rev]
 
-    expect(result.current.doc._conflicts).toEqual([loosing])
+    expect(result.current.doc?._conflicts).toEqual([loosing])
 
     await myPouch.put({
       _id: 'test',
@@ -630,13 +619,9 @@ describe('pouchdb get options', () => {
       value: 'update2',
     })
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
-    expect(result.current.state).toBe('loading')
-
-    await waitForNextUpdate()
-
-    expect(result.current.doc._conflicts).toEqual([loosing])
+    expect(result.current.doc?._conflicts).toEqual([loosing])
   })
 
   test('should include attachments if attachments is set to true', async () => {
@@ -651,7 +636,7 @@ describe('pouchdb get options', () => {
       value: 'first',
     })
 
-    const { result, waitForNextUpdate, rerender } = renderHook(
+    const { result, rerender } = renderHook(
       (attachments: boolean) =>
         useDoc<{ _id?: string; value: string }>('test', { attachments }),
       {
@@ -660,10 +645,12 @@ describe('pouchdb get options', () => {
       }
     )
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
-    expect(typeof result.current.doc._attachments).toBe('object')
-    expect(result.current.doc._attachments['info.txt']).toEqual({
+    expect(typeof result.current.doc?._attachments).toBe('object')
+    expect(
+      (result.current.doc as DocWithAttachment)._attachments['info.txt']
+    ).toEqual({
       content_type: 'text/plain',
       digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
       length: 23,
@@ -673,9 +660,11 @@ describe('pouchdb get options', () => {
 
     rerender(true)
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
-    expect(result.current.doc._attachments['info.txt']).toEqual({
+    expect(
+      (result.current.doc as DocWithAttachment)._attachments['info.txt']
+    ).toEqual({
       content_type: 'text/plain',
       data: 'SXMgdGhlcmUgbGlmZSBvbiBNYXJzPwo=',
       digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
@@ -685,24 +674,24 @@ describe('pouchdb get options', () => {
     await myPouch.putAttachment(
       'test',
       'moar.txt',
-      result.current.doc._rev,
+      result.current.doc?._rev ?? 'fail',
       'aGVsbG8gd29ybGQ=',
       'text/plain'
     )
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
-    expect(result.current.state).toBe('loading')
-
-    await waitForNextUpdate()
-
-    expect(result.current.doc._attachments['info.txt']).toEqual({
+    expect(
+      (result.current.doc as DocWithAttachment)._attachments['info.txt']
+    ).toEqual({
       content_type: 'text/plain',
       data: 'SXMgdGhlcmUgbGlmZSBvbiBNYXJzPwo=',
       digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
       revpos: 1,
     })
-    expect(result.current.doc._attachments['moar.txt']).toEqual({
+    expect(
+      (result.current.doc as DocWithAttachment)._attachments['moar.txt']
+    ).toEqual({
       content_type: 'text/plain',
       data: 'aGVsbG8gd29ybGQ=',
       digest: 'md5-XrY7u+Ae7tCTyyK7j1rNww==',
@@ -713,20 +702,20 @@ describe('pouchdb get options', () => {
     doc.value = 'moreData'
     await myPouch.put(doc)
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
-    expect(result.current.state).toBe('loading')
-
-    await waitForNextUpdate()
-
-    expect(result.current.doc.value).toBe('moreData')
-    expect(result.current.doc._attachments['info.txt']).toEqual({
+    expect(result.current.doc?.value).toBe('moreData')
+    expect(
+      (result.current.doc as DocWithAttachment)._attachments['info.txt']
+    ).toEqual({
       content_type: 'text/plain',
       data: 'SXMgdGhlcmUgbGlmZSBvbiBNYXJzPwo=',
       digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
       revpos: 1,
     })
-    expect(result.current.doc._attachments['moar.txt']).toEqual({
+    expect(
+      (result.current.doc as DocWithAttachment)._attachments['moar.txt']
+    ).toEqual({
       content_type: 'text/plain',
       data: 'aGVsbG8gd29ybGQ=',
       digest: 'md5-XrY7u+Ae7tCTyyK7j1rNww==',
@@ -746,7 +735,7 @@ describe('pouchdb get options', () => {
       value: 'first',
     })
 
-    const { result, waitForNextUpdate } = renderHook(
+    const { result } = renderHook(
       () =>
         useDoc<{ _id?: string; value: string }>('test', {
           attachments: true,
@@ -757,10 +746,12 @@ describe('pouchdb get options', () => {
       }
     )
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
-    expect(result.current.doc._attachments).toBeTruthy()
-    expect(result.current.doc._attachments['info.txt']).toEqual({
+    expect(result.current.doc?._attachments).toBeTruthy()
+    expect(
+      (result.current.doc as DocWithAttachment)._attachments['info.txt']
+    ).toEqual({
       content_type: 'text/plain',
       data: Buffer.from('Is there life on Mars?\n'),
       digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
@@ -770,24 +761,24 @@ describe('pouchdb get options', () => {
     await myPouch.putAttachment(
       'test',
       'moar.txt',
-      result.current.doc._rev,
+      result.current.doc?._rev ?? 'fail',
       Buffer.from('hello world'),
       'text/plain'
     )
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
-    expect(result.current.state).toBe('loading')
-
-    await waitForNextUpdate()
-
-    expect(result.current.doc._attachments['info.txt']).toEqual({
+    expect(
+      (result.current.doc as DocWithAttachment)._attachments['info.txt']
+    ).toEqual({
       content_type: 'text/plain',
       data: Buffer.from('Is there life on Mars?\n'),
       digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
       revpos: 1,
     })
-    expect(result.current.doc._attachments['moar.txt']).toEqual({
+    expect(
+      (result.current.doc as DocWithAttachment)._attachments['moar.txt']
+    ).toEqual({
       content_type: 'text/plain',
       data: Buffer.from('hello world'),
       digest: 'md5-XrY7u+Ae7tCTyyK7j1rNww==',
@@ -798,20 +789,20 @@ describe('pouchdb get options', () => {
     doc.value = 'moreData'
     await myPouch.put(doc)
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
-    expect(result.current.state).toBe('loading')
-
-    await waitForNextUpdate()
-
-    expect(result.current.doc.value).toBe('moreData')
-    expect(result.current.doc._attachments['info.txt']).toEqual({
+    expect(result.current.doc?.value).toBe('moreData')
+    expect(
+      (result.current.doc as DocWithAttachment)._attachments['info.txt']
+    ).toEqual({
       content_type: 'text/plain',
       data: Buffer.from('Is there life on Mars?\n'),
       digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
       revpos: 1,
     })
-    expect(result.current.doc._attachments['moar.txt']).toEqual({
+    expect(
+      (result.current.doc as DocWithAttachment)._attachments['moar.txt']
+    ).toEqual({
       content_type: 'text/plain',
       data: Buffer.from('hello world'),
       digest: 'md5-XrY7u+Ae7tCTyyK7j1rNww==',
@@ -831,7 +822,7 @@ describe('pouchdb get options', () => {
       value: 'update',
     })
 
-    const { result, waitForNextUpdate } = renderHook(
+    const { result } = renderHook(
       () =>
         useDoc<{ _id?: string; value: string }>('test', {
           rev: firstPutResult.rev,
@@ -842,9 +833,9 @@ describe('pouchdb get options', () => {
       }
     )
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
-    expect(result.current.doc._rev).toBe(updateResult.rev)
+    expect(result.current.doc?._rev).toBe(updateResult.rev)
 
     const secondUpdateResult = await myPouch.put({
       _id: 'test',
@@ -852,9 +843,9 @@ describe('pouchdb get options', () => {
       value: 'update2',
     })
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
-    expect(result.current.doc._rev).toBe(secondUpdateResult.rev)
+    expect(result.current.doc?._rev).toBe(secondUpdateResult.rev)
   })
 
   test('should support the selection of a database in the context to be used', async () => {
@@ -870,17 +861,16 @@ describe('pouchdb get options', () => {
       value: 'other',
     })
 
-    const { result, waitForNextUpdate, rerender } =
-      renderHookWithMultiDbContext(
-        (name?: string) => useDoc('test', { db: name }),
-        {
-          initialProps: undefined,
-          main: myPouch,
-          other: other,
-        }
-      )
+    const { result, rerender } = renderHookWithMultiDbContext(
+      (name?: string) => useDoc('test', { db: name }),
+      {
+        initialProps: undefined,
+        main: myPouch,
+        other: other,
+      }
+    )
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     // No db selection
     expect(result.current.loading).toBeFalsy()
@@ -893,7 +883,7 @@ describe('pouchdb get options', () => {
     // selecting a database that is not the default
     rerender('other')
     expect(result.current.loading).toBeTruthy()
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.loading).toBeFalsy()
     expect(result.current.doc).toEqual({
@@ -905,7 +895,7 @@ describe('pouchdb get options', () => {
     // selecting the default db by it's name
     rerender('main')
     expect(result.current.loading).toBeTruthy()
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.loading).toBeFalsy()
     expect(result.current.doc).toEqual({
@@ -917,11 +907,11 @@ describe('pouchdb get options', () => {
     // reset to other db
     rerender('other')
     expect(result.current.loading).toBeTruthy()
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     // selecting by special _default key
     rerender('_default')
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.doc).toEqual({
       _id: 'test',

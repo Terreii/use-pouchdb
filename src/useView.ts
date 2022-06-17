@@ -228,7 +228,7 @@ function doDDocQuery<Model, Result>(
         dispatch({
           type: 'loading_error',
           payload: {
-            error,
+            error: error as PouchDB.Core.Error,
             setResult: false,
           },
         })
@@ -328,7 +328,7 @@ function doTemporaryQuery<Model, Result>(
         dispatch({
           type: 'loading_error',
           payload: {
-            error,
+            error: error as PouchDB.Core.Error,
             setResult: false,
           },
         })

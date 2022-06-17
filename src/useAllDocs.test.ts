@@ -2,7 +2,13 @@ import PouchDB from 'pouchdb-core'
 import memory from 'pouchdb-adapter-memory'
 import mapReduce from 'pouchdb-mapreduce'
 
-import { renderHook, renderHookWithMultiDbContext, act } from './test-utils'
+import {
+  renderHook,
+  renderHookWithMultiDbContext,
+  act,
+  waitForNextUpdate,
+  DocWithAttachment,
+} from './test-utils'
 import useAllDocs from './useAllDocs'
 
 PouchDB.plugin(memory)
@@ -18,22 +24,13 @@ afterEach(async () => {
   await myPouch.destroy()
 })
 
-test('should throw an error if there is no pouchdb context', () => {
-  const { result } = renderHook(() => useAllDocs())
-
-  expect(result.error).toBeInstanceOf(Error)
-  expect(result.error.message).toBe(
-    'could not find PouchDB context value; please ensure the component is wrapped in a <Provider>'
-  )
-})
-
 test('should load all documents', async () => {
   const putResult = await myPouch.bulkDocs([
     { _id: 'a', test: 'value' },
     { _id: 'b', test: 'other' },
   ])
 
-  const { result, waitForNextUpdate } = renderHook(() => useAllDocs(), {
+  const { result } = renderHook(() => useAllDocs(), {
     pouchdb: myPouch,
   })
 
@@ -46,7 +43,7 @@ test('should load all documents', async () => {
     total_rows: 0,
   })
 
-  await waitForNextUpdate()
+  await waitForNextUpdate(result)
 
   expect(result.current).toEqual({
     error: null,
@@ -67,11 +64,13 @@ test('should subscribe to changes', async () => {
     { _id: 'b', test: 'other' },
   ])
 
-  const { result, waitForNextUpdate } = renderHook(() => useAllDocs(), {
+  const { result } = renderHook(() => useAllDocs(), {
     pouchdb: myPouch,
   })
 
-  await waitForNextUpdate()
+  expect(result.current.state).toBe('loading')
+
+  await waitForNextUpdate(result)
 
   expect(result.current.state).toBe('done')
   expect(result.current.rows).toEqual([
@@ -80,8 +79,8 @@ test('should subscribe to changes', async () => {
   ])
   expect(result.current.total_rows).toBe(2)
 
-  let revC: string
-  let revD: string
+  let revC = 'fail'
+  let revD = 'fail'
   act(() => {
     myPouch
       .bulkDocs([
@@ -89,16 +88,12 @@ test('should subscribe to changes', async () => {
         { _id: 'd', test: 'world!' },
       ])
       .then(result => {
-        revC = result[0].rev
-        revD = result[1].rev
+        revC = result[0].rev ?? 'fail'
+        revD = result[1].rev ?? 'fail'
       })
   })
 
-  await waitForNextUpdate()
-
-  expect(result.current.loading).toBeTruthy()
-
-  await waitForNextUpdate()
+  await waitForNextUpdate(result)
 
   expect(result.current.rows).toEqual([
     { id: 'a', key: 'a', value: { rev: revA } },
@@ -107,8 +102,6 @@ test('should subscribe to changes', async () => {
     { id: 'd', key: 'd', value: { rev: revD } },
   ])
   expect(result.current.total_rows).toBe(4)
-
-  await waitForNextUpdate()
 
   let secondUpdateRev = ''
   act(() => {
@@ -123,11 +116,7 @@ test('should subscribe to changes', async () => {
       })
   })
 
-  await waitForNextUpdate()
-
-  expect(result.current.loading).toBeTruthy()
-
-  await waitForNextUpdate()
+  await waitForNextUpdate(result)
 
   expect(result.current.state).toBe('done')
   expect(result.current.rows).toEqual([
@@ -139,10 +128,10 @@ test('should subscribe to changes', async () => {
   expect(result.current.total_rows).toBe(4)
 
   act(() => {
-    myPouch.remove('b', revB)
+    myPouch.remove('b', revB ?? 'fail')
   })
 
-  await waitForNextUpdate()
+  await waitForNextUpdate(result)
 
   expect(result.current.state).toBe('done')
   expect(result.current.rows).toEqual([
@@ -159,11 +148,11 @@ test('should reload if a change did happen while a query is running', async () =
     { _id: 'b', test: 'other' },
   ])
 
-  const { result, waitForNextUpdate } = renderHook(() => useAllDocs(), {
+  const { result } = renderHook(() => useAllDocs(), {
     pouchdb: myPouch,
   })
 
-  await waitForNextUpdate()
+  await waitForNextUpdate(result)
 
   expect(result.current.state).toBe('done')
   expect(result.current.rows).toEqual([
@@ -171,8 +160,8 @@ test('should reload if a change did happen while a query is running', async () =
     { id: 'b', key: 'b', value: { rev: revB } },
   ])
 
-  let revC: string
-  let revD: string
+  let revC = 'fail'
+  let revD = 'fail'
   act(() => {
     myPouch
       .bulkDocs([
@@ -180,37 +169,24 @@ test('should reload if a change did happen while a query is running', async () =
         { _id: 'd', test: 'world!' },
       ])
       .then(result => {
-        revC = result[0].rev
-        revD = result[1].rev
+        revC = result[0].rev ?? 'fail'
+        revD = result[1].rev ?? 'fail'
       })
   })
 
-  await waitForNextUpdate()
-
-  expect(result.current.state).toBe('loading')
   expect(result.current.rows).toEqual([
     { id: 'a', key: 'a', value: { rev: revA } },
     { id: 'b', key: 'b', value: { rev: revB } },
   ])
 
-  let revE: string
+  let revE = 'fail'
   act(() => {
     myPouch.put({ _id: 'e', test: 'Hallo!' }).then(result => {
       revE = result.rev
     })
   })
 
-  await waitForNextUpdate()
-
-  expect(result.current.loading).toBeTruthy()
-  expect(result.current.rows).toEqual([
-    { id: 'a', key: 'a', value: { rev: revA } },
-    { id: 'b', key: 'b', value: { rev: revB } },
-    { id: 'c', key: 'c', value: { rev: revC } },
-    { id: 'd', key: 'd', value: { rev: revD } },
-  ])
-
-  await waitForNextUpdate()
+  await waitForNextUpdate(result)
 
   expect(result.current.state).toBe('done')
   expect(result.current.rows).toEqual([
@@ -220,8 +196,6 @@ test('should reload if a change did happen while a query is running', async () =
     { id: 'd', key: 'd', value: { rev: revD } },
     { id: 'e', key: 'e', value: { rev: revE } },
   ])
-
-  await waitForNextUpdate()
 })
 
 describe('options', () => {
@@ -231,7 +205,7 @@ describe('options', () => {
       { _id: 'b', test: 'other' },
     ])
 
-    const { result, waitForNextUpdate, rerender } = renderHook(
+    const { result, rerender } = renderHook(
       (include_docs: boolean) => useAllDocs({ include_docs }),
       {
         initialProps: false,
@@ -239,7 +213,7 @@ describe('options', () => {
       }
     )
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([
@@ -249,7 +223,7 @@ describe('options', () => {
 
     rerender(true)
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([
@@ -291,7 +265,7 @@ describe('options', () => {
       { force: true }
     )
 
-    const { result, waitForNextUpdate, rerender } = renderHook(
+    const { result, rerender } = renderHook(
       (conflicts: boolean) => useAllDocs({ include_docs: true, conflicts }),
       {
         initialProps: false,
@@ -299,22 +273,22 @@ describe('options', () => {
       }
     )
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
-    expect(result.current.rows[0].doc._conflicts).toBeUndefined()
+    expect(result.current.rows[0].doc?._conflicts).toBeUndefined()
 
     rerender(true)
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
-    expect(result.current.rows[0].doc._conflicts).toEqual(
-      result.current.rows[0].doc._rev === updateResult.rev
+    expect(result.current.rows[0].doc?._conflicts).toEqual(
+      result.current.rows[0].doc?._rev === updateResult.rev
         ? [conflictResult.rev]
         : [updateResult.rev]
     )
-    expect(result.current.rows[1].doc._conflicts).toBeUndefined()
+    expect(result.current.rows[1].doc?._conflicts).toBeUndefined()
   })
 
   test('should handle the attachments option', async () => {
@@ -332,7 +306,7 @@ describe('options', () => {
       { _id: 'b', test: 'other' },
     ])
 
-    const { result, waitForNextUpdate, rerender } = renderHook(
+    const { result, rerender } = renderHook(
       (attachments: boolean) => useAllDocs({ include_docs: true, attachments }),
       {
         initialProps: false,
@@ -340,10 +314,12 @@ describe('options', () => {
       }
     )
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
-    expect(result.current.rows[0].doc._attachments['info.txt']).toEqual({
+    expect(
+      (result.current.rows[0].doc as DocWithAttachment)._attachments['info.txt']
+    ).toEqual({
       content_type: 'text/plain',
       digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
       length: 23,
@@ -353,10 +329,12 @@ describe('options', () => {
 
     rerender(true)
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
-    expect(result.current.rows[0].doc._attachments['info.txt']).toEqual({
+    expect(
+      (result.current.rows[0].doc as DocWithAttachment)._attachments['info.txt']
+    ).toEqual({
       content_type: 'text/plain',
       data: 'SXMgdGhlcmUgbGlmZSBvbiBNYXJzPwo=',
       digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
@@ -380,7 +358,7 @@ describe('options', () => {
       { _id: 'b', test: 'other', type: 'checker' },
     ])
 
-    const { result, waitForNextUpdate, rerender } = renderHook(
+    const { result, rerender } = renderHook(
       (binary: boolean) =>
         useAllDocs({
           include_docs: true,
@@ -393,10 +371,12 @@ describe('options', () => {
       }
     )
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
-    expect(result.current.rows[0].doc._attachments['info.txt']).toEqual({
+    expect(
+      (result.current.rows[0].doc as DocWithAttachment)._attachments['info.txt']
+    ).toEqual({
       content_type: 'text/plain',
       data: 'SXMgdGhlcmUgbGlmZSBvbiBNYXJzPwo=',
       digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
@@ -405,10 +385,12 @@ describe('options', () => {
 
     rerender(true)
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
-    expect(result.current.rows[0].doc._attachments['info.txt']).toEqual({
+    expect(
+      (result.current.rows[0].doc as DocWithAttachment)._attachments['info.txt']
+    ).toEqual({
       content_type: 'text/plain',
       data: Buffer.from('Is there life on Mars?\n'),
       digest: 'md5-knhR9rrbyHqrdPJYmv/iAg==',
@@ -422,7 +404,7 @@ describe('options', () => {
       { _id: 'b', test: 'other' },
     ])
 
-    const { result, waitForNextUpdate, rerender } = renderHook(
+    const { result, rerender } = renderHook(
       (startkey: string) => useAllDocs({ startkey, endkey: 'x' }),
       {
         initialProps: 'b',
@@ -430,14 +412,14 @@ describe('options', () => {
       }
     )
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([
       { id: 'b', key: 'b', value: { rev: revB } },
     ])
 
-    let revAA: string
+    let revAA = 'fail'
     act(() => {
       myPouch.put({ _id: 'aa' }).then(result => {
         revAA = result.rev
@@ -454,7 +436,7 @@ describe('options', () => {
 
     rerender('a')
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([
@@ -470,7 +452,7 @@ describe('options', () => {
       { _id: 'b', test: 'other' },
     ])
 
-    const { result, waitForNextUpdate, rerender } = renderHook(
+    const { result, rerender } = renderHook(
       (endkey: string) => useAllDocs({ startkey: 'a', endkey }),
       {
         initialProps: 'x',
@@ -478,7 +460,7 @@ describe('options', () => {
       }
     )
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([
@@ -488,7 +470,7 @@ describe('options', () => {
 
     rerender('a')
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([
@@ -514,7 +496,7 @@ describe('options', () => {
       { _id: 'b', test: 'other' },
     ])
 
-    const { result, waitForNextUpdate, rerender } = renderHook(
+    const { result, rerender } = renderHook(
       (inclusive_end: boolean) =>
         useAllDocs({ startkey: 'a', endkey: 'b', inclusive_end }),
       {
@@ -523,7 +505,7 @@ describe('options', () => {
       }
     )
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([
@@ -546,7 +528,7 @@ describe('options', () => {
 
     rerender(false)
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([
@@ -560,7 +542,7 @@ describe('options', () => {
       { _id: 'b', test: 'other' },
     ])
 
-    const { result, waitForNextUpdate, rerender } = renderHook(
+    const { result, rerender } = renderHook(
       (limit?: number) => useAllDocs({ limit }),
       {
         initialProps: 1,
@@ -568,7 +550,7 @@ describe('options', () => {
       }
     )
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([
@@ -577,7 +559,7 @@ describe('options', () => {
 
     rerender(5)
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([
@@ -592,7 +574,7 @@ describe('options', () => {
       { _id: 'b', test: 'other' },
     ])
 
-    const { result, waitForNextUpdate, rerender } = renderHook(
+    const { result, rerender } = renderHook(
       (skip?: number) => useAllDocs({ skip }),
       {
         initialProps: 1,
@@ -600,7 +582,7 @@ describe('options', () => {
       }
     )
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([
@@ -610,7 +592,7 @@ describe('options', () => {
 
     rerender(5)
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([])
@@ -618,7 +600,7 @@ describe('options', () => {
 
     rerender(0)
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([
@@ -634,7 +616,7 @@ describe('options', () => {
       { _id: 'b', test: 'other' },
     ])
 
-    const { result, waitForNextUpdate, rerender } = renderHook(
+    const { result, rerender } = renderHook(
       (descending: boolean) => useAllDocs({ descending }),
       {
         initialProps: false,
@@ -642,7 +624,7 @@ describe('options', () => {
       }
     )
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([
@@ -652,7 +634,7 @@ describe('options', () => {
 
     rerender(true)
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([
@@ -667,14 +649,11 @@ describe('options', () => {
       { _id: 'b', test: 'other' },
     ])
 
-    const { result, waitForNextUpdate } = renderHook(
-      () => useAllDocs({ descending: true }),
-      {
-        pouchdb: myPouch,
-      }
-    )
+    const { result } = renderHook(() => useAllDocs({ descending: true }), {
+      pouchdb: myPouch,
+    })
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([
@@ -682,18 +661,14 @@ describe('options', () => {
       { id: 'a', key: 'a', value: { rev: revA } },
     ])
 
-    let revC: string
+    let revC = 'fail'
     act(() => {
       myPouch.put({ _id: 'c', test: 'moar' }).then(result => {
         revC = result.rev
       })
     })
 
-    await waitForNextUpdate()
-
-    expect(result.current.state).toBe('loading')
-
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([
@@ -709,7 +684,7 @@ describe('options', () => {
       { _id: 'b', test: 'other' },
     ])
 
-    const { result, waitForNextUpdate, rerender } = renderHook(
+    const { result, rerender } = renderHook(
       (key: string) => useAllDocs({ key }),
       {
         initialProps: 'a',
@@ -717,7 +692,7 @@ describe('options', () => {
       }
     )
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([
@@ -726,7 +701,7 @@ describe('options', () => {
 
     rerender('b')
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([
@@ -755,7 +730,7 @@ describe('options', () => {
         { _id: 'c', test: 'moar' },
       ])
 
-    const { result, waitForNextUpdate, rerender } = renderHook(
+    const { result, rerender } = renderHook(
       (keys: string[]) => useAllDocs({ keys }),
       {
         initialProps: ['a'],
@@ -763,7 +738,7 @@ describe('options', () => {
       }
     )
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([
@@ -772,7 +747,7 @@ describe('options', () => {
 
     rerender(['c', 'b'])
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([
@@ -802,7 +777,7 @@ describe('options', () => {
       { _id: 'c', test: 'moar' },
     ])
 
-    const { result, waitForNextUpdate, rerender } = renderHook(
+    const { result, rerender } = renderHook(
       (keys: string[]) => useAllDocs({ keys }),
       {
         initialProps: ['a'],
@@ -810,7 +785,7 @@ describe('options', () => {
       }
     )
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([
@@ -828,7 +803,7 @@ describe('options', () => {
       { _id: 'b', test: 'other' },
     ])
 
-    const { result, waitForNextUpdate, rerender } = renderHook(
+    const { result, rerender } = renderHook(
       (update_seq: boolean) => useAllDocs({ update_seq }),
       {
         initialProps: false,
@@ -836,14 +811,14 @@ describe('options', () => {
       }
     )
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.update_seq).toBeUndefined()
 
     rerender(true)
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.state).toBe('done')
     expect(result.current.update_seq).not.toBeUndefined()
@@ -862,17 +837,16 @@ describe('options', () => {
       value: 'other',
     })
 
-    const { result, waitForNextUpdate, rerender } =
-      renderHookWithMultiDbContext(
-        (name?: string) => useAllDocs({ db: name, include_docs: true }),
-        {
-          initialProps: undefined,
-          main: myPouch,
-          other: other,
-        }
-      )
+    const { result, rerender } = renderHookWithMultiDbContext(
+      (name?: string) => useAllDocs({ db: name, include_docs: true }),
+      {
+        initialProps: undefined,
+        main: myPouch,
+        other: other,
+      }
+    )
 
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     // No db selection
     expect(result.current.loading).toBeFalsy()
@@ -892,7 +866,7 @@ describe('options', () => {
     // selecting a database that is not the default
     rerender('other')
     expect(result.current.loading).toBeTruthy()
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.loading).toBeFalsy()
     expect(result.current.rows).toEqual([
@@ -911,7 +885,7 @@ describe('options', () => {
     // selecting the default db by it's name
     rerender('main')
     expect(result.current.loading).toBeTruthy()
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.loading).toBeFalsy()
     expect(result.current.rows).toEqual([
@@ -930,11 +904,11 @@ describe('options', () => {
     // reset to other db
     rerender('other')
     expect(result.current.loading).toBeTruthy()
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     // selecting by special _default key
     rerender('_default')
-    await waitForNextUpdate()
+    await waitForNextUpdate(result)
 
     expect(result.current.rows).toEqual([
       {

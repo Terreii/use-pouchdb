@@ -8,13 +8,12 @@ on:
 
 jobs:
   checks:
-    if: github.event_name != 'push'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
-          node-version: '16.x'
+          node-version: '18.x'
       - name: Lint
         run: |
           npm ci
@@ -27,11 +26,13 @@ jobs:
   gh-release:
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
+    # Waits for test jobs for each Node.js version to complete
+    needs: checks
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
-          node-version: '16.x'
+          node-version: '18.x'
       - name: Release to GitHub Pages
         run: |
           git config --global user.email "christopher.astfalk@icloud.com"

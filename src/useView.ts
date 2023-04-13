@@ -6,15 +6,18 @@ import type SubscriptionManager from './subscription'
 import useStateMachine, { ResultType, Dispatch } from './state-machine'
 import { useDeepMemo, CommonOptions } from './utils'
 
-type ViewResponseBase<Result extends {}> = PouchDB.Query.Response<Result> & {
-  /**
-   * Include an update_seq value indicating which sequence id of the underlying database the view
-   * reflects.
-   */
-  update_seq?: number | string
-}
+type ViewResponseBase<Result extends Record<string, unknown>> =
+  PouchDB.Query.Response<Result> & {
+    /**
+     * Include an update_seq value indicating which sequence id of the underlying database the view
+     * reflects.
+     */
+    update_seq?: number | string
+  }
 
-export type ViewResponse<T extends {}> = ResultType<ViewResponseBase<T>>
+export type ViewResponse<T extends Record<string, unknown>> = ResultType<
+  ViewResponseBase<T>
+>
 
 /**
  * Query a view and subscribe to its updates.
@@ -22,9 +25,9 @@ export type ViewResponse<T extends {}> = ResultType<ViewResponseBase<T>>
  * @param {object} [opts] PouchDB's query-options
  */
 export default function useView<
-  Content extends {},
-  Result extends {},
-  Model extends {} = Content
+  Content extends Record<string, unknown>,
+  Result extends Record<string, unknown>,
+  Model extends Record<string, unknown> = Content
 >(
   fun: string | PouchDB.Map<Model, Result> | PouchDB.Filter<Model, Result>,
   opts?: PouchDB.Query.Options<Model, Result> & {
@@ -139,7 +142,10 @@ export default function useView<
  * @param fn Name of the view.
  * @param option PouchDB's query options.
  */
-function doDDocQuery<Model extends {}, Result extends {}>(
+function doDDocQuery<
+  Model extends Record<string, unknown>,
+  Result extends Record<string, unknown>
+>(
   dispatch: Dispatch<PouchDB.Query.Response<Result>>,
   pouch: PouchDB.Database<Record<string, unknown>>,
   subscriptionManager: SubscriptionManager,
@@ -281,7 +287,10 @@ function doDDocQuery<Model extends {}, Result extends {}>(
  * @param fn The temporary view.
  * @param option PouchDB's query options.
  */
-function doTemporaryQuery<Model extends {}, Result extends {}>(
+function doTemporaryQuery<
+  Model extends Record<string, unknown>,
+  Result extends Record<string, unknown>
+>(
   dispatch: Dispatch<PouchDB.Query.Response<Result>>,
   pouch: PouchDB.Database<Record<string, unknown>>,
   subscriptionManager: SubscriptionManager,

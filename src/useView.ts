@@ -6,18 +6,16 @@ import type SubscriptionManager from './subscription'
 import useStateMachine, { ResultType, Dispatch } from './state-machine'
 import { useDeepMemo, CommonOptions } from './utils'
 
-type ViewResponseBase<Result extends Record<string, unknown>> =
-  PouchDB.Query.Response<Result> & {
-    /**
-     * Include an update_seq value indicating which sequence id of the underlying database the view
-     * reflects.
-     */
-    update_seq?: number | string
-  }
+/* typescript-eslint-disable @typescript-eslint/ban-types */
+type ViewResponseBase<Result extends {}> = PouchDB.Query.Response<Result> & {
+  /**
+   * Include an update_seq value indicating which sequence id of the underlying database the view
+   * reflects.
+   */
+  update_seq?: number | string
+}
 
-export type ViewResponse<T extends Record<string, unknown>> = ResultType<
-  ViewResponseBase<T>
->
+export type ViewResponse<T extends {}> = ResultType<ViewResponseBase<T>>
 
 /**
  * Query a view and subscribe to its updates.
@@ -25,9 +23,9 @@ export type ViewResponse<T extends Record<string, unknown>> = ResultType<
  * @param {object} [opts] PouchDB's query-options
  */
 export default function useView<
-  Content extends Record<string, unknown>,
-  Result extends Record<string, unknown>,
-  Model extends Record<string, unknown> = Content
+  Content extends {},
+  Result extends {},
+  Model extends {} = Content
 >(
   fun: string | PouchDB.Map<Model, Result> | PouchDB.Filter<Model, Result>,
   opts?: PouchDB.Query.Options<Model, Result> & {

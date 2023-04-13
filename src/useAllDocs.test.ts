@@ -8,6 +8,7 @@ import {
   act,
   waitForNextUpdate,
   DocWithAttachment,
+  sleep,
 } from './test-utils'
 import useAllDocs from './useAllDocs'
 
@@ -426,9 +427,7 @@ describe('options', () => {
       })
     })
 
-    await new Promise(resolve => {
-      setTimeout(resolve, 10)
-    })
+    await sleep(10)
 
     expect(result.current.rows).toEqual([
       { id: 'b', key: 'b', value: { rev: revB } },
@@ -481,9 +480,7 @@ describe('options', () => {
       myPouch.put({ _id: 'c', test: 'moar' })
     })
 
-    await new Promise(resolve => {
-      setTimeout(resolve, 10)
-    })
+    await sleep(10)
 
     expect(result.current.rows).toEqual([
       { id: 'a', key: 'a', value: { rev: revA } },
@@ -517,9 +514,7 @@ describe('options', () => {
       myPouch.put({ _id: 'c', test: 'moar' })
     })
 
-    await new Promise(resolve => {
-      setTimeout(resolve, 10)
-    })
+    await sleep(10)
 
     expect(result.current.rows).toEqual([
       { id: 'a', key: 'a', value: { rev: revA } },
@@ -712,9 +707,7 @@ describe('options', () => {
       myPouch.put({ _id: 'c', test: 'moar' })
     })
 
-    await new Promise(resolve => {
-      setTimeout(resolve, 10)
-    })
+    await sleep(10)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([
@@ -759,9 +752,7 @@ describe('options', () => {
       myPouch.put({ _id: 'd', test: 'moar' })
     })
 
-    await new Promise(resolve => {
-      setTimeout(resolve, 10)
-    })
+    await sleep(10)
 
     expect(result.current.state).toBe('done')
     expect(result.current.rows).toEqual([

@@ -14,14 +14,9 @@ import useView from './useView'
 PouchDB.plugin(memory)
 PouchDB.plugin(mapReduce)
 
-type TempView = PouchDB.Map<
-  PouchDB.Core.Document<Record<string, unknown>>,
-  unknown
->
-type TempViewDoc = PouchDB.Filter<
-  PouchDB.Core.Document<Record<string, unknown>>,
-  unknown
->
+type Doc = PouchDB.Core.Document<{ type: string; test: number; value?: number }>
+type TempView = PouchDB.Map<Doc, {}>
+type TempViewDoc = PouchDB.Filter<Doc, {}>
 
 let myPouch: PouchDB.Database
 
@@ -975,7 +970,7 @@ describe('temporary function only views', () => {
 
       const view: TempView = (doc, emit) => {
         if (doc.type === 'tester') {
-          emit?.(doc.type, doc.value)
+          emit?.(doc.type, doc.value ?? 1)
         }
       }
 
@@ -2235,7 +2230,7 @@ describe('temporary views objects', () => {
       const view: TempViewDoc = {
         map: (doc, emit) => {
           if (doc.type === 'tester') {
-            emit?.(doc.type, doc.value)
+            emit?.(doc.type, doc.value ?? 1)
           }
         },
       }

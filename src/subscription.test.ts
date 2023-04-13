@@ -4,6 +4,8 @@ import mapReduce from 'pouchdb-mapreduce'
 
 import SubscriptionManager from './subscription'
 
+import { sleep } from './test-utils'
+
 PouchDB.plugin(memory)
 PouchDB.plugin(mapReduce)
 
@@ -104,6 +106,55 @@ test('should only subscribe once to document updates', () => {
   expect(callback1).not.toHaveBeenCalled()
   expect(callback2).not.toHaveBeenCalled()
   expect(callback3).not.toHaveBeenCalled()
+})
+
+test('should handle unsubscribing during an doc update', () => {
+  const { changes, get } = myPouch
+
+  const doc = {
+    _id: 'test',
+    _rev: '1-fb7e8b3df19087a905ab792366bd118a',
+    value: 42,
+  }
+
+  let callback: (
+    change: PouchDB.Core.ChangesResponseChange<Record<string, unknown>>
+  ) => void = () => {
+    console.error('should not be called')
+  }
+
+  ;(myPouch as unknown as { changes: unknown }).changes = () => ({
+    on(_type: string, callFn: (c: unknown) => void) {
+      callback = callFn
+      return {
+        cancel: jest.fn(),
+      }
+    },
+  })
+
+  const subscriptionManager = new SubscriptionManager(myPouch)
+  const unsubscribe = subscriptionManager.subscribeToDocs(['test'], jest.fn())
+
+  let getCallback: (doc: unknown) => void = jest.fn()
+  ;(myPouch as unknown as { get: unknown }).get = jest.fn(() => {
+    return {
+      then(fn: (doc: unknown) => void) {
+        getCallback = fn
+        return { catch: jest.fn() }
+      },
+    }
+  })
+
+  callback({
+    id: 'test',
+    seq: 1,
+    changes: [{ rev: doc._rev }],
+    doc,
+  })
+  unsubscribe()
+  myPouch.changes = changes
+  myPouch.get = get
+  expect(() => getCallback(doc)).not.toThrow()
 })
 
 test('should subscribe to view updates', () => {
@@ -227,9 +278,7 @@ test('should call the callback to documents with a document and to views with an
     value: 42,
   })
 
-  await new Promise(resolve => {
-    setTimeout(resolve, 50)
-  })
+  await sleep(50)
 
   expect(docCallback).toHaveBeenCalled()
   expect(typeof docCallback.mock.calls[0]).toBe('object')
@@ -249,9 +298,7 @@ test('should call the callback to documents with a document and to views with an
     value: 'and the question is:',
   })
 
-  await new Promise(resolve => {
-    setTimeout(resolve, 10)
-  })
+  await sleep(10)
 
   expect(docCallback).toHaveBeenCalledTimes(1)
   expect(viewCallback).toHaveBeenCalledTimes(1)
@@ -295,9 +342,7 @@ test('should have a unsubscribeAll method', async () => {
     value: 42,
   })
 
-  await new Promise(resolve => {
-    setTimeout(resolve, 50)
-  })
+  await sleep(50)
 
   expect(docCallback).not.toHaveBeenCalled()
   expect(allDocCallback).not.toHaveBeenCalled()
@@ -346,9 +391,7 @@ test('should clone the documents that are passed to document callbacks', async (
     value: 42,
   })
 
-  await new Promise(resolve => {
-    setTimeout(resolve, 10)
-  })
+  await sleep(10)
   ;(docs[0] as PouchDB.Core.IdMeta & { value: number }).value = 43
 
   expect(docs).toHaveLength(2)
@@ -375,9 +418,7 @@ test('should subscribe to all docs if null is passed to doc subscription', async
   }
   await myPouch.bulkDocs(docs)
 
-  await new Promise(resolve => {
-    setTimeout(resolve, 50)
-  })
+  await sleep(50)
 
   expect(callback).toHaveBeenCalledTimes(15)
 

@@ -7,6 +7,7 @@ import {
   act,
   waitForNextUpdate,
   DocWithAttachment,
+  sleep,
 } from './test-utils'
 import useDoc from './useDoc'
 
@@ -479,9 +480,7 @@ describe('pouchdb get options', () => {
       value: 'update',
     })
 
-    await new Promise(resolve => {
-      setTimeout(resolve, 10)
-    })
+    await sleep(10)
 
     expect(result.current.state).toBe('done')
     expect(result.current.doc).toEqual({

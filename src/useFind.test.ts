@@ -8,6 +8,7 @@ import {
   waitForNextUpdate,
   waitForLoadingChange,
   act,
+  sleep,
 } from './test-utils'
 import useFind, { FindHookIndexOption } from './useFind'
 
@@ -141,9 +142,7 @@ describe('by id', () => {
       })
     })
 
-    await new Promise(resolve => {
-      setTimeout(resolve, 10)
-    })
+    await sleep(10)
     expect(result.current.loading).toBeFalsy()
     expect(result.current.docs).toHaveLength(5)
 
@@ -732,9 +731,7 @@ describe('index', () => {
       })
     })
 
-    await new Promise(resolve => {
-      setTimeout(resolve, 20)
-    })
+    await sleep(20)
     expect(result.current.error).toBeFalsy()
     expect(result.current.loading).toBeFalsy()
     expect(result.current.docs).toHaveLength(5)
@@ -1131,9 +1128,7 @@ describe('index', () => {
           _id: 'aa',
           captain: 'Captain Hook',
         })
-        return new Promise(resolve => {
-          setTimeout(resolve, 20)
-        })
+        await sleep(20)
       })
 
       expect(result.current.error).toBeFalsy()
@@ -1146,9 +1141,7 @@ describe('index', () => {
           captain: 'Käpt’n Blaubär',
           aired: 1991,
         })
-        return new Promise(resolve => {
-          setTimeout(resolve, 20)
-        })
+        await sleep(20)
       })
 
       await waitForLoadingChange(result, false)

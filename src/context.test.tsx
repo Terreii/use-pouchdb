@@ -4,6 +4,7 @@ import PouchDB from 'pouchdb-core'
 import memory from 'pouchdb-adapter-memory'
 
 import { Provider, useContext } from './context'
+import { sleep } from './test-utils'
 
 PouchDB.plugin(memory)
 
@@ -53,9 +54,7 @@ test('should unsubscribe all when the database changes', async () => {
 
   rerender()
 
-  await new Promise(resolve => {
-    setTimeout(resolve, 10)
-  })
+  await sleep(10)
 
   expect(unsubscribe).toHaveBeenCalled()
 
@@ -81,9 +80,7 @@ test('should unsubscribe all when a database gets destroyed', async () => {
 
   await myPouch.destroy()
 
-  await new Promise(resolve => {
-    setTimeout(resolve, 10)
-  })
+  await sleep(10)
 
   expect(unsubscribe).toHaveBeenCalled()
 })

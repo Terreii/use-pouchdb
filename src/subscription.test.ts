@@ -4,6 +4,8 @@ import mapReduce from 'pouchdb-mapreduce'
 
 import SubscriptionManager from './subscription'
 
+import { sleep } from './test-utils'
+
 PouchDB.plugin(memory)
 PouchDB.plugin(mapReduce)
 
@@ -279,9 +281,7 @@ test('should call the callback to documents with a document and to views with an
     value: 42,
   })
 
-  await new Promise(resolve => {
-    setTimeout(resolve, 50)
-  })
+  await sleep(50)
 
   expect(docCallback).toHaveBeenCalled()
   expect(typeof docCallback.mock.calls[0]).toBe('object')
@@ -301,9 +301,7 @@ test('should call the callback to documents with a document and to views with an
     value: 'and the question is:',
   })
 
-  await new Promise(resolve => {
-    setTimeout(resolve, 10)
-  })
+  await sleep(10)
 
   expect(docCallback).toHaveBeenCalledTimes(1)
   expect(viewCallback).toHaveBeenCalledTimes(1)
@@ -347,9 +345,7 @@ test('should have a unsubscribeAll method', async () => {
     value: 42,
   })
 
-  await new Promise(resolve => {
-    setTimeout(resolve, 50)
-  })
+  await sleep(50)
 
   expect(docCallback).not.toHaveBeenCalled()
   expect(allDocCallback).not.toHaveBeenCalled()
@@ -398,9 +394,7 @@ test('should clone the documents that are passed to document callbacks', async (
     value: 42,
   })
 
-  await new Promise(resolve => {
-    setTimeout(resolve, 10)
-  })
+  await sleep(10)
   ;(docs[0] as PouchDB.Core.IdMeta & { value: number }).value = 43
 
   expect(docs).toHaveLength(2)
@@ -427,9 +421,7 @@ test('should subscribe to all docs if null is passed to doc subscription', async
   }
   await myPouch.bulkDocs(docs)
 
-  await new Promise(resolve => {
-    setTimeout(resolve, 50)
-  })
+  await sleep(50)
 
   expect(callback).toHaveBeenCalledTimes(15)
 

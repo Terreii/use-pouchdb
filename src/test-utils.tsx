@@ -87,3 +87,9 @@ export async function waitForLoadingChange(
     expect(result.current.loading).toBe(desiredState)
   })
 }
+
+export async function sleep(milliseconds: number) {
+  return new Promise(resolve => {
+    setTimeout(resolve, milliseconds)
+  })
+}

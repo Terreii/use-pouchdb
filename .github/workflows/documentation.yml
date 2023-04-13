@@ -8,7 +8,6 @@ on:
 
 jobs:
   checks:
-    if: github.event_name != 'push'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -27,6 +26,8 @@ jobs:
   gh-release:
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
+    # Waits for test jobs for each Node.js version to complete
+    needs: checks
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2

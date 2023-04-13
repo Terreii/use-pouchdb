@@ -4,7 +4,7 @@ import { useContext } from './context'
 import useStateMachine, { ResultType } from './state-machine'
 import type { CommonOptions } from './utils'
 
-type DocResultType<T extends Record<string, unknown>> = ResultType<{
+type DocResultType<T extends {}> = ResultType<{
   doc: (PouchDB.Core.Document<T> & PouchDB.Core.GetMeta) | null
 }>
 
@@ -14,7 +14,7 @@ type DocResultType<T extends Record<string, unknown>> = ResultType<{
  * @param {object} [options] - PouchDB get options. Excluding 'open_revs'.
  * @param {object|function} [initialValue] - Value that should be returned while fetching the doc.
  */
-export default function useDoc<Content extends Record<string, unknown>>(
+export default function useDoc<Content extends {}>(
   id: PouchDB.Core.DocumentId,
   options?: (PouchDB.Core.GetOptions & CommonOptions) | null,
   initialValue?: (() => Content) | Content

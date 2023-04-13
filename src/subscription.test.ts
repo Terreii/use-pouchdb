@@ -109,7 +109,6 @@ test('should only subscribe once to document updates', () => {
 })
 
 test('should handle unsubscribing during an doc update', () => {
-  expect.assertions(0)
   const { changes, get } = myPouch
 
   const doc = {
@@ -119,27 +118,29 @@ test('should handle unsubscribing during an doc update', () => {
   }
 
   let callback: (
-    change: PouchDB.Core.ChangesResponseChange<{}>
-  ) => void = () => {}
+    change: PouchDB.Core.ChangesResponseChange<Record<string, unknown>>
+  ) => void = () => {
+    console.error('should not be called')
+  }
 
   ;(myPouch as unknown as { changes: unknown }).changes = () => ({
     on(_type: string, callFn: (c: unknown) => void) {
       callback = callFn
       return {
-        cancel() {},
+        cancel: jest.fn(),
       }
     },
   })
 
   const subscriptionManager = new SubscriptionManager(myPouch)
-  const unsubscribe = subscriptionManager.subscribeToDocs(['test'], () => {})
+  const unsubscribe = subscriptionManager.subscribeToDocs(['test'], jest.fn())
 
-  let getCallback = (_doc: unknown) => {}
+  let getCallback: (doc: unknown) => void = jest.fn()
   ;(myPouch as unknown as { get: unknown }).get = jest.fn(() => {
     return {
-      then(fn = (_doc: unknown) => {}) {
+      then(fn: (doc: unknown) => void) {
         getCallback = fn
-        return { catch() {} }
+        return { catch: jest.fn() }
       },
     }
   })
@@ -153,11 +154,7 @@ test('should handle unsubscribing during an doc update', () => {
   unsubscribe()
   myPouch.changes = changes
   myPouch.get = get
-  try {
-    getCallback(doc)
-  } catch (err) {
-    expect(err).toBeUndefined()
-  }
+  expect(() => getCallback(doc)).not.toThrow()
 })
 
 test('should subscribe to view updates', () => {

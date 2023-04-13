@@ -7,7 +7,7 @@ declare module 'pouchdb-utils' {
 }
 
 declare module 'pouchdb-selector-core' {
-  export function matchesSelector<T extends Record<string, unknown>>(
+  export function matchesSelector<T extends {}>(
     doc: PouchDB.Core.Document<T>,
     selector: PouchDB.Find.Selector
   ): boolean

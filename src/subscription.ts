@@ -1,15 +1,15 @@
 import { clone } from 'pouchdb-utils'
 
-export type DocsCallback<T extends Record<string, unknown>> = (
+export type DocsCallback<T extends {}> = (
   deleted: boolean,
   id: PouchDB.Core.DocumentId,
   doc?: PouchDB.Core.Document<T>
 ) => void
 
 interface DocsSubscription {
-  changesFeed: PouchDB.Core.Changes<Record<string, unknown>>
-  all: Set<DocsCallback<Record<string, unknown>>>
-  ids: Map<PouchDB.Core.DocumentId, Set<DocsCallback<Record<string, unknown>>>>
+  changesFeed: PouchDB.Core.Changes<{}>
+  all: Set<DocsCallback<{}>>
+  ids: Map<PouchDB.Core.DocumentId, Set<DocsCallback<{}>>>
 }
 
 export type ViewCallback = (id: PouchDB.Core.DocumentId) => void
@@ -19,10 +19,10 @@ export type subscribeToView = (
 ) => () => void
 
 interface SubscriptionToAView {
-  feed: PouchDB.Core.Changes<Record<string, unknown>>
+  feed: PouchDB.Core.Changes<{}>
   callbacks: Set<ViewCallback>
 }
-export type subscribeToDocs = <T extends Record<string, unknown>>(
+export type subscribeToDocs = <T extends {}>(
   ids: PouchDB.Core.DocumentId[] | null,
   callback: DocsCallback<T>
 ) => () => void
@@ -44,7 +44,7 @@ export default class SubscriptionManager {
     pouch.once('destroyed', this.#destroyListener)
   }
 
-  subscribeToDocs<T extends Record<string, unknown>>(
+  subscribeToDocs<T extends {}>(
     ids: PouchDB.Core.DocumentId[] | null,
     callback: DocsCallback<T>
   ): () => void {
@@ -63,19 +63,15 @@ export default class SubscriptionManager {
     if (isIds) {
       for (const id of ids ?? []) {
         if (this.#docsSubscription.ids.has(id)) {
-          this.#docsSubscription.ids
-            .get(id)
-            ?.add(callback as DocsCallback<Record<string, unknown>>)
+          this.#docsSubscription.ids.get(id)?.add(callback as DocsCallback<{}>)
         } else {
-          const set: Set<DocsCallback<Record<string, unknown>>> = new Set()
-          set.add(callback as DocsCallback<Record<string, unknown>>)
+          const set: Set<DocsCallback<{}>> = new Set()
+          set.add(callback as DocsCallback<{}>)
           this.#docsSubscription.ids.set(id, set)
         }
       }
     } else {
-      this.#docsSubscription.all.add(
-        callback as DocsCallback<Record<string, unknown>>
-      )
+      this.#docsSubscription.all.add(callback as DocsCallback<{}>)
     }
 
     let didUnsubscribe = false
@@ -86,16 +82,14 @@ export default class SubscriptionManager {
       if (isIds) {
         for (const id of ids ?? []) {
           const set = this.#docsSubscription?.ids.get(id)
-          set?.delete(callback as DocsCallback<Record<string, unknown>>)
+          set?.delete(callback as DocsCallback<{}>)
 
           if (set?.size === 0) {
             this.#docsSubscription?.ids.delete(id)
           }
         }
       } else {
-        this.#docsSubscription?.all.delete(
-          callback as DocsCallback<Record<string, unknown>>
-        )
+        this.#docsSubscription?.all.delete(callback as DocsCallback<{}>)
       }
 
       if (
@@ -191,7 +185,7 @@ function createDocSubscription(pouch: PouchDB.Database): DocsSubscription {
                 docsSubscription.all,
                 false,
                 change.id,
-                doc as unknown as PouchDB.Core.Document<Record<string, unknown>>
+                doc as unknown as PouchDB.Core.Document<{}>
               )
             }
             if (idSubscriptions) {
@@ -199,7 +193,7 @@ function createDocSubscription(pouch: PouchDB.Database): DocsSubscription {
                 idSubscriptions,
                 false,
                 change.id,
-                doc as unknown as PouchDB.Core.Document<Record<string, unknown>>
+                doc as unknown as PouchDB.Core.Document<{}>
               )
             }
           })
@@ -217,10 +211,10 @@ function createDocSubscription(pouch: PouchDB.Database): DocsSubscription {
 }
 
 function notify(
-  set: Set<DocsCallback<Record<string, unknown>>>,
+  set: Set<DocsCallback<{}>>,
   deleted: boolean,
   id: PouchDB.Core.DocumentId,
-  doc?: PouchDB.Core.Document<Record<string, unknown>>
+  doc?: PouchDB.Core.Document<{}>
 ) {
   for (const subscription of set) {
     try {

@@ -10,4 +10,14 @@ module.exports = {
     'plugin:react-hooks/recommended',
     'plugin:jest/recommended',
   ],
+  rules: {
+    '@typescript-eslint/ban-types': [
+      'error',
+      {
+        types: {
+          '{}': false,
+        },
+      },
+    ],
+  },
 }

@@ -61,7 +61,7 @@ export interface FindHookOptions extends CommonOptions {
  * Query, and optionally create, a Mango index and subscribe to its updates.
  * @param {object} [opts] A combination of PouchDB's find options and create index options.
  */
-export default function useFind<Content extends Record<string, unknown>>(
+export default function useFind<Content extends {}>(
   options: FindHookOptions
 ): ResultType<PouchDB.Find.FindResponse<Content>> {
   const { pouchdb: pouch, subscriptionManager } = useContext(options.db)
@@ -236,7 +236,7 @@ export default function useFind<Content extends Record<string, unknown>>(
 function getIndex(
   db: PouchDB.Database,
   index: FindHookIndexOption | undefined,
-  selector: PouchDB.Find.FindRequest<Record<string, unknown>>
+  selector: PouchDB.Find.FindRequest<{}>
 ): Promise<[string | null, string]> {
   if (index && typeof index === 'string') {
     return findIndex(db, selector)
@@ -260,7 +260,7 @@ async function createIndex(
 ): Promise<[string, string]> {
   const result = (await db.createIndex(
     index
-  )) as PouchDB.Find.CreateIndexResponse<Record<string, unknown>> & {
+  )) as PouchDB.Find.CreateIndexResponse<{}> & {
     id: PouchDB.Core.DocumentId
     name: string
   }
@@ -274,7 +274,7 @@ async function createIndex(
  */
 async function findIndex(
   db: PouchDB.Database,
-  selector: PouchDB.Find.FindRequest<Record<string, unknown>>
+  selector: PouchDB.Find.FindRequest<{}>
 ): Promise<[string | null, string]> {
   const database = db as PouchDB.Database & {
     explain: (selector: PouchDB.Find.Selector) => Promise<ExplainResult>
@@ -303,22 +303,19 @@ function subscribe(
     ? '_design/' + id.replace(/^_design\//, '') // normalize, user can add a ddoc name
     : undefined
 
-  return subscriptionManager.subscribeToDocs<Record<string, unknown>>(
-    null,
-    (_del, id, doc) => {
-      if (idsInResult.ids.has(id)) {
-        query()
-      } else if (id === ddocName) {
-        query()
-      } else if (doc && typeof matchesSelector !== 'function') {
-        // because pouchdb-selector-core is semver-free zone
-        // If matchesSelector doesn't exist, just query every time
-        query()
-      } else if (doc && matchesSelector(doc, selector)) {
-        query()
-      }
+  return subscriptionManager.subscribeToDocs<{}>(null, (_del, id, doc) => {
+    if (idsInResult.ids.has(id)) {
+      query()
+    } else if (id === ddocName) {
+      query()
+    } else if (doc && typeof matchesSelector !== 'function') {
+      // because pouchdb-selector-core is semver-free zone
+      // If matchesSelector doesn't exist, just query every time
+      query()
+    } else if (doc && matchesSelector(doc, selector)) {
+      query()
     }
-  )
+  })
 }
 
 interface ExplainResult {

@@ -6,7 +6,6 @@ import type SubscriptionManager from './subscription'
 import useStateMachine, { ResultType, Dispatch } from './state-machine'
 import { useDeepMemo, CommonOptions } from './utils'
 
-/* typescript-eslint-disable @typescript-eslint/ban-types */
 type ViewResponseBase<Result extends {}> = PouchDB.Query.Response<Result> & {
   /**
    * Include an update_seq value indicating which sequence id of the underlying database the view
@@ -140,10 +139,7 @@ export default function useView<
  * @param fn Name of the view.
  * @param option PouchDB's query options.
  */
-function doDDocQuery<
-  Model extends Record<string, unknown>,
-  Result extends Record<string, unknown>
->(
+function doDDocQuery<Model extends {}, Result extends {}>(
   dispatch: Dispatch<PouchDB.Query.Response<Result>>,
   pouch: PouchDB.Database<Record<string, unknown>>,
   subscriptionManager: SubscriptionManager,
@@ -285,10 +281,7 @@ function doDDocQuery<
  * @param fn The temporary view.
  * @param option PouchDB's query options.
  */
-function doTemporaryQuery<
-  Model extends Record<string, unknown>,
-  Result extends Record<string, unknown>
->(
+function doTemporaryQuery<Model extends {}, Result extends {}>(
   dispatch: Dispatch<PouchDB.Query.Response<Result>>,
   pouch: PouchDB.Database<Record<string, unknown>>,
   subscriptionManager: SubscriptionManager,

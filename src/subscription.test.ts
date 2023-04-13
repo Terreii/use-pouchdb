@@ -106,6 +106,58 @@ test('should only subscribe once to document updates', () => {
   expect(callback3).not.toHaveBeenCalled()
 })
 
+test('should handle unsubscribing during an doc update', () => {
+  expect.assertions(0)
+  const { changes, get } = myPouch
+
+  const doc = {
+    _id: 'test',
+    _rev: '1-fb7e8b3df19087a905ab792366bd118a',
+    value: 42,
+  }
+
+  let callback: (
+    change: PouchDB.Core.ChangesResponseChange<{}>
+  ) => void = () => {}
+
+  ;(myPouch as unknown as { changes: unknown }).changes = () => ({
+    on(_type: string, callFn: (c: unknown) => void) {
+      callback = callFn
+      return {
+        cancel() {},
+      }
+    },
+  })
+
+  const subscriptionManager = new SubscriptionManager(myPouch)
+  const unsubscribe = subscriptionManager.subscribeToDocs(['test'], () => {})
+
+  let getCallback = (_doc: unknown) => {}
+  ;(myPouch as unknown as { get: unknown }).get = jest.fn(() => {
+    return {
+      then(fn = (_doc: unknown) => {}) {
+        getCallback = fn
+        return { catch() {} }
+      },
+    }
+  })
+
+  callback({
+    id: 'test',
+    seq: 1,
+    changes: [{ rev: doc._rev }],
+    doc,
+  })
+  unsubscribe()
+  myPouch.changes = changes
+  myPouch.get = get
+  try {
+    getCallback(doc)
+  } catch (err) {
+    expect(err).toBeUndefined()
+  }
+})
+
 test('should subscribe to view updates', () => {
   const changesObject = {
     on: jest.fn(() => changesObject),

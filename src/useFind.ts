@@ -16,35 +16,7 @@ import { useDeepMemo, CommonOptions } from './utils'
 export type FindHookIndexOption =
   | string
   | [string, string]
-  | {
-      /**
-       * List of fields to index
-       */
-      fields: string[]
-
-      /**
-       * Name of the index, auto-generated if you don't include it
-       */
-      name?: string
-
-      /**
-       * Design document name (i.e. the part after '_design/',
-       * auto-generated if you don't include it.
-       */
-      ddoc?: string
-
-      /**
-       * Only supports 'json', and it's also the default
-       */
-      type?: string
-
-      /**
-       * A selector used to filter the set of documents included in the index.
-       * Requires PouchDB v7.3.0 or newer.
-       * Use [Find selectors](https://docs.couchdb.org/en/stable/api/database/find.html#find-selectors).
-       */
-      partial_filter_selector?: PouchDB.Find.Selector
-    }
+  | PouchDB.Find.CreateIndexOptions['index']
 
 export interface FindHookOptions extends CommonOptions {
   /**

@@ -172,44 +172,31 @@ function createDocSubscription(pouch: PouchDB.Database): DocsSubscription {
       live: true,
     })
     .on('change', change => {
-      const hasAll =
-        docsSubscription?.all != null && docsSubscription.all.size > 0
-      const hasId = docsSubscription && docsSubscription.ids.has(change.id)
+      const hasAll = (docsSubscription?.all.size ?? 0) > 0
+      const idSubscriptions = docsSubscription?.ids.get(change.id)
 
       if (change.deleted) {
-        if (hasAll) {
-          const subscription = docsSubscription as DocsSubscription
-          notify(subscription.all, true, change.id)
+        if (hasAll && docsSubscription) {
+          notify(docsSubscription.all, true, change.id)
         }
-        if (hasId) {
-          const subscription = docsSubscription as DocsSubscription
-          notify(
-            subscription.ids.get(change.id) as Set<
-              DocsCallback<Record<string, unknown>>
-            >,
-            true,
-            change.id
-          )
+        if (idSubscriptions) {
+          notify(idSubscriptions, true, change.id)
         }
       } else {
         pouch
           .get(change.id)
           .then(doc => {
-            if (hasAll) {
-              const subscription = docsSubscription as DocsSubscription
+            if (hasAll && docsSubscription) {
               notify(
-                subscription.all,
+                docsSubscription.all,
                 false,
                 change.id,
                 doc as unknown as PouchDB.Core.Document<Record<string, unknown>>
               )
             }
-            if (hasId) {
-              const subscription = docsSubscription as DocsSubscription
+            if (idSubscriptions) {
               notify(
-                subscription.ids.get(change.id) as Set<
-                  DocsCallback<Record<string, unknown>>
-                >,
+                idSubscriptions,
                 false,
                 change.id,
                 doc as unknown as PouchDB.Core.Document<Record<string, unknown>>

@@ -974,6 +974,190 @@ describe('index', () => {
     expect(result.current.docs).toHaveLength(5)
     expect(result.current).toBe(current)
   })
+
+  describe('partial_filter_selector', () => {
+    test('should use a existing index', async () => {
+      await createDocs()
+      const index = {
+        fields: ['captain'],
+        partial_filter_selector: {
+          aired: { $gt: 1980 },
+        },
+      }
+
+      await myPouch.createIndex({ index })
+
+      const { result } = renderHook(
+        () =>
+          useFind({
+            selector: {
+              captain: { $gt: null },
+            },
+            index,
+            sort: ['captain'],
+          }),
+        {
+          pouchdb: myPouch,
+        }
+      )
+
+      expect(result.current.loading).toBeTruthy()
+
+      await waitForLoadingChange(result, false)
+
+      expect(result.current.warning).toBeFalsy()
+      expect(result.current.docs).toEqual([
+        {
+          _id: 'DS9',
+          _rev: expect.anything(),
+          name: 'Deep Space Nine',
+          captain: 'Benjamin Sisko',
+          aired: 1993,
+        },
+        {
+          _id: 'TNG',
+          _rev: expect.anything(),
+          name: 'The Next Generation',
+          captain: 'Jean-Luc Picard',
+          aired: 1987,
+        },
+        {
+          _id: 'ENT',
+          _rev: expect.anything(),
+          name: 'Enterprise',
+          captain: 'Jonathan Archer',
+          aired: 2001,
+        },
+        {
+          _id: 'VOY',
+          _rev: expect.anything(),
+          name: 'Voyager',
+          captain: 'Kathryn Janeway',
+          aired: 1995,
+        },
+      ])
+    })
+
+    test('should create an index and use it', async () => {
+      await createDocs()
+
+      const { result } = renderHook(
+        () =>
+          useFind({
+            index: {
+              fields: ['captain'],
+              partial_filter_selector: {
+                aired: { $gt: 1980 },
+              },
+            },
+            selector: {
+              captain: { $gt: null },
+            },
+            sort: ['captain'],
+          }),
+        {
+          pouchdb: myPouch,
+        }
+      )
+
+      expect(result.current.loading).toBeTruthy()
+
+      await waitForLoadingChange(result, false)
+
+      expect(result.current.loading).toBeFalsy()
+      expect(result.current.warning).toBeFalsy()
+      expect(result.current.docs).toEqual([
+        {
+          _id: 'DS9',
+          _rev: expect.anything(),
+          name: 'Deep Space Nine',
+          captain: 'Benjamin Sisko',
+          aired: 1993,
+        },
+        {
+          _id: 'TNG',
+          _rev: expect.anything(),
+          name: 'The Next Generation',
+          captain: 'Jean-Luc Picard',
+          aired: 1987,
+        },
+        {
+          _id: 'ENT',
+          _rev: expect.anything(),
+          name: 'Enterprise',
+          captain: 'Jonathan Archer',
+          aired: 2001,
+        },
+        {
+          _id: 'VOY',
+          _rev: expect.anything(),
+          name: 'Voyager',
+          captain: 'Kathryn Janeway',
+          aired: 1995,
+        },
+      ])
+    })
+
+    test('should subscribe to changes', async () => {
+      await createDocs()
+
+      const { result } = renderHook(
+        () =>
+          useFind({
+            index: {
+              fields: ['captain'],
+              partial_filter_selector: {
+                aired: { $gt: 1980 },
+              },
+            },
+            selector: {
+              captain: { $gt: '' },
+            },
+            sort: ['captain'],
+          }),
+        {
+          pouchdb: myPouch,
+        }
+      )
+
+      await waitForLoadingChange(result, false)
+
+      expect(result.current.error).toBeFalsy()
+      expect(result.current.docs).toHaveLength(4)
+      expect(result.current.loading).toBeFalsy()
+
+      await act(async () => {
+        await myPouch.put({
+          _id: 'aa',
+          captain: 'Captain Hook',
+        })
+        return new Promise(resolve => {
+          setTimeout(resolve, 20)
+        })
+      })
+
+      expect(result.current.error).toBeFalsy()
+      expect(result.current.loading).toBeFalsy()
+      expect(result.current.docs).toHaveLength(4)
+
+      await act(async () => {
+        await myPouch.put({
+          _id: 'Sendung mit der Maus',
+          captain: 'Käpt’n Blaubär',
+          aired: 1991,
+        })
+        return new Promise(resolve => {
+          setTimeout(resolve, 20)
+        })
+      })
+
+      await waitForLoadingChange(result, false)
+
+      expect(result.current.loading).toBeFalsy()
+      expect(result.current.error).toBeFalsy()
+      expect(result.current.docs).toHaveLength(5)
+    })
+  })
 })
 
 describe('options', () => {

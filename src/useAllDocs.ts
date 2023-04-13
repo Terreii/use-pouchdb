@@ -8,7 +8,7 @@ import { useDeepMemo, CommonOptions } from './utils'
  * Get all docs or a slice of all docs and subscribe to their updates.
  * @param options PouchDB's allDocs options.
  */
-export default function useAllDocs<Content>(
+export default function useAllDocs<Content extends Record<string, unknown>>(
   options?: CommonOptions &
     (
       | PouchDB.Core.AllDocsWithKeyOptions

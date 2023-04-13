@@ -16,28 +16,7 @@ import { useDeepMemo, CommonOptions } from './utils'
 export type FindHookIndexOption =
   | string
   | [string, string]
-  | {
-      /**
-       * List of fields to index
-       */
-      fields: string[]
-
-      /**
-       * Name of the index, auto-generated if you don't include it
-       */
-      name?: string
-
-      /**
-       * Design document name (i.e. the part after '_design/',
-       * auto-generated if you don't include it.
-       */
-      ddoc?: string
-
-      /**
-       * Only supports 'json', and it's also the default
-       */
-      type?: string
-    }
+  | PouchDB.Find.CreateIndexOptions['index']
 
 export interface FindHookOptions extends CommonOptions {
   /**
@@ -51,6 +30,8 @@ export interface FindHookOptions extends CommonOptions {
 
   /**
    * Defines a selector to filter the results. Required
+   *
+   * Use [Find selectors](https://docs.couchdb.org/en/stable/api/database/find.html#find-selectors).
    */
   selector: PouchDB.Find.Selector
 
@@ -80,7 +61,7 @@ export interface FindHookOptions extends CommonOptions {
  * Query, and optionally create, a Mango index and subscribe to its updates.
  * @param {object} [opts] A combination of PouchDB's find options and create index options.
  */
-export default function useFind<Content>(
+export default function useFind<Content extends Record<string, unknown>>(
   options: FindHookOptions
 ): ResultType<PouchDB.Find.FindResponse<Content>> {
   const { pouchdb: pouch, subscriptionManager } = useContext(options.db)

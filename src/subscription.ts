@@ -1,6 +1,6 @@
 import { clone } from 'pouchdb-utils'
 
-export type DocsCallback<T> = (
+export type DocsCallback<T extends {}> = (
   deleted: boolean,
   id: PouchDB.Core.DocumentId,
   doc?: PouchDB.Core.Document<T>
@@ -22,7 +22,7 @@ interface SubscriptionToAView {
   feed: PouchDB.Core.Changes<Record<string, unknown>>
   callbacks: Set<ViewCallback>
 }
-export type subscribeToDocs = <T>(
+export type subscribeToDocs = <T extends {}>(
   ids: PouchDB.Core.DocumentId[] | null,
   callback: DocsCallback<T>
 ) => () => void
@@ -44,7 +44,7 @@ export default class SubscriptionManager {
     pouch.once('destroyed', this.#destroyListener)
   }
 
-  subscribeToDocs<T>(
+  subscribeToDocs<T extends {}>(
     ids: PouchDB.Core.DocumentId[] | null,
     callback: DocsCallback<T>
   ): () => void {

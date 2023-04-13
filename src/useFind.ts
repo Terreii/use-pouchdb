@@ -89,7 +89,7 @@ export interface FindHookOptions extends CommonOptions {
  * Query, and optionally create, a Mango index and subscribe to its updates.
  * @param {object} [opts] A combination of PouchDB's find options and create index options.
  */
-export default function useFind<Content>(
+export default function useFind<Content extends {}>(
   options: FindHookOptions
 ): ResultType<PouchDB.Find.FindResponse<Content>> {
   const { pouchdb: pouch, subscriptionManager } = useContext(options.db)

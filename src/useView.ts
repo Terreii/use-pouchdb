@@ -6,7 +6,7 @@ import type SubscriptionManager from './subscription'
 import useStateMachine, { ResultType, Dispatch } from './state-machine'
 import { useDeepMemo, CommonOptions } from './utils'
 
-type ViewResponseBase<Result> = PouchDB.Query.Response<Result> & {
+type ViewResponseBase<Result extends {}> = PouchDB.Query.Response<Result> & {
   /**
    * Include an update_seq value indicating which sequence id of the underlying database the view
    * reflects.
@@ -14,14 +14,18 @@ type ViewResponseBase<Result> = PouchDB.Query.Response<Result> & {
   update_seq?: number | string
 }
 
-export type ViewResponse<T> = ResultType<ViewResponseBase<T>>
+export type ViewResponse<T extends {}> = ResultType<ViewResponseBase<T>>
 
 /**
  * Query a view and subscribe to its updates.
  * @param {string | function | object} fun The name of the view or a temporary view.
  * @param {object} [opts] PouchDB's query-options
  */
-export default function useView<Content, Result, Model = Content>(
+export default function useView<
+  Content extends {},
+  Result extends {},
+  Model extends {} = Content
+>(
   fun: string | PouchDB.Map<Model, Result> | PouchDB.Filter<Model, Result>,
   opts?: PouchDB.Query.Options<Model, Result> & {
     update_seq?: boolean
@@ -135,7 +139,7 @@ export default function useView<Content, Result, Model = Content>(
  * @param fn Name of the view.
  * @param option PouchDB's query options.
  */
-function doDDocQuery<Model, Result>(
+function doDDocQuery<Model extends {}, Result extends {}>(
   dispatch: Dispatch<PouchDB.Query.Response<Result>>,
   pouch: PouchDB.Database<Record<string, unknown>>,
   subscriptionManager: SubscriptionManager,
@@ -277,7 +281,7 @@ function doDDocQuery<Model, Result>(
  * @param fn The temporary view.
  * @param option PouchDB's query options.
  */
-function doTemporaryQuery<Model, Result>(
+function doTemporaryQuery<Model extends {}, Result extends {}>(
   dispatch: Dispatch<PouchDB.Query.Response<Result>>,
   pouch: PouchDB.Database<Record<string, unknown>>,
   subscriptionManager: SubscriptionManager,

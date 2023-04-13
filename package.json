@@ -38,6 +38,7 @@
   },
   "homepage": "https://terreii.github.io/use-pouchdb/",
   "files": [
+    "README.md",
     "lib"
   ],
   "devDependencies": {

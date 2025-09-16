@@ -127,7 +127,8 @@ export default function useFind<Content extends {}>(
           selector,
           fields: fieldsToFetch,
           sort,
-          limit,
+          // No docs where returned if no ddoc/index where present and limit = undefined
+          ...(limit != null ? { limit } : {}),
           skip,
           use_index: indexToUse,
         })) as PouchDB.Find.FindResponse<Content>

@@ -100,10 +100,5 @@
     "branches": [
       "latest"
     ]
-  },
-  "prettier": {
-    "arrowParens": "avoid",
-    "semi": false,
-    "singleQuote": true
   }
 }

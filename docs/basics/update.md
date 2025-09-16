@@ -11,40 +11,40 @@ Updating will be the job of our updated `<Todo />` component:
 
 ```jsx
 // Todo.js
-import React from 'react'
-import { usePouch } from 'use-pouchdb'
+import React from "react";
+import { usePouch } from "use-pouchdb";
 
 export default function Todo({ todo }) {
-  const db = usePouch()
+  const db = usePouch();
 
   const update = async () => {
-    const doc = await db.get(todo._id)
+    const doc = await db.get(todo._id);
 
     // check if the UI state matches the state in the database.
     if (doc.done === todo.done) {
-      doc.done = !doc.done // Update the doc.
+      doc.done = !doc.done; // Update the doc.
 
       try {
-        await db.put(doc) // And put the new version into the database.
+        await db.put(doc); // And put the new version into the database.
       } catch (err) {
-        if (err.name === 'conflict') {
-          update() // There was a conflict, try again.
+        if (err.name === "conflict") {
+          update(); // There was a conflict, try again.
         } else {
-          console.error(err) // Handle other errors.
+          console.error(err); // Handle other errors.
         }
       }
     }
-  }
+  };
 
   return (
     <li className="todo-item">
       <input type="checkbox" checked={todo.done} onChange={update} />
 
-      <span className={'todo-item__text' + (todo.done ? ' done' : '')}>
+      <span className={"todo-item__text" + (todo.done ? " done" : "")}>
         {todo.text}
       </span>
     </li>
-  )
+  );
 }
 ```
 
@@ -103,44 +103,44 @@ Update `<TodoList />` to be similar to this:
 
 ```jsx
 // TodoList.js
-import React, { useState, useMemo } from 'react'
-import { useAllDocs } from 'use-pouchdb'
-import Todo from './Todo'
-import VisibilityFilters from './VisibilityFilters'
+import React, { useState, useMemo } from "react";
+import { useAllDocs } from "use-pouchdb";
+import Todo from "./Todo";
+import VisibilityFilters from "./VisibilityFilters";
 
 const filters = {
-  all: 'all',
-  completed: 'completed',
-  incomplete: 'incomplete',
-}
+  all: "all",
+  completed: "completed",
+  incomplete: "incomplete",
+};
 
 export default function TodoList() {
   const { rows, loading } = useAllDocs({
     include_docs: true, // Load all document bodies
-  })
+  });
 
-  const [filter, setFilter] = useState(filters.all)
+  const [filter, setFilter] = useState(filters.all);
 
   const todos = useMemo(() => {
     switch (filter) {
       case filters.completed:
-        return rows.filter(row => row.doc.done)
+        return rows.filter((row) => row.doc.done);
 
       case filters.incomplete:
-        return rows.filter(row => !row.doc.done)
+        return rows.filter((row) => !row.doc.done);
 
       case filters.all:
       default:
-        return rows
+        return rows;
     }
-  }, [rows, filter])
+  }, [rows, filter]);
 
   return (
     <>
       <ul className="todo-list">
         {(todos && todos.length) || loading
-          ? todos.map(todo => <Todo key={todo.key} todo={todo.doc} />)
-          : 'No todos, yay!'}
+          ? todos.map((todo) => <Todo key={todo.key} todo={todo.doc} />)
+          : "No todos, yay!"}
       </ul>
 
       <VisibilityFilters
@@ -149,7 +149,7 @@ export default function TodoList() {
         onChange={setFilter}
       />
     </>
-  )
+  );
 }
 ```
 
@@ -157,7 +157,7 @@ And the `<VisibilityFilters />` component:
 
 ```jsx
 // VisibilityFilters.js
-import React from 'react'
+import React from "react";
 
 export default function VisibilityFilters({ current, options, onChange }) {
   return (
@@ -170,14 +170,14 @@ export default function VisibilityFilters({ current, options, onChange }) {
             value={value}
             checked={value === current}
             onChange={() => {
-              onChange(value)
+              onChange(value);
             }}
           />
           <span>{value}</span>
         </label>
       ))}
     </div>
-  )
+  );
 }
 ```
 
@@ -245,49 +245,49 @@ After that, we can update `<TodoList />` to use Mango queries:
 
 ```jsx
 // TodoList.js
-import React, { useState } from 'react'
-import { useFind } from 'use-pouchdb'
-import Todo from './Todo'
-import VisibilityFilters from './VisibilityFilters'
+import React, { useState } from "react";
+import { useFind } from "use-pouchdb";
+import Todo from "./Todo";
+import VisibilityFilters from "./VisibilityFilters";
 
 const filters = {
-  all: 'all',
-  completed: 'completed',
-  incomplete: 'incomplete',
-}
+  all: "all",
+  completed: "completed",
+  incomplete: "incomplete",
+};
 
 export default function TodoList() {
-  const [filter, setFilter] = useState(filters.all)
+  const [filter, setFilter] = useState(filters.all);
   const { docs: todos, loading } = useFind(
     filter === filters.all
       ? {
           // Create and query an index for all Todos
           index: {
-            fields: ['type'],
+            fields: ["type"],
           },
           selector: {
-            type: 'todo',
+            type: "todo",
           },
         }
       : {
           // Create and query an index for all Todos, sorted by their done state
           index: {
-            fields: ['type', 'done'],
+            fields: ["type", "done"],
           },
           selector: {
-            type: 'todo',
+            type: "todo",
             done: filter === filters.completed,
           },
-        }
-  )
+        },
+  );
 
   // todos is now an array of the documents. You must use their _id field directly!
   return (
     <>
       <ul className="todo-list">
         {(todos && todos.length) || loading
-          ? todos.map(todo => <Todo key={todo._id} todo={todo} />)
-          : 'No todos, yay!'}
+          ? todos.map((todo) => <Todo key={todo._id} todo={todo} />)
+          : "No todos, yay!"}
       </ul>
 
       <VisibilityFilters
@@ -296,7 +296,7 @@ export default function TodoList() {
         onChange={setFilter}
       />
     </>
-  )
+  );
 }
 ```
 
@@ -350,13 +350,13 @@ to `useFind`:
 ```javascript
 useFind({
   index: {
-    fields: ['type'],
+    fields: ["type"],
   },
   selector: {
-    type: 'todo',
+    type: "todo",
   },
   limit: 50, // or more or what you need.
-})
+});
 ```
 
 > PouchDB's secondary indexes are **lazy**.

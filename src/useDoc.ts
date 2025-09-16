@@ -1,12 +1,12 @@
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef, useCallback } from "react";
 
-import { useContext } from './context'
-import useStateMachine, { ResultType } from './state-machine'
-import type { CommonOptions } from './utils'
+import { useContext } from "./context";
+import useStateMachine, { ResultType } from "./state-machine";
+import type { CommonOptions } from "./utils";
 
 type DocResultType<T extends {}> = ResultType<{
-  doc: (PouchDB.Core.Document<T> & PouchDB.Core.GetMeta) | null
-}>
+  doc: (PouchDB.Core.Document<T> & PouchDB.Core.GetMeta) | null;
+}>;
 
 /**
  * Retrieves a document and subscribes to it's changes.
@@ -17,64 +17,66 @@ type DocResultType<T extends {}> = ResultType<{
 export default function useDoc<Content extends {}>(
   id: PouchDB.Core.DocumentId,
   options?: (PouchDB.Core.GetOptions & CommonOptions) | null,
-  initialValue?: (() => Content) | Content
+  initialValue?: (() => Content) | Content,
 ): DocResultType<Content> {
-  type Document = (PouchDB.Core.Document<Content> & PouchDB.Core.GetMeta) | null
+  type Document =
+    | (PouchDB.Core.Document<Content> & PouchDB.Core.GetMeta)
+    | null;
 
-  const { pouchdb: pouch, subscriptionManager } = useContext(options?.db)
+  const { pouchdb: pouch, subscriptionManager } = useContext(options?.db);
 
   const { rev, revs, revs_info, conflicts, attachments, binary, latest } =
-    options || {}
+    options || {};
 
   const getInitialValue = useCallback((): { doc: Document } => {
-    let doc: Content | null = null
+    let doc: Content | null = null;
 
-    if (typeof initialValue === 'function') {
-      doc = (initialValue as () => Content)()
-    } else if (initialValue && typeof initialValue === 'object') {
-      doc = initialValue
+    if (typeof initialValue === "function") {
+      doc = (initialValue as () => Content)();
+    } else if (initialValue && typeof initialValue === "object") {
+      doc = initialValue;
     }
 
-    const resultDoc = doc as Document
+    const resultDoc = doc as Document;
 
     // Add _id and _rev to the initial value (if they aren't set)
     if (resultDoc && resultDoc._id == null) {
-      resultDoc._id = id
+      resultDoc._id = id;
     }
     if (resultDoc && resultDoc._rev == null) {
-      resultDoc._rev = ''
+      resultDoc._rev = "";
     }
 
-    return { doc: resultDoc }
-  }, [id, initialValue])
+    return { doc: resultDoc };
+  }, [id, initialValue]);
 
-  const [state, dispatch] = useStateMachine(getInitialValue)
+  const [state, dispatch] = useStateMachine(getInitialValue);
 
   // Reset the document if the id did change and a initial value is set.
-  const lastId = useRef(id)
+  const lastId = useRef(id);
   useEffect(() => {
-    if (id === lastId.current) return
-    lastId.current = id
+    if (id === lastId.current) return;
+    lastId.current = id;
 
     if (initialValue != null) {
       dispatch({
-        type: 'loading_finished',
+        type: "loading_finished",
         payload: getInitialValue(),
-      })
+      });
     }
-  }, [id, initialValue, getInitialValue, dispatch])
+  }, [id, initialValue, getInitialValue, dispatch]);
 
   // Workaround, that initial value can change on every render, without re-run the query effect.
   // eslint-plugin-react-hooks missing dependency for all other dependency, but getInitialValue.
-  const getInitialValueRef = useRef(getInitialValue)
-  getInitialValueRef.current = getInitialValue
+  const getInitialValueRef = useRef(getInitialValue);
+  getInitialValueRef.current = getInitialValue;
 
   useEffect(() => {
     // Is this instance still current?
-    let isMounted = true
+    let isMounted = true;
 
     const fetchDoc = async () => {
-      dispatch({ type: 'loading_started' })
+      dispatch({ type: "loading_started" });
 
       try {
         const doc = await pouch.get<Document>(id, {
@@ -85,58 +87,58 @@ export default function useDoc<Content extends {}>(
           attachments,
           binary,
           latest,
-        })
+        });
 
         if (isMounted) {
           dispatch({
-            type: 'loading_finished',
+            type: "loading_finished",
             payload: { doc },
-          })
+          });
         }
       } catch (err) {
         if (isMounted) {
           dispatch({
-            type: 'loading_error',
+            type: "loading_error",
             payload: {
               error: err as PouchDB.Core.Error,
               setResult: true,
               result: getInitialValueRef.current(),
             },
-          })
+          });
         }
       }
-    }
+    };
 
-    fetchDoc()
+    fetchDoc();
 
     // Use the changes feed to get updates to the document
     const unsubscribe =
       rev && !latest // but don't subscribe if a specific rev is requested.
         ? () => {
-            return
+            return;
           }
         : subscriptionManager.subscribeToDocs([id], (deleted, _id, doc) => {
-            if (!isMounted) return
+            if (!isMounted) return;
 
             // If the document got deleted it should change to an 404 error state
             // or if there is a conflicting version, then it should show the new winning one.
             if (deleted || revs || revs_info || conflicts || attachments) {
-              fetchDoc()
+              fetchDoc();
             } else {
               dispatch({
-                type: 'loading_finished',
+                type: "loading_finished",
                 payload: {
                   doc: doc as unknown as PouchDB.Core.Document<Content> &
                     PouchDB.Core.GetMeta,
                 },
-              })
+              });
             }
-          })
+          });
 
     return () => {
-      isMounted = false
-      unsubscribe()
-    }
+      isMounted = false;
+      unsubscribe();
+    };
   }, [
     dispatch,
     pouch,
@@ -149,7 +151,7 @@ export default function useDoc<Content extends {}>(
     attachments,
     binary,
     latest,
-  ])
+  ]);
 
-  return state
+  return state;
 }

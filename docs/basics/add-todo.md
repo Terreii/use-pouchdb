@@ -8,28 +8,28 @@ database. We are going to use the [`usePouch`](../api/use-pouch.md) hook for thi
 
 ```jsx
 // AddTodo.js
-import React, { useState } from 'react'
-import { usePouch } from 'use-pouchdb'
+import React, { useState } from "react";
+import { usePouch } from "use-pouchdb";
 
 export default function AddTodo() {
-  const db = usePouch() // get the database
+  const db = usePouch(); // get the database
 
-  const [input, setInput] = useState('')
+  const [input, setInput] = useState("");
 
-  const handleAddTodo = async event => {
-    event.preventDefault()
+  const handleAddTodo = async (event) => {
+    event.preventDefault();
 
     const doc = {
       _id: new Date().toJSON(), // give the document a unique id
-      type: 'todo',
+      type: "todo",
       text: input,
       done: false,
-    }
+    };
 
-    await db.put(doc) // put the new document into the database
+    await db.put(doc); // put the new document into the database
 
-    setInput('')
-  }
+    setInput("");
+  };
 
   return (
     <form onSubmit={handleAddTodo}>
@@ -37,14 +37,14 @@ export default function AddTodo() {
         type="text"
         value={input}
         minLength="1"
-        onChange={event => {
-          setInput(event.target.value)
+        onChange={(event) => {
+          setInput(event.target.value);
         }}
       />
 
       <button>Add Todo</button>
     </form>
-  )
+  );
 }
 ```
 

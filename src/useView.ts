@@ -1,10 +1,10 @@
-import { useEffect, useRef } from 'react'
-import { MISSING_DOC } from 'pouchdb-errors'
+import { useEffect, useRef } from "react";
+import { MISSING_DOC } from "pouchdb-errors";
 
-import { useContext } from './context'
-import type SubscriptionManager from './subscription'
-import useStateMachine, { ResultType, Dispatch } from './state-machine'
-import { useDeepMemo, CommonOptions } from './utils'
+import { useContext } from "./context";
+import type SubscriptionManager from "./subscription";
+import useStateMachine, { ResultType, Dispatch } from "./state-machine";
+import { useDeepMemo, CommonOptions } from "./utils";
 
 /* typescript-eslint-disable @typescript-eslint/ban-types */
 type ViewResponseBase<Result extends {}> = PouchDB.Query.Response<Result> & {
@@ -12,10 +12,10 @@ type ViewResponseBase<Result extends {}> = PouchDB.Query.Response<Result> & {
    * Include an update_seq value indicating which sequence id of the underlying database the view
    * reflects.
    */
-  update_seq?: number | string
-}
+  update_seq?: number | string;
+};
 
-export type ViewResponse<T extends {}> = ResultType<ViewResponseBase<T>>
+export type ViewResponse<T extends {}> = ResultType<ViewResponseBase<T>>;
 
 /**
  * Query a view and subscribe to its updates.
@@ -25,22 +25,22 @@ export type ViewResponse<T extends {}> = ResultType<ViewResponseBase<T>>
 export default function useView<
   Content extends {},
   Result extends {},
-  Model extends {} = Content
+  Model extends {} = Content,
 >(
   fun: string | PouchDB.Map<Model, Result> | PouchDB.Filter<Model, Result>,
   opts?: PouchDB.Query.Options<Model, Result> & {
-    update_seq?: boolean
-  } & CommonOptions
+    update_seq?: boolean;
+  } & CommonOptions,
 ): ViewResponse<Result> {
-  const { pouchdb: pouch, subscriptionManager } = useContext(opts?.db)
+  const { pouchdb: pouch, subscriptionManager } = useContext(opts?.db);
 
-  if (typeof pouch?.query !== 'function') {
+  if (typeof pouch?.query !== "function") {
     throw new TypeError(
-      'db.query() is not defined. Please install "pouchdb-mapreduce"'
-    )
+      'db.query() is not defined. Please install "pouchdb-mapreduce"',
+    );
   }
 
-  const lastView = useRef<string | null>(null)
+  const lastView = useRef<string | null>(null);
 
   const {
     reduce,
@@ -56,18 +56,18 @@ export default function useView<
     group_level,
     update_seq,
     stale,
-  } = opts || {}
+  } = opts || {};
 
-  const startkey = useDeepMemo(opts?.startkey)
-  const endkey = useDeepMemo(opts?.endkey)
-  const key = useDeepMemo(opts?.key)
-  const keys = useDeepMemo(opts?.keys)
+  const startkey = useDeepMemo(opts?.startkey);
+  const endkey = useDeepMemo(opts?.endkey);
+  const key = useDeepMemo(opts?.key);
+  const keys = useDeepMemo(opts?.keys);
 
   const [state, dispatch] = useStateMachine<ViewResponseBase<Result>>(() => ({
     rows: [],
     total_rows: 0,
     offset: 0,
-  }))
+  }));
 
   useEffect(() => {
     const options = {
@@ -90,19 +90,19 @@ export default function useView<
       // only add the stale option if the view is not the same as last request.
       // Because the view is already upto date.
       stale: lastView.current === fun ? undefined : stale,
-    }
+    };
 
-    if (typeof fun === 'string') {
-      lastView.current = fun
-      return doDDocQuery(dispatch, pouch, subscriptionManager, fun, options)
+    if (typeof fun === "string") {
+      lastView.current = fun;
+      return doDDocQuery(dispatch, pouch, subscriptionManager, fun, options);
     } else {
       return doTemporaryQuery(
         dispatch,
         pouch,
         subscriptionManager,
         fun,
-        options
-      )
+        options,
+      );
     }
   }, [
     dispatch,
@@ -126,9 +126,9 @@ export default function useView<
     group_level,
     update_seq,
     stale,
-  ])
+  ]);
 
-  return state
+  return state;
 }
 
 /**
@@ -142,23 +142,23 @@ export default function useView<
  */
 function doDDocQuery<
   Model extends Record<string, unknown>,
-  Result extends Record<string, unknown>
+  Result extends Record<string, unknown>,
 >(
   dispatch: Dispatch<PouchDB.Query.Response<Result>>,
   pouch: PouchDB.Database<Record<string, unknown>>,
   subscriptionManager: SubscriptionManager,
   fn: string,
-  option?: PouchDB.Query.Options<Model, Result>
+  option?: PouchDB.Query.Options<Model, Result>,
 ): () => void {
-  let isMounted = true
-  let isFetching = false // A query is underway.
-  let shouldUpdateAfter = false // A relevant update did happen while fetching.
-  let isReduce = Boolean(option?.reduce)
+  let isMounted = true;
+  let isFetching = false; // A query is underway.
+  let shouldUpdateAfter = false; // A relevant update did happen while fetching.
+  let isReduce = Boolean(option?.reduce);
 
-  let unsubscribeFromDocs: (() => void) | null = null
+  let unsubscribeFromDocs: (() => void) | null = null;
 
-  let lastResultIds = new Set<PouchDB.Core.DocumentId>()
-  const id = '_design/' + fn.split('/')[0]
+  let lastResultIds = new Set<PouchDB.Core.DocumentId>();
+  const id = "_design/" + fn.split("/")[0];
 
   // Subscribe to updates of documents that where returned in the last query,
   // and the design doc.
@@ -166,18 +166,18 @@ function doDDocQuery<
   // which removes them from the view.
   const createDocSubscription = (ids: string[]) => {
     if (unsubscribeFromDocs != null) {
-      unsubscribeFromDocs()
+      unsubscribeFromDocs();
     }
 
     unsubscribeFromDocs = subscriptionManager.subscribeToDocs(
       // when reduce listen to all doc changes. Because reduce doesn't have ids in the result.
       isReduce ? null : ids,
       (deleted, docId) => {
-        if (!isMounted) return
+        if (!isMounted) return;
 
         if (docId === id && deleted) {
           dispatch({
-            type: 'loading_error',
+            type: "loading_error",
             payload: {
               error: MISSING_DOC,
               setResult: true,
@@ -187,93 +187,93 @@ function doDDocQuery<
                 offset: 0,
               },
             },
-          })
+          });
         } else {
-          query()
+          query();
         }
-      }
-    )
-  }
+      },
+    );
+  };
 
   // Does the query.
   // It updates the state only if this function is still active.
   const query = async () => {
     if (isFetching) {
-      shouldUpdateAfter = true
-      return
+      shouldUpdateAfter = true;
+      return;
     }
-    isFetching = true
-    shouldUpdateAfter = false
-    dispatch({ type: 'loading_started' })
+    isFetching = true;
+    shouldUpdateAfter = false;
+    dispatch({ type: "loading_started" });
 
     try {
-      const result = await pouch.query(fn, option)
-      if (!isMounted) return
+      const result = await pouch.query(fn, option);
+      if (!isMounted) return;
 
       dispatch({
-        type: 'loading_finished',
+        type: "loading_finished",
         payload: result,
-      })
+      });
 
-      const ids = new Set<PouchDB.Core.DocumentId>()
+      const ids = new Set<PouchDB.Core.DocumentId>();
       for (const row of result.rows) {
         if (row.id != null) {
-          ids.add(row.id)
+          ids.add(row.id);
         }
       }
-      lastResultIds = ids
+      lastResultIds = ids;
       // Reduce doesn't return ids. Only keys and values.
       // Checked because the reduce option defaults to true.
-      const isThisReduced = ids.size === 0 && result.rows.length > 0
+      const isThisReduced = ids.size === 0 && result.rows.length > 0;
 
       if (!isReduce || isReduce !== isThisReduced) {
-        isReduce = isThisReduced
-        ids.add(id)
-        createDocSubscription(Array.from(ids))
+        isReduce = isThisReduced;
+        ids.add(id);
+        createDocSubscription(Array.from(ids));
       }
     } catch (error) {
       if (isMounted) {
         dispatch({
-          type: 'loading_error',
+          type: "loading_error",
           payload: {
             error: error as PouchDB.Core.Error,
             setResult: false,
           },
-        })
+        });
       }
     } finally {
       if (isMounted) {
         // refresh if change did happen while querying
-        isFetching = false
+        isFetching = false;
         if (option?.stale) {
           // future queries shouldn't be stale
-          delete option.stale
-          query()
+          delete option.stale;
+          query();
         } else if (shouldUpdateAfter) {
-          query()
+          query();
         }
       }
     }
-  }
+  };
 
-  query()
-  createDocSubscription([id])
+  query();
+  createDocSubscription([id]);
 
   // Subscribe to new entries in the view.
-  const unsubscribe = subscriptionManager.subscribeToView(fn, id => {
+  const unsubscribe = subscriptionManager.subscribeToView(fn, (id) => {
     if (isMounted && !isReduce && !lastResultIds.has(id)) {
-      query()
+      query();
     }
-  })
+  });
 
   return () => {
-    isMounted = false
-    unsubscribe()
+    isMounted = false;
+    unsubscribe();
 
     if (unsubscribeFromDocs) {
-      unsubscribeFromDocs()
+      unsubscribeFromDocs();
     }
-  }
+  };
 }
 
 /**
@@ -287,80 +287,80 @@ function doDDocQuery<
  */
 function doTemporaryQuery<
   Model extends Record<string, unknown>,
-  Result extends Record<string, unknown>
+  Result extends Record<string, unknown>,
 >(
   dispatch: Dispatch<PouchDB.Query.Response<Result>>,
   pouch: PouchDB.Database<Record<string, unknown>>,
   subscriptionManager: SubscriptionManager,
   fn: PouchDB.Map<Model, Result> | PouchDB.Filter<Model, Result>,
-  option?: PouchDB.Query.Options<Model, Result>
+  option?: PouchDB.Query.Options<Model, Result>,
 ): () => void {
-  let isMounted = true
-  let isFetching = false // A query is underway.
-  let shouldUpdateAfter = false // A relevant update did happen while fetching.
+  let isMounted = true;
+  let isFetching = false; // A query is underway.
+  let shouldUpdateAfter = false; // A relevant update did happen while fetching.
   const isReduce =
-    typeof option?.reduce === 'string' ||
-    (option?.reduce !== false && typeof fn === 'object' && Boolean(fn.reduce))
-  let resultIds: Set<PouchDB.Core.DocumentId | null> | null = null
+    typeof option?.reduce === "string" ||
+    (option?.reduce !== false && typeof fn === "object" && Boolean(fn.reduce));
+  let resultIds: Set<PouchDB.Core.DocumentId | null> | null = null;
 
   // Does the query.
   // It updates the state only if this function is still active.
   const query = async () => {
     if (isFetching) {
-      shouldUpdateAfter = true
-      return
+      shouldUpdateAfter = true;
+      return;
     }
-    isFetching = true
-    shouldUpdateAfter = false
-    dispatch({ type: 'loading_started' })
+    isFetching = true;
+    shouldUpdateAfter = false;
+    dispatch({ type: "loading_started" });
 
     try {
-      const result = await pouch.query(fn, option)
-      if (!isMounted) return
+      const result = await pouch.query(fn, option);
+      if (!isMounted) return;
 
       dispatch({
-        type: 'loading_finished',
+        type: "loading_finished",
         payload: result,
-      })
+      });
 
-      const ids = new Set<PouchDB.Core.DocumentId | null>()
+      const ids = new Set<PouchDB.Core.DocumentId | null>();
       for (const row of result.rows) {
         if (row.id != null) {
-          ids.add(row.id)
+          ids.add(row.id);
         }
       }
       if (ids.size === 0) {
-        resultIds = null
+        resultIds = null;
       } else {
-        resultIds = ids
+        resultIds = ids;
       }
     } catch (error) {
       if (isMounted) {
         dispatch({
-          type: 'loading_error',
+          type: "loading_error",
           payload: {
             error: error as PouchDB.Core.Error,
             setResult: false,
           },
-        })
+        });
       }
     } finally {
       // refresh if change did happen while querying
-      isFetching = false
+      isFetching = false;
       if (shouldUpdateAfter && isMounted) {
-        query()
+        query();
       }
     }
-  }
+  };
 
-  query()
+  query();
 
-  let viewFunction: PouchDB.Map<Model, Result>
+  let viewFunction: PouchDB.Map<Model, Result>;
 
-  if (typeof fn === 'function') {
-    viewFunction = fn
-  } else if (typeof fn === 'object' && typeof fn.map === 'function') {
-    viewFunction = fn.map
+  if (typeof fn === "function") {
+    viewFunction = fn;
+  } else if (typeof fn === "object" && typeof fn.map === "function") {
+    viewFunction = fn.map;
   }
 
   // Subscribe to updates of the view.
@@ -368,30 +368,30 @@ function doTemporaryQuery<
     null,
     (_deleted, id, doc) => {
       if (isReduce) {
-        query()
-        return
+        query();
+        return;
       }
       try {
-        let isDocInView = false
+        let isDocInView = false;
         if (doc) {
           viewFunction(doc, () => {
-            isDocInView = true
-          })
+            isDocInView = true;
+          });
         }
 
         // Also check if one of the result documents did update in a way,
         // that removes it from the view.
         if (isDocInView || resultIds?.has(id)) {
-          query()
+          query();
         }
       } catch (err) {
-        console.error(err)
+        console.error(err);
       }
-    }
-  )
+    },
+  );
 
   return () => {
-    isMounted = false
-    unsubscribe()
-  }
+    isMounted = false;
+    unsubscribe();
+  };
 }

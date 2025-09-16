@@ -1,31 +1,31 @@
-import PouchDB from 'pouchdb-core'
-import memory from 'pouchdb-adapter-memory'
+import PouchDB from "pouchdb-core";
+import memory from "pouchdb-adapter-memory";
 
-import { renderHook, renderHookWithMultiDbContext } from './test-utils'
-import usePouch from './usePouch'
+import { renderHook, renderHookWithMultiDbContext } from "./test-utils";
+import usePouch from "./usePouch";
 
-PouchDB.plugin(memory)
+PouchDB.plugin(memory);
 
-let myPouch: PouchDB.Database
+let myPouch: PouchDB.Database;
 
 beforeEach(() => {
-  myPouch = new PouchDB('test', { adapter: 'memory' })
-})
+  myPouch = new PouchDB("test", { adapter: "memory" });
+});
 
 afterEach(async () => {
-  await myPouch.destroy()
-})
+  await myPouch.destroy();
+});
 
-test('should return the pouchdb from the provider', () => {
+test("should return the pouchdb from the provider", () => {
   const { result } = renderHook(() => usePouch(), {
     pouchdb: myPouch,
-  })
+  });
 
-  expect(result.current).toBe(myPouch)
-})
+  expect(result.current).toBe(myPouch);
+});
 
-test('should support the selection of a database in the context to be used', async () => {
-  const other = new PouchDB('other', { adapter: 'memory' })
+test("should support the selection of a database in the context to be used", async () => {
+  const other = new PouchDB("other", { adapter: "memory" });
 
   const { result, rerender } = renderHookWithMultiDbContext(
     (name?: string) => usePouch(name),
@@ -33,26 +33,26 @@ test('should support the selection of a database in the context to be used', asy
       initialProps: undefined,
       main: myPouch,
       other,
-    }
-  )
+    },
+  );
 
   // No db selection
-  expect(result.current).toBe(myPouch)
+  expect(result.current).toBe(myPouch);
 
   // selecting a database that is not the default
-  rerender('other')
-  expect(result.current).toBe(other)
+  rerender("other");
+  expect(result.current).toBe(other);
 
   // selecting the default db by it's name
-  rerender('main')
-  expect(result.current).toBe(myPouch)
+  rerender("main");
+  expect(result.current).toBe(myPouch);
 
   // reset to other db
-  rerender('other')
+  rerender("other");
 
   // selecting by special _default key
-  rerender('_default')
-  expect(result.current).toBe(myPouch)
+  rerender("_default");
+  expect(result.current).toBe(myPouch);
 
-  await other.destroy()
-})
+  await other.destroy();
+});

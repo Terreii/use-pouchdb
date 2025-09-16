@@ -1,258 +1,258 @@
-import { clone } from 'pouchdb-utils'
+import { clone } from "pouchdb-utils";
 
 export type DocsCallback<T extends {}> = (
   deleted: boolean,
   id: PouchDB.Core.DocumentId,
-  doc?: PouchDB.Core.Document<T>
-) => void
+  doc?: PouchDB.Core.Document<T>,
+) => void;
 
 interface DocsSubscription {
-  changesFeed: PouchDB.Core.Changes<{}>
-  all: Set<DocsCallback<{}>>
-  ids: Map<PouchDB.Core.DocumentId, Set<DocsCallback<{}>>>
+  changesFeed: PouchDB.Core.Changes<{}>;
+  all: Set<DocsCallback<{}>>;
+  ids: Map<PouchDB.Core.DocumentId, Set<DocsCallback<{}>>>;
 }
 
-export type ViewCallback = (id: PouchDB.Core.DocumentId) => void
+export type ViewCallback = (id: PouchDB.Core.DocumentId) => void;
 export type subscribeToView = (
   fun: string,
-  callback: ViewCallback
-) => () => void
+  callback: ViewCallback,
+) => () => void;
 
 interface SubscriptionToAView {
-  feed: PouchDB.Core.Changes<{}>
-  callbacks: Set<ViewCallback>
+  feed: PouchDB.Core.Changes<{}>;
+  callbacks: Set<ViewCallback>;
 }
 export type subscribeToDocs = <T extends {}>(
   ids: PouchDB.Core.DocumentId[] | null,
-  callback: DocsCallback<T>
-) => () => void
+  callback: DocsCallback<T>,
+) => () => void;
 
 export default class SubscriptionManager {
-  #pouch: PouchDB.Database
-  #destroyListener: () => void
+  #pouch: PouchDB.Database;
+  #destroyListener: () => void;
 
-  #docsSubscription: DocsSubscription | null = null
-  #viewsSubscription = new Map<string, SubscriptionToAView>()
+  #docsSubscription: DocsSubscription | null = null;
+  #viewsSubscription = new Map<string, SubscriptionToAView>();
 
-  #didUnsubscribeAll = false
+  #didUnsubscribeAll = false;
 
   constructor(pouch: PouchDB.Database) {
-    this.#pouch = pouch
+    this.#pouch = pouch;
     this.#destroyListener = () => {
-      this.unsubscribeAll()
-    }
-    pouch.once('destroyed', this.#destroyListener)
+      this.unsubscribeAll();
+    };
+    pouch.once("destroyed", this.#destroyListener);
   }
 
   subscribeToDocs<T extends {}>(
     ids: PouchDB.Core.DocumentId[] | null,
-    callback: DocsCallback<T>
+    callback: DocsCallback<T>,
   ): () => void {
     if (this.#didUnsubscribeAll) {
       return () => {
-        return
-      }
+        return;
+      };
     }
 
     if (this.#docsSubscription == null) {
-      this.#docsSubscription = createDocSubscription(this.#pouch)
+      this.#docsSubscription = createDocSubscription(this.#pouch);
     }
 
-    const isIds = Array.isArray(ids) && ids.length > 0
+    const isIds = Array.isArray(ids) && ids.length > 0;
 
     if (isIds) {
       for (const id of ids ?? []) {
         if (this.#docsSubscription.ids.has(id)) {
-          this.#docsSubscription.ids.get(id)?.add(callback as DocsCallback<{}>)
+          this.#docsSubscription.ids.get(id)?.add(callback as DocsCallback<{}>);
         } else {
-          const set: Set<DocsCallback<{}>> = new Set()
-          set.add(callback as DocsCallback<{}>)
-          this.#docsSubscription.ids.set(id, set)
+          const set: Set<DocsCallback<{}>> = new Set();
+          set.add(callback as DocsCallback<{}>);
+          this.#docsSubscription.ids.set(id, set);
         }
       }
     } else {
-      this.#docsSubscription.all.add(callback as DocsCallback<{}>)
+      this.#docsSubscription.all.add(callback as DocsCallback<{}>);
     }
 
-    let didUnsubscribe = false
+    let didUnsubscribe = false;
     return () => {
-      if (didUnsubscribe || this.#didUnsubscribeAll) return
-      didUnsubscribe = true
+      if (didUnsubscribe || this.#didUnsubscribeAll) return;
+      didUnsubscribe = true;
 
       if (isIds) {
         for (const id of ids ?? []) {
-          const set = this.#docsSubscription?.ids.get(id)
-          set?.delete(callback as DocsCallback<{}>)
+          const set = this.#docsSubscription?.ids.get(id);
+          set?.delete(callback as DocsCallback<{}>);
 
           if (set?.size === 0) {
-            this.#docsSubscription?.ids.delete(id)
+            this.#docsSubscription?.ids.delete(id);
           }
         }
       } else {
-        this.#docsSubscription?.all.delete(callback as DocsCallback<{}>)
+        this.#docsSubscription?.all.delete(callback as DocsCallback<{}>);
       }
 
       if (
         this.#docsSubscription?.all.size === 0 &&
         this.#docsSubscription.ids.size === 0
       ) {
-        this.#docsSubscription.changesFeed.cancel()
-        this.#docsSubscription = null
+        this.#docsSubscription.changesFeed.cancel();
+        this.#docsSubscription = null;
       }
-    }
+    };
   }
 
   subscribeToView(fun: string, callback: ViewCallback): () => void {
     if (this.#didUnsubscribeAll) {
       return () => {
-        return
-      }
+        return;
+      };
     }
 
-    let subscription: SubscriptionToAView
+    let subscription: SubscriptionToAView;
 
     if (this.#viewsSubscription.has(fun)) {
-      subscription = this.#viewsSubscription.get(fun) as SubscriptionToAView
+      subscription = this.#viewsSubscription.get(fun) as SubscriptionToAView;
     } else {
-      subscription = subscribeToView(this.#pouch, fun)
-      this.#viewsSubscription.set(fun, subscription)
+      subscription = subscribeToView(this.#pouch, fun);
+      this.#viewsSubscription.set(fun, subscription);
     }
 
-    subscription.callbacks.add(callback)
+    subscription.callbacks.add(callback);
 
-    let didUnsubscribe = false
+    let didUnsubscribe = false;
     return () => {
-      if (didUnsubscribe || this.#didUnsubscribeAll) return
-      didUnsubscribe = true
+      if (didUnsubscribe || this.#didUnsubscribeAll) return;
+      didUnsubscribe = true;
 
-      subscription.callbacks.delete(callback)
+      subscription.callbacks.delete(callback);
 
       if (subscription.callbacks.size === 0) {
-        subscription.feed.cancel()
-        this.#viewsSubscription.delete(fun)
+        subscription.feed.cancel();
+        this.#viewsSubscription.delete(fun);
       }
-    }
+    };
   }
 
   unsubscribeAll(): void {
-    if (this.#didUnsubscribeAll) return
-    this.#didUnsubscribeAll = true
+    if (this.#didUnsubscribeAll) return;
+    this.#didUnsubscribeAll = true;
 
-    this.#pouch.removeListener('destroyed', this.#destroyListener)
+    this.#pouch.removeListener("destroyed", this.#destroyListener);
 
     if (this.#docsSubscription) {
-      this.#docsSubscription.changesFeed.cancel()
-      this.#docsSubscription.all.clear()
-      this.#docsSubscription.ids.forEach(set => {
-        set.clear()
-      })
-      this.#docsSubscription.ids.clear()
+      this.#docsSubscription.changesFeed.cancel();
+      this.#docsSubscription.all.clear();
+      this.#docsSubscription.ids.forEach((set) => {
+        set.clear();
+      });
+      this.#docsSubscription.ids.clear();
     }
 
     for (const viewInfo of this.#viewsSubscription.values()) {
-      viewInfo.feed.cancel()
-      viewInfo.callbacks.clear()
+      viewInfo.feed.cancel();
+      viewInfo.callbacks.clear();
     }
-    this.#viewsSubscription.clear()
+    this.#viewsSubscription.clear();
   }
 }
 
 function createDocSubscription(pouch: PouchDB.Database): DocsSubscription {
-  let docsSubscription: DocsSubscription | null = null
+  let docsSubscription: DocsSubscription | null = null;
 
   const changesFeed = pouch
     .changes({
-      since: 'now',
+      since: "now",
       live: true,
     })
-    .on('change', change => {
-      const hasAll = (docsSubscription?.all.size ?? 0) > 0
-      const idSubscriptions = docsSubscription?.ids.get(change.id)
+    .on("change", (change) => {
+      const hasAll = (docsSubscription?.all.size ?? 0) > 0;
+      const idSubscriptions = docsSubscription?.ids.get(change.id);
 
       if (change.deleted) {
         if (hasAll && docsSubscription) {
-          notify(docsSubscription.all, true, change.id)
+          notify(docsSubscription.all, true, change.id);
         }
         if (idSubscriptions) {
-          notify(idSubscriptions, true, change.id)
+          notify(idSubscriptions, true, change.id);
         }
       } else {
         pouch
           .get(change.id)
-          .then(doc => {
+          .then((doc) => {
             if (hasAll && docsSubscription) {
               notify(
                 docsSubscription.all,
                 false,
                 change.id,
-                doc as unknown as PouchDB.Core.Document<{}>
-              )
+                doc as unknown as PouchDB.Core.Document<{}>,
+              );
             }
             if (idSubscriptions) {
               notify(
                 idSubscriptions,
                 false,
                 change.id,
-                doc as unknown as PouchDB.Core.Document<{}>
-              )
+                doc as unknown as PouchDB.Core.Document<{}>,
+              );
             }
           })
-          .catch(console.error)
+          .catch(console.error);
       }
-    })
+    });
 
   docsSubscription = {
     changesFeed,
     all: new Set(),
     ids: new Map(),
-  }
+  };
 
-  return docsSubscription
+  return docsSubscription;
 }
 
 function notify(
   set: Set<DocsCallback<{}>>,
   deleted: boolean,
   id: PouchDB.Core.DocumentId,
-  doc?: PouchDB.Core.Document<{}>
+  doc?: PouchDB.Core.Document<{}>,
 ) {
   for (const subscription of set) {
     try {
-      const document = doc ? clone(doc) : undefined
-      subscription(deleted, id, document)
+      const document = doc ? clone(doc) : undefined;
+      subscription(deleted, id, document);
     } catch (err) {
-      console.error(err)
+      console.error(err);
     }
   }
 }
 
 function subscribeToView(
   pouch: PouchDB.Database,
-  view: string
+  view: string,
 ): SubscriptionToAView {
-  let viewsSubscription: SubscriptionToAView | null = null
+  let viewsSubscription: SubscriptionToAView | null = null;
 
   const changesFeed = pouch
     .changes({
-      since: 'now',
+      since: "now",
       live: true,
-      filter: '_view',
+      filter: "_view",
       view,
     })
-    .on('change', change => {
+    .on("change", (change) => {
       for (const callback of viewsSubscription?.callbacks ?? []) {
         try {
-          callback(change.id)
+          callback(change.id);
         } catch (err) {
-          console.error(err)
+          console.error(err);
         }
       }
-    })
+    });
 
   viewsSubscription = {
     feed: changesFeed,
     callbacks: new Set(),
-  }
+  };
 
-  return viewsSubscription
+  return viewsSubscription;
 }

@@ -1,6 +1,6 @@
-import PouchDB from 'pouchdb-core'
-import memory from 'pouchdb-adapter-memory'
-import find from 'pouchdb-find'
+import PouchDB from "pouchdb-core";
+import memory from "pouchdb-adapter-memory";
+import find from "pouchdb-find";
 
 import {
   renderHook,
@@ -9,321 +9,321 @@ import {
   waitForLoadingChange,
   act,
   sleep,
-} from './test-utils'
-import useFind, { FindHookIndexOption } from './useFind'
+} from "./test-utils";
+import useFind, { FindHookIndexOption } from "./useFind";
 
-PouchDB.plugin(memory)
-PouchDB.plugin(find)
+PouchDB.plugin(memory);
+PouchDB.plugin(find);
 
-let myPouch: PouchDB.Database
+let myPouch: PouchDB.Database;
 
 beforeEach(() => {
-  myPouch = new PouchDB('test', { adapter: 'memory' })
-})
+  myPouch = new PouchDB("test", { adapter: "memory" });
+});
 
 afterEach(async () => {
-  await myPouch.destroy()
-})
+  await myPouch.destroy();
+});
 
 function createDocs() {
   return myPouch.bulkDocs([
     {
-      _id: 'TOS',
-      name: 'The Original Series',
-      captain: 'James T. Kirk',
+      _id: "TOS",
+      name: "The Original Series",
+      captain: "James T. Kirk",
       aired: 1966,
     },
     {
-      _id: 'TNG',
-      name: 'The Next Generation',
-      captain: 'Jean-Luc Picard',
+      _id: "TNG",
+      name: "The Next Generation",
+      captain: "Jean-Luc Picard",
       aired: 1987,
     },
     {
-      _id: 'DS9',
-      name: 'Deep Space Nine',
-      captain: 'Benjamin Sisko',
+      _id: "DS9",
+      name: "Deep Space Nine",
+      captain: "Benjamin Sisko",
       aired: 1993,
     },
-    { _id: 'VOY', name: 'Voyager', captain: 'Kathryn Janeway', aired: 1995 },
-    { _id: 'ENT', name: 'Enterprise', captain: 'Jonathan Archer', aired: 2001 },
-  ])
+    { _id: "VOY", name: "Voyager", captain: "Kathryn Janeway", aired: 1995 },
+    { _id: "ENT", name: "Enterprise", captain: "Jonathan Archer", aired: 2001 },
+  ]);
 }
 
-describe('by id', () => {
-  test('should return docs sorted by _id', async () => {
-    await createDocs()
+describe("by id", () => {
+  test("should return docs sorted by _id", async () => {
+    await createDocs();
 
     const { result } = renderHook(
       () =>
         useFind({
-          selector: { _id: { $gte: 'DS9' } },
-          sort: ['_id'],
+          selector: { _id: { $gte: "DS9" } },
+          sort: ["_id"],
         }),
       {
         pouchdb: myPouch,
-      }
-    )
+      },
+    );
 
-    expect(result.current.docs).toEqual([])
-    expect(result.current.warning).toBeFalsy()
-    expect(result.current.loading).toBeTruthy()
-    expect(result.current.state).toBe('loading')
-    expect(result.current.error).toBeNull()
+    expect(result.current.docs).toEqual([]);
+    expect(result.current.warning).toBeFalsy();
+    expect(result.current.loading).toBeTruthy();
+    expect(result.current.state).toBe("loading");
+    expect(result.current.error).toBeNull();
 
-    await waitForLoadingChange(result, false)
+    await waitForLoadingChange(result, false);
 
     expect(result.current.docs).toEqual([
       {
-        _id: 'DS9',
+        _id: "DS9",
         _rev: expect.anything(),
-        name: 'Deep Space Nine',
-        captain: 'Benjamin Sisko',
+        name: "Deep Space Nine",
+        captain: "Benjamin Sisko",
         aired: 1993,
       },
       {
-        _id: 'ENT',
+        _id: "ENT",
         _rev: expect.anything(),
-        name: 'Enterprise',
-        captain: 'Jonathan Archer',
+        name: "Enterprise",
+        captain: "Jonathan Archer",
         aired: 2001,
       },
       {
-        _id: 'TNG',
+        _id: "TNG",
         _rev: expect.anything(),
-        name: 'The Next Generation',
-        captain: 'Jean-Luc Picard',
+        name: "The Next Generation",
+        captain: "Jean-Luc Picard",
         aired: 1987,
       },
       {
-        _id: 'TOS',
+        _id: "TOS",
         _rev: expect.anything(),
-        name: 'The Original Series',
-        captain: 'James T. Kirk',
+        name: "The Original Series",
+        captain: "James T. Kirk",
         aired: 1966,
       },
       {
-        _id: 'VOY',
+        _id: "VOY",
         _rev: expect.anything(),
-        name: 'Voyager',
-        captain: 'Kathryn Janeway',
+        name: "Voyager",
+        captain: "Kathryn Janeway",
         aired: 1995,
       },
-    ])
-    expect(result.current.warning).toBeFalsy()
-    expect(result.current.loading).toBeFalsy()
-    expect(result.current.state).toBe('done')
-    expect(result.current.error).toBeNull()
-  })
+    ]);
+    expect(result.current.warning).toBeFalsy();
+    expect(result.current.loading).toBeFalsy();
+    expect(result.current.state).toBe("done");
+    expect(result.current.error).toBeNull();
+  });
 
-  test('should subscribe to changes', async () => {
-    await createDocs()
+  test("should subscribe to changes", async () => {
+    await createDocs();
 
     const { result } = renderHook(
       () =>
         useFind({
-          selector: { _id: { $gte: 'DS9' } },
-          sort: ['_id'],
+          selector: { _id: { $gte: "DS9" } },
+          sort: ["_id"],
         }),
       {
         pouchdb: myPouch,
-      }
-    )
+      },
+    );
 
-    await waitForLoadingChange(result, false)
+    await waitForLoadingChange(result, false);
 
-    expect(result.current.docs).toHaveLength(5)
-    expect(result.current.loading).toBeFalsy()
-
-    act(() => {
-      myPouch.put({
-        _id: 'AA',
-        other: 'value',
-      })
-    })
-
-    await sleep(10)
-    expect(result.current.loading).toBeFalsy()
-    expect(result.current.docs).toHaveLength(5)
+    expect(result.current.docs).toHaveLength(5);
+    expect(result.current.loading).toBeFalsy();
 
     act(() => {
       myPouch.put({
-        _id: 'zzz',
+        _id: "AA",
+        other: "value",
+      });
+    });
+
+    await sleep(10);
+    expect(result.current.loading).toBeFalsy();
+    expect(result.current.docs).toHaveLength(5);
+
+    act(() => {
+      myPouch.put({
+        _id: "zzz",
         moar: 42,
-      })
-    })
+      });
+    });
 
-    await waitForLoadingChange(result, false)
-    await waitForNextUpdate(result)
+    await waitForLoadingChange(result, false);
+    await waitForNextUpdate(result);
 
-    expect(result.current.docs).toHaveLength(6)
-  })
+    expect(result.current.docs).toHaveLength(6);
+  });
 
-  test('should re-query if a change did happen while a query is underway', async () => {
-    await createDocs()
+  test("should re-query if a change did happen while a query is underway", async () => {
+    await createDocs();
 
     const { result } = renderHook(
       () =>
         useFind({
-          selector: { _id: { $gte: 'DS9' } },
-          sort: ['_id'],
+          selector: { _id: { $gte: "DS9" } },
+          sort: ["_id"],
         }),
       {
         pouchdb: myPouch,
-      }
-    )
+      },
+    );
 
-    await waitForLoadingChange(result, false)
+    await waitForLoadingChange(result, false);
 
-    expect(result.current.docs).toHaveLength(5)
-    expect(result.current.loading).toBeFalsy()
+    expect(result.current.docs).toHaveLength(5);
+    expect(result.current.loading).toBeFalsy();
 
     act(() => {
       myPouch.put({
-        _id: 'Jolly Roger',
-        captain: 'Hook',
-      })
-    })
+        _id: "Jolly Roger",
+        captain: "Hook",
+      });
+    });
 
     act(() => {
-      myPouch.put({ _id: 'test', captain: 'Ching Shih (石陽)' })
-    })
+      myPouch.put({ _id: "test", captain: "Ching Shih (石陽)" });
+    });
 
-    await waitForNextUpdate(result)
+    await waitForNextUpdate(result);
 
-    await waitForLoadingChange(result, false)
+    await waitForLoadingChange(result, false);
 
-    expect(result.current.loading).toBeFalsy()
-    expect(result.current.docs).toHaveLength(7)
-  })
+    expect(result.current.loading).toBeFalsy();
+    expect(result.current.docs).toHaveLength(7);
+  });
 
-  test('should handle the deletion of docs in the result', async () => {
-    await createDocs()
+  test("should handle the deletion of docs in the result", async () => {
+    await createDocs();
 
     const { result } = renderHook(
       () =>
         useFind({
-          selector: { _id: { $gte: 'DS9' } },
-          sort: ['_id'],
+          selector: { _id: { $gte: "DS9" } },
+          sort: ["_id"],
         }),
       {
         pouchdb: myPouch,
-      }
-    )
+      },
+    );
 
-    await waitForLoadingChange(result, false)
+    await waitForLoadingChange(result, false);
 
-    expect(result.current.docs).toHaveLength(5)
-    expect(result.current.loading).toBeFalsy()
+    expect(result.current.docs).toHaveLength(5);
+    expect(result.current.loading).toBeFalsy();
 
-    const doc = await myPouch.get('TOS')
+    const doc = await myPouch.get("TOS");
     act(() => {
-      myPouch.remove(doc._id, doc._rev)
-    })
+      myPouch.remove(doc._id, doc._rev);
+    });
 
-    await waitForLoadingChange(result, false)
-    await waitForNextUpdate(result)
+    await waitForLoadingChange(result, false);
+    await waitForNextUpdate(result);
 
-    expect(result.current.docs).toHaveLength(4)
-    expect(result.current.loading).toBeFalsy()
-  })
+    expect(result.current.docs).toHaveLength(4);
+    expect(result.current.loading).toBeFalsy();
+  });
 
   test("shouldn't re-query if a document not in the result gets deleted", async () => {
-    await createDocs()
+    await createDocs();
 
-    const docToDelete = await myPouch.put({ _id: 'AA', other: 42 })
+    const docToDelete = await myPouch.put({ _id: "AA", other: 42 });
 
     const { result } = renderHook(
       () =>
         useFind({
-          selector: { _id: { $gte: 'DS9' } },
-          sort: ['_id'],
+          selector: { _id: { $gte: "DS9" } },
+          sort: ["_id"],
         }),
       {
         pouchdb: myPouch,
-      }
-    )
+      },
+    );
 
-    await waitForLoadingChange(result, false)
+    await waitForLoadingChange(result, false);
 
-    expect(result.current.docs).toHaveLength(5)
-    expect(result.current.loading).toBeFalsy()
+    expect(result.current.docs).toHaveLength(5);
+    expect(result.current.loading).toBeFalsy();
 
-    const current = result.current
+    const current = result.current;
     act(() => {
-      myPouch.remove(docToDelete.id, docToDelete.rev)
-    })
+      myPouch.remove(docToDelete.id, docToDelete.rev);
+    });
 
-    await waitForLoadingChange(result, false)
-    expect(result.current.docs).toHaveLength(5)
-    expect(result.current).toBe(current)
-  })
+    await waitForLoadingChange(result, false);
+    expect(result.current.docs).toHaveLength(5);
+    expect(result.current).toBe(current);
+  });
 
-  test('should re-query when the selector changes', async () => {
-    await createDocs()
+  test("should re-query when the selector changes", async () => {
+    await createDocs();
 
     const { result, rerender } = renderHook(
       (id: string) =>
         useFind({
           selector: { _id: { $gte: id } },
-          sort: ['_id'],
+          sort: ["_id"],
         }),
       {
-        initialProps: 'DS9',
+        initialProps: "DS9",
         pouchdb: myPouch,
-      }
-    )
+      },
+    );
 
-    await waitForNextUpdate(result)
+    await waitForNextUpdate(result);
 
-    expect(result.current.docs).toHaveLength(5)
+    expect(result.current.docs).toHaveLength(5);
 
-    rerender('ENT')
+    rerender("ENT");
 
-    expect(result.current.loading).toBeTruthy()
+    expect(result.current.loading).toBeTruthy();
 
-    await waitForNextUpdate(result)
+    await waitForNextUpdate(result);
 
-    expect(result.current.docs).toHaveLength(4)
-  })
+    expect(result.current.docs).toHaveLength(4);
+  });
 
   test("shouldn't re-query when the selector changes, but not it's value", async () => {
-    await createDocs()
+    await createDocs();
 
     const { result, rerender } = renderHook(
       (selector: PouchDB.Find.Selector) =>
         useFind({
           selector,
-          sort: ['_id'],
+          sort: ["_id"],
         }),
       {
-        initialProps: { _id: { $gte: 'DS9' } },
+        initialProps: { _id: { $gte: "DS9" } },
         pouchdb: myPouch,
-      }
-    )
+      },
+    );
 
-    await waitForNextUpdate(result)
+    await waitForNextUpdate(result);
 
-    expect(result.current.docs).toHaveLength(5)
+    expect(result.current.docs).toHaveLength(5);
 
-    const current = result.current
-    rerender({ _id: { $gte: 'DS9' } })
+    const current = result.current;
+    rerender({ _id: { $gte: "DS9" } });
 
-    await waitForLoadingChange(result, false)
-    expect(result.current.docs).toHaveLength(5)
-    expect(result.current).toBe(current)
-  })
-})
+    await waitForLoadingChange(result, false);
+    expect(result.current.docs).toHaveLength(5);
+    expect(result.current).toBe(current);
+  });
+});
 
-describe('index', () => {
-  test('should use a existing index', async () => {
-    await createDocs()
+describe("index", () => {
+  test("should use a existing index", async () => {
+    await createDocs();
 
     await myPouch.createIndex({
       index: {
-        fields: ['captain'],
+        fields: ["captain"],
       },
-    })
+    });
 
     const { result } = renderHook(
       () =>
@@ -331,123 +331,123 @@ describe('index', () => {
           selector: {
             captain: { $gt: null },
           },
-          sort: ['captain'],
+          sort: ["captain"],
         }),
       {
         pouchdb: myPouch,
-      }
-    )
+      },
+    );
 
-    expect(result.current.loading).toBeTruthy()
+    expect(result.current.loading).toBeTruthy();
 
-    await waitForLoadingChange(result, false)
+    await waitForLoadingChange(result, false);
 
-    expect(result.current.warning).toBeFalsy()
+    expect(result.current.warning).toBeFalsy();
     expect(result.current.docs).toEqual([
       {
-        _id: 'DS9',
+        _id: "DS9",
         _rev: expect.anything(),
-        name: 'Deep Space Nine',
-        captain: 'Benjamin Sisko',
+        name: "Deep Space Nine",
+        captain: "Benjamin Sisko",
         aired: 1993,
       },
       {
-        _id: 'TOS',
+        _id: "TOS",
         _rev: expect.anything(),
-        name: 'The Original Series',
-        captain: 'James T. Kirk',
+        name: "The Original Series",
+        captain: "James T. Kirk",
         aired: 1966,
       },
       {
-        _id: 'TNG',
+        _id: "TNG",
         _rev: expect.anything(),
-        name: 'The Next Generation',
-        captain: 'Jean-Luc Picard',
+        name: "The Next Generation",
+        captain: "Jean-Luc Picard",
         aired: 1987,
       },
       {
-        _id: 'ENT',
+        _id: "ENT",
         _rev: expect.anything(),
-        name: 'Enterprise',
-        captain: 'Jonathan Archer',
+        name: "Enterprise",
+        captain: "Jonathan Archer",
         aired: 2001,
       },
       {
-        _id: 'VOY',
+        _id: "VOY",
         _rev: expect.anything(),
-        name: 'Voyager',
-        captain: 'Kathryn Janeway',
+        name: "Voyager",
+        captain: "Kathryn Janeway",
         aired: 1995,
       },
-    ])
-  })
+    ]);
+  });
 
-  test('should create an index and use it', async () => {
-    await createDocs()
+  test("should create an index and use it", async () => {
+    await createDocs();
 
     const { result } = renderHook(
       () =>
         useFind({
           index: {
-            fields: ['captain'],
+            fields: ["captain"],
           },
           selector: {
             captain: { $gt: null },
           },
-          sort: ['captain'],
+          sort: ["captain"],
         }),
       {
         pouchdb: myPouch,
-      }
-    )
+      },
+    );
 
-    expect(result.current.loading).toBeTruthy()
+    expect(result.current.loading).toBeTruthy();
 
-    await waitForLoadingChange(result, false)
+    await waitForLoadingChange(result, false);
 
-    expect(result.current.loading).toBeFalsy()
-    expect(result.current.warning).toBeFalsy()
+    expect(result.current.loading).toBeFalsy();
+    expect(result.current.warning).toBeFalsy();
     expect(result.current.docs).toEqual([
       {
-        _id: 'DS9',
+        _id: "DS9",
         _rev: expect.anything(),
-        name: 'Deep Space Nine',
-        captain: 'Benjamin Sisko',
+        name: "Deep Space Nine",
+        captain: "Benjamin Sisko",
         aired: 1993,
       },
       {
-        _id: 'TOS',
+        _id: "TOS",
         _rev: expect.anything(),
-        name: 'The Original Series',
-        captain: 'James T. Kirk',
+        name: "The Original Series",
+        captain: "James T. Kirk",
         aired: 1966,
       },
       {
-        _id: 'TNG',
+        _id: "TNG",
         _rev: expect.anything(),
-        name: 'The Next Generation',
-        captain: 'Jean-Luc Picard',
+        name: "The Next Generation",
+        captain: "Jean-Luc Picard",
         aired: 1987,
       },
       {
-        _id: 'ENT',
+        _id: "ENT",
         _rev: expect.anything(),
-        name: 'Enterprise',
-        captain: 'Jonathan Archer',
+        name: "Enterprise",
+        captain: "Jonathan Archer",
         aired: 2001,
       },
       {
-        _id: 'VOY',
+        _id: "VOY",
         _rev: expect.anything(),
-        name: 'Voyager',
-        captain: 'Kathryn Janeway',
+        name: "Voyager",
+        captain: "Kathryn Janeway",
         aired: 1995,
       },
-    ])
-  })
+    ]);
+  });
 
-  test('should warn if no index exist', async () => {
-    await createDocs()
+  test("should warn if no index exist", async () => {
+    await createDocs();
 
     const { result } = renderHook(
       () =>
@@ -458,32 +458,32 @@ describe('index', () => {
         }),
       {
         pouchdb: myPouch,
-      }
-    )
+      },
+    );
 
-    expect(result.current.loading).toBeTruthy()
+    expect(result.current.loading).toBeTruthy();
 
-    await waitForLoadingChange(result, false)
+    await waitForLoadingChange(result, false);
 
-    expect(typeof result.current.warning).toBe('string')
-    expect(result.current.warning?.length).toBeGreaterThan(0)
-    expect(result.current.docs).toHaveLength(5)
-  })
+    expect(typeof result.current.warning).toBe("string");
+    expect(result.current.warning?.length).toBeGreaterThan(0);
+    expect(result.current.docs).toHaveLength(5);
+  });
 
   test("shouldn't warn if an index already exist", async () => {
-    await createDocs()
+    await createDocs();
 
     await myPouch.createIndex({
       index: {
-        fields: ['captain'],
+        fields: ["captain"],
       },
-    })
+    });
 
     const { result } = renderHook(
       () =>
         useFind({
           index: {
-            fields: ['captain'],
+            fields: ["captain"],
           },
           selector: {
             captain: { $gt: null },
@@ -491,19 +491,19 @@ describe('index', () => {
         }),
       {
         pouchdb: myPouch,
-      }
-    )
+      },
+    );
 
-    expect(result.current.loading).toBeTruthy()
+    expect(result.current.loading).toBeTruthy();
 
-    await waitForLoadingChange(result, false)
+    await waitForLoadingChange(result, false);
 
-    expect(result.current.warning).toBeFalsy()
-    expect(result.current.docs).toHaveLength(5)
-  })
+    expect(result.current.warning).toBeFalsy();
+    expect(result.current.docs).toHaveLength(5);
+  });
 
-  test('should remove warn if an index gets created', async () => {
-    await createDocs()
+  test("should remove warn if an index gets created", async () => {
+    await createDocs();
 
     const { result, rerender } = renderHook(
       (index?: FindHookIndexOption) =>
@@ -516,65 +516,66 @@ describe('index', () => {
       {
         initialProps: undefined,
         pouchdb: myPouch,
-      }
-    )
+      },
+    );
 
-    expect(result.current.loading).toBeTruthy()
+    expect(result.current.loading).toBeTruthy();
 
-    await waitForLoadingChange(result, false)
+    await waitForLoadingChange(result, false);
 
-    expect(result.current.warning).toBeTruthy()
-    expect(result.current.docs).toHaveLength(5)
+    expect(result.current.warning).toBeTruthy();
+    expect(result.current.docs).toHaveLength(5);
 
     rerender({
-      fields: ['captain'],
-    })
+      fields: ["captain"],
+    });
 
-    await waitForLoadingChange(result, false)
+    await waitForLoadingChange(result, false);
 
-    expect(result.current.warning).toBeUndefined()
-    expect(result.current.docs).toHaveLength(5)
-  })
+    expect(result.current.warning).toBeUndefined();
+    expect(result.current.docs).toHaveLength(5);
+  });
 
-  test('should create an index with the provided name and ddoc', async () => {
-    await createDocs()
+  test("should create an index with the provided name and ddoc", async () => {
+    await createDocs();
 
     const { result } = renderHook(
       () =>
         useFind({
           index: {
-            fields: ['captain'],
-            ddoc: 'star_trek',
-            name: 'captains',
+            fields: ["captain"],
+            ddoc: "star_trek",
+            name: "captains",
           },
           selector: {
             captain: { $gt: null },
           },
-          sort: ['captain'],
+          sort: ["captain"],
         }),
       {
         pouchdb: myPouch,
-      }
-    )
+      },
+    );
 
-    expect(result.current.loading).toBeTruthy()
+    expect(result.current.loading).toBeTruthy();
 
-    await waitForLoadingChange(result, false)
+    await waitForLoadingChange(result, false);
 
-    expect(result.current.warning).toBeFalsy()
-    expect(result.current.docs).toHaveLength(5)
+    expect(result.current.warning).toBeFalsy();
+    expect(result.current.docs).toHaveLength(5);
 
-    const ddoc = await myPouch.get<Record<string, unknown>>('_design/star_trek')
-    expect(ddoc).toBeTruthy()
-    expect(ddoc.language).toBe('query')
-    expect(typeof ddoc.views).toBe('object')
+    const ddoc =
+      await myPouch.get<Record<string, unknown>>("_design/star_trek");
+    expect(ddoc).toBeTruthy();
+    expect(ddoc.language).toBe("query");
+    expect(typeof ddoc.views).toBe("object");
     expect(typeof (ddoc.views as Record<string, unknown>).captains).toBe(
-      'object'
-    )
-  })
+      "object",
+    );
+  });
 
-  test('should create a new index if fields change', async () => {
-    await createDocs()
+  test("should create a new index if fields change", async () => {
+    await createDocs();
 
     const { result, rerender } = renderHook(
       (fields: string[]) =>
@@ -588,318 +589,320 @@ describe('index', () => {
           sort: fields,
         }),
       {
-        initialProps: ['captain'],
+        initialProps: ["captain"],
         pouchdb: myPouch,
-      }
-    )
+      },
+    );
 
-    await waitForLoadingChange(result, false)
-    expect(result.current.loading).toBeFalsy()
+    await waitForLoadingChange(result, false);
+    expect(result.current.loading).toBeFalsy();
 
-    rerender(['name'])
+    rerender(["name"]);
 
-    expect(result.current.loading).toBeTruthy()
+    expect(result.current.loading).toBeTruthy();
 
-    await waitForLoadingChange(result, false)
+    await waitForLoadingChange(result, false);
 
-    expect(result.current.loading).toBeFalsy()
+    expect(result.current.loading).toBeFalsy();
     expect(result.current.docs).toEqual([
       {
-        _id: 'DS9',
+        _id: "DS9",
         _rev: expect.anything(),
-        name: 'Deep Space Nine',
-        captain: 'Benjamin Sisko',
+        name: "Deep Space Nine",
+        captain: "Benjamin Sisko",
         aired: 1993,
       },
       {
-        _id: 'ENT',
+        _id: "ENT",
         _rev: expect.anything(),
-        name: 'Enterprise',
-        captain: 'Jonathan Archer',
+        name: "Enterprise",
+        captain: "Jonathan Archer",
         aired: 2001,
       },
       {
-        _id: 'TNG',
+        _id: "TNG",
         _rev: expect.anything(),
-        name: 'The Next Generation',
-        captain: 'Jean-Luc Picard',
+        name: "The Next Generation",
+        captain: "Jean-Luc Picard",
         aired: 1987,
       },
       {
-        _id: 'TOS',
+        _id: "TOS",
         _rev: expect.anything(),
-        name: 'The Original Series',
-        captain: 'James T. Kirk',
+        name: "The Original Series",
+        captain: "James T. Kirk",
         aired: 1966,
       },
       {
-        _id: 'VOY',
+        _id: "VOY",
         _rev: expect.anything(),
-        name: 'Voyager',
-        captain: 'Kathryn Janeway',
+        name: "Voyager",
+        captain: "Kathryn Janeway",
         aired: 1995,
       },
-    ])
+    ]);
 
-    expect((await myPouch.getIndexes()).indexes).toHaveLength(3)
-  })
+    expect((await myPouch.getIndexes()).indexes).toHaveLength(3);
+  });
 
-  test('should create a new index if name or ddoc change', async () => {
-    await createDocs()
+  test("should create a new index if name or ddoc change", async () => {
+    await createDocs();
 
     const { result, rerender } = renderHook(
       ({ name, ddoc }: { name: string; ddoc: string }) =>
         useFind({
           index: {
-            fields: ['captain'],
+            fields: ["captain"],
             name,
             ddoc,
           },
           selector: {
             captain: { $gt: null },
           },
-          sort: ['captain'],
+          sort: ["captain"],
         }),
       {
-        initialProps: { ddoc: 'star_trek', name: 'captains' },
+        initialProps: { ddoc: "star_trek", name: "captains" },
         pouchdb: myPouch,
-      }
-    )
+      },
+    );
 
-    await waitForLoadingChange(result, false)
+    await waitForLoadingChange(result, false);
 
-    expect(result.current.loading).toBeFalsy()
+    expect(result.current.loading).toBeFalsy();
 
-    rerender({ ddoc: 'star_trek', name: 'other' })
+    rerender({ ddoc: "star_trek", name: "other" });
 
-    expect(result.current.loading).toBeTruthy()
+    expect(result.current.loading).toBeTruthy();
 
-    await waitForLoadingChange(result, false)
+    await waitForLoadingChange(result, false);
 
-    expect(result.current.loading).toBeFalsy()
-    expect(result.current.docs).toHaveLength(5)
+    expect(result.current.loading).toBeFalsy();
+    expect(result.current.docs).toHaveLength(5);
 
-    rerender({ ddoc: 'star', name: 'other' })
+    rerender({ ddoc: "star", name: "other" });
 
-    expect(result.current.loading).toBeTruthy()
+    expect(result.current.loading).toBeTruthy();
 
-    await waitForLoadingChange(result, false)
+    await waitForLoadingChange(result, false);
 
-    expect(result.current.loading).toBeFalsy()
-    expect(result.current.docs).toHaveLength(5)
+    expect(result.current.loading).toBeFalsy();
+    expect(result.current.docs).toHaveLength(5);
 
-    const starTrek = await myPouch.get<Record<string, Record<string, unknown>>>(
-      '_design/star_trek'
-    )
-    expect(Object.keys(starTrek.views)).toEqual(['captains', 'other'])
+    const starTrek =
+      await myPouch.get<Record<string, Record<string, unknown>>>(
+        "_design/star_trek",
+      );
+    expect(Object.keys(starTrek.views)).toEqual(["captains", "other"]);
 
-    const starDDoc = await myPouch.get<Record<string, Record<string, unknown>>>(
-      '_design/star'
-    )
-    expect(Object.keys(starDDoc.views)).toEqual(['other'])
-  })
+    const starDDoc =
+      await myPouch.get<Record<string, Record<string, unknown>>>(
+        "_design/star",
+      );
+    expect(Object.keys(starDDoc.views)).toEqual(["other"]);
+  });
 
-  test('should subscribe to changes', async () => {
-    await createDocs()
+  test("should subscribe to changes", async () => {
+    await createDocs();
 
     const { result } = renderHook(
       () =>
         useFind({
           index: {
-            fields: ['captain'],
+            fields: ["captain"],
           },
           selector: {
-            captain: { $gt: '' },
+            captain: { $gt: "" },
           },
-          sort: ['captain'],
+          sort: ["captain"],
         }),
       {
         pouchdb: myPouch,
-      }
-    )
+      },
+    );
 
-    await waitForLoadingChange(result, false)
+    await waitForLoadingChange(result, false);
 
-    expect(result.current.error).toBeFalsy()
-    expect(result.current.docs).toHaveLength(5)
-    expect(result.current.loading).toBeFalsy()
-
-    act(() => {
-      myPouch.put({
-        _id: 'aa',
-        other: 'value',
-      })
-    })
-
-    await sleep(20)
-    expect(result.current.error).toBeFalsy()
-    expect(result.current.loading).toBeFalsy()
-    expect(result.current.docs).toHaveLength(5)
+    expect(result.current.error).toBeFalsy();
+    expect(result.current.docs).toHaveLength(5);
+    expect(result.current.loading).toBeFalsy();
 
     act(() => {
       myPouch.put({
-        _id: 'zzz',
-        captain: 'Captain Hook',
-      })
-    })
+        _id: "aa",
+        other: "value",
+      });
+    });
 
-    await waitForNextUpdate(result)
+    await sleep(20);
+    expect(result.current.error).toBeFalsy();
+    expect(result.current.loading).toBeFalsy();
+    expect(result.current.docs).toHaveLength(5);
 
-    await waitForLoadingChange(result, false)
+    act(() => {
+      myPouch.put({
+        _id: "zzz",
+        captain: "Captain Hook",
+      });
+    });
 
-    expect(result.current.loading).toBeFalsy()
-    expect(result.current.error).toBeFalsy()
-    expect(result.current.docs).toHaveLength(6)
-  })
+    await waitForNextUpdate(result);
 
-  test('should re-query if a change did happen while a query is underway', async () => {
-    await createDocs()
+    await waitForLoadingChange(result, false);
+
+    expect(result.current.loading).toBeFalsy();
+    expect(result.current.error).toBeFalsy();
+    expect(result.current.docs).toHaveLength(6);
+  });
+
+  test("should re-query if a change did happen while a query is underway", async () => {
+    await createDocs();
 
     const { result } = renderHook(
       () =>
         useFind({
           index: {
-            fields: ['captain'],
+            fields: ["captain"],
           },
           selector: {
-            captain: { $gt: '' },
+            captain: { $gt: "" },
           },
-          sort: ['captain'],
+          sort: ["captain"],
         }),
       {
         pouchdb: myPouch,
-      }
-    )
+      },
+    );
 
-    await waitForLoadingChange(result, false)
+    await waitForLoadingChange(result, false);
 
-    expect(result.current.docs).toHaveLength(5)
-    expect(result.current.loading).toBeFalsy()
+    expect(result.current.docs).toHaveLength(5);
+    expect(result.current.loading).toBeFalsy();
 
     act(() => {
       myPouch.put({
-        _id: 'Jolly Roger',
-        captain: 'Hook',
-      })
-    })
+        _id: "Jolly Roger",
+        captain: "Hook",
+      });
+    });
 
     act(() => {
-      myPouch.put({ _id: 'test', captain: 'Ching Shih (石陽)' })
-    })
+      myPouch.put({ _id: "test", captain: "Ching Shih (石陽)" });
+    });
 
-    await waitForNextUpdate(result)
+    await waitForNextUpdate(result);
 
-    expect(result.current.loading).toBeFalsy()
-    expect(result.current.docs).toHaveLength(7)
-  })
+    expect(result.current.loading).toBeFalsy();
+    expect(result.current.docs).toHaveLength(7);
+  });
 
-  test('should handle the deletion of docs in the result', async () => {
-    await createDocs()
+  test("should handle the deletion of docs in the result", async () => {
+    await createDocs();
 
     const { result } = renderHook(
       () =>
         useFind({
           index: {
-            fields: ['captain'],
+            fields: ["captain"],
           },
           selector: {
-            captain: { $gt: '' },
+            captain: { $gt: "" },
           },
-          sort: ['captain'],
+          sort: ["captain"],
         }),
       {
         pouchdb: myPouch,
-      }
-    )
+      },
+    );
 
-    await waitForLoadingChange(result, false)
+    await waitForLoadingChange(result, false);
 
-    expect(result.current.docs).toHaveLength(5)
-    expect(result.current.loading).toBeFalsy()
+    expect(result.current.docs).toHaveLength(5);
+    expect(result.current.loading).toBeFalsy();
 
-    const doc = await myPouch.get('TOS')
+    const doc = await myPouch.get("TOS");
     act(() => {
-      myPouch.remove(doc._id, doc._rev)
-    })
+      myPouch.remove(doc._id, doc._rev);
+    });
 
-    await waitForNextUpdate(result)
+    await waitForNextUpdate(result);
 
-    await waitForLoadingChange(result, false)
-    expect(result.current.docs).toHaveLength(4)
-    expect(result.current.loading).toBeFalsy()
-  })
+    await waitForLoadingChange(result, false);
+    expect(result.current.docs).toHaveLength(4);
+    expect(result.current.loading).toBeFalsy();
+  });
 
   test("shouldn't re-query if a document not in the result gets deleted", async () => {
-    await createDocs()
+    await createDocs();
 
-    const docToDelete = await myPouch.post({ other: 42 })
+    const docToDelete = await myPouch.post({ other: 42 });
 
     const { result } = renderHook(
       () =>
         useFind({
           index: {
-            fields: ['captain'],
+            fields: ["captain"],
           },
           selector: {
-            captain: { $gt: '' },
+            captain: { $gt: "" },
           },
-          sort: ['captain'],
+          sort: ["captain"],
         }),
       {
         pouchdb: myPouch,
-      }
-    )
+      },
+    );
 
-    await waitForLoadingChange(result, false)
+    await waitForLoadingChange(result, false);
 
-    expect(result.current.docs).toHaveLength(5)
-    expect(result.current.loading).toBeFalsy()
+    expect(result.current.docs).toHaveLength(5);
+    expect(result.current.loading).toBeFalsy();
 
-    const current = result.current
+    const current = result.current;
     act(() => {
-      myPouch.remove(docToDelete.id, docToDelete.rev)
-    })
+      myPouch.remove(docToDelete.id, docToDelete.rev);
+    });
 
-    await waitForLoadingChange(result, false)
-    expect(result.current.docs).toHaveLength(5)
-    expect(result.current).toBe(current)
-  })
+    await waitForLoadingChange(result, false);
+    expect(result.current.docs).toHaveLength(5);
+    expect(result.current).toBe(current);
+  });
 
-  test('should re-query when the selector changes', async () => {
-    await createDocs()
+  test("should re-query when the selector changes", async () => {
+    await createDocs();
 
     const { result, rerender } = renderHook(
       (name: string | null) =>
         useFind({
           index: {
-            fields: ['captain'],
+            fields: ["captain"],
           },
           selector: {
             captain: { $gt: name },
           },
-          sort: ['captain'],
+          sort: ["captain"],
         }),
       {
         initialProps: null as null | string,
         pouchdb: myPouch,
-      }
-    )
+      },
+    );
 
-    await waitForLoadingChange(result, false)
+    await waitForLoadingChange(result, false);
 
-    expect(result.current.docs).toHaveLength(5)
+    expect(result.current.docs).toHaveLength(5);
 
-    rerender('Jonathan Archer')
+    rerender("Jonathan Archer");
 
-    expect(result.current.loading).toBeTruthy()
+    expect(result.current.loading).toBeTruthy();
 
-    await waitForLoadingChange(result, false)
+    await waitForLoadingChange(result, false);
 
-    expect(result.current.docs).toHaveLength(1)
-  })
+    expect(result.current.docs).toHaveLength(1);
+  });
 
   test("shouldn't re-query when the index changes, but not it's value", async () => {
-    await createDocs()
+    await createDocs();
 
     const { result, rerender } = renderHook(
       (options: PouchDB.Find.CreateIndexOptions) =>
@@ -908,81 +911,81 @@ describe('index', () => {
           selector: {
             captain: { $gt: null },
           },
-          sort: ['captain'],
+          sort: ["captain"],
         }),
       {
         initialProps: {
           index: {
-            fields: ['captain'],
+            fields: ["captain"],
           },
         },
         pouchdb: myPouch,
-      }
-    )
+      },
+    );
 
-    await waitForLoadingChange(result, false)
+    await waitForLoadingChange(result, false);
 
-    expect(result.current.loading).toBeFalsy()
-    expect(result.current.docs).toHaveLength(5)
+    expect(result.current.loading).toBeFalsy();
+    expect(result.current.docs).toHaveLength(5);
 
-    const current = result.current
+    const current = result.current;
     rerender({
       index: {
-        fields: ['captain'],
+        fields: ["captain"],
       },
-    })
+    });
 
-    await waitForLoadingChange(result, false)
-    expect(result.current.docs).toHaveLength(5)
-    expect(result.current).toBe(current)
-  })
+    await waitForLoadingChange(result, false);
+    expect(result.current.docs).toHaveLength(5);
+    expect(result.current).toBe(current);
+  });
 
   test("shouldn't re-query when the selector changes, but not it's value", async () => {
-    await createDocs()
+    await createDocs();
 
     const { result, rerender } = renderHook(
       (selector: PouchDB.Find.Selector) =>
         useFind({
           index: {
-            fields: ['captain'],
+            fields: ["captain"],
           },
           selector,
-          sort: ['captain'],
+          sort: ["captain"],
         }),
       {
         initialProps: {
           captain: { $gt: null },
         },
         pouchdb: myPouch,
-      }
-    )
+      },
+    );
 
-    await waitForLoadingChange(result, false)
+    await waitForLoadingChange(result, false);
 
-    expect(result.current.loading).toBeFalsy()
-    expect(result.current.docs).toHaveLength(5)
+    expect(result.current.loading).toBeFalsy();
+    expect(result.current.docs).toHaveLength(5);
 
-    const current = result.current
+    const current = result.current;
     rerender({
       captain: { $gt: null },
-    })
+    });
 
-    await waitForLoadingChange(result, false)
-    expect(result.current.docs).toHaveLength(5)
-    expect(result.current).toBe(current)
-  })
+    await waitForLoadingChange(result, false);
+    expect(result.current.docs).toHaveLength(5);
+    expect(result.current).toBe(current);
+  });
 
-  describe('partial_filter_selector', () => {
-    test('should use a existing index', async () => {
-      await createDocs()
+  describe("partial_filter_selector", () => {
+    test("should use a existing index", async () => {
+      await createDocs();
       const index = {
-        fields: ['captain'],
+        fields: ["captain"],
         partial_filter_selector: {
           aired: { $gt: 1980 },
         },
-      }
+      };
 
-      await myPouch.createIndex({ index })
+      await myPouch.createIndex({ index });
 
       const { result } = renderHook(
         () =>
@@ -991,58 +994,58 @@ describe('index', () => {
               captain: { $gt: null },
             },
             index,
-            sort: ['captain'],
+            sort: ["captain"],
           }),
         {
           pouchdb: myPouch,
-        }
-      )
+        },
+      );
 
-      expect(result.current.loading).toBeTruthy()
+      expect(result.current.loading).toBeTruthy();
 
-      await waitForLoadingChange(result, false)
+      await waitForLoadingChange(result, false);
 
-      expect(result.current.warning).toBeFalsy()
+      expect(result.current.warning).toBeFalsy();
       expect(result.current.docs).toEqual([
         {
-          _id: 'DS9',
+          _id: "DS9",
           _rev: expect.anything(),
-          name: 'Deep Space Nine',
-          captain: 'Benjamin Sisko',
+          name: "Deep Space Nine",
+          captain: "Benjamin Sisko",
           aired: 1993,
         },
         {
-          _id: 'TNG',
+          _id: "TNG",
           _rev: expect.anything(),
-          name: 'The Next Generation',
-          captain: 'Jean-Luc Picard',
+          name: "The Next Generation",
+          captain: "Jean-Luc Picard",
           aired: 1987,
         },
         {
-          _id: 'ENT',
+          _id: "ENT",
           _rev: expect.anything(),
-          name: 'Enterprise',
-          captain: 'Jonathan Archer',
+          name: "Enterprise",
+          captain: "Jonathan Archer",
           aired: 2001,
         },
         {
-          _id: 'VOY',
+          _id: "VOY",
           _rev: expect.anything(),
-          name: 'Voyager',
-          captain: 'Kathryn Janeway',
+          name: "Voyager",
+          captain: "Kathryn Janeway",
           aired: 1995,
         },
-      ])
-    })
+      ]);
+    });
 
-    test('should create an index and use it', async () => {
-      await createDocs()
+    test("should create an index and use it", async () => {
+      await createDocs();
 
       const { result } = renderHook(
         () =>
           useFind({
             index: {
-              fields: ['captain'],
+              fields: ["captain"],
               partial_filter_selector: {
                 aired: { $gt: 1980 },
               },
@@ -1050,295 +1053,295 @@ describe('index', () => {
             selector: {
               captain: { $gt: null },
             },
-            sort: ['captain'],
+            sort: ["captain"],
           }),
         {
           pouchdb: myPouch,
-        }
-      )
+        },
+      );
 
-      expect(result.current.loading).toBeTruthy()
+      expect(result.current.loading).toBeTruthy();
 
-      await waitForLoadingChange(result, false)
+      await waitForLoadingChange(result, false);
 
-      expect(result.current.loading).toBeFalsy()
-      expect(result.current.warning).toBeFalsy()
+      expect(result.current.loading).toBeFalsy();
+      expect(result.current.warning).toBeFalsy();
       expect(result.current.docs).toEqual([
         {
-          _id: 'DS9',
+          _id: "DS9",
           _rev: expect.anything(),
-          name: 'Deep Space Nine',
-          captain: 'Benjamin Sisko',
+          name: "Deep Space Nine",
+          captain: "Benjamin Sisko",
           aired: 1993,
         },
         {
-          _id: 'TNG',
+          _id: "TNG",
           _rev: expect.anything(),
-          name: 'The Next Generation',
-          captain: 'Jean-Luc Picard',
+          name: "The Next Generation",
+          captain: "Jean-Luc Picard",
           aired: 1987,
         },
         {
-          _id: 'ENT',
+          _id: "ENT",
           _rev: expect.anything(),
-          name: 'Enterprise',
-          captain: 'Jonathan Archer',
+          name: "Enterprise",
+          captain: "Jonathan Archer",
           aired: 2001,
         },
         {
-          _id: 'VOY',
+          _id: "VOY",
           _rev: expect.anything(),
-          name: 'Voyager',
-          captain: 'Kathryn Janeway',
+          name: "Voyager",
+          captain: "Kathryn Janeway",
           aired: 1995,
         },
-      ])
-    })
+      ]);
+    });
 
-    test('should subscribe to changes', async () => {
-      await createDocs()
+    test("should subscribe to changes", async () => {
+      await createDocs();
 
       const { result } = renderHook(
         () =>
           useFind({
             index: {
-              fields: ['captain'],
+              fields: ["captain"],
               partial_filter_selector: {
                 aired: { $gt: 1980 },
               },
             },
             selector: {
-              captain: { $gt: '' },
+              captain: { $gt: "" },
             },
-            sort: ['captain'],
+            sort: ["captain"],
           }),
         {
           pouchdb: myPouch,
-        }
-      )
+        },
+      );
 
-      await waitForLoadingChange(result, false)
+      await waitForLoadingChange(result, false);
 
-      expect(result.current.error).toBeFalsy()
-      expect(result.current.docs).toHaveLength(4)
-      expect(result.current.loading).toBeFalsy()
-
-      await act(async () => {
-        await myPouch.put({
-          _id: 'aa',
-          captain: 'Captain Hook',
-        })
-        await sleep(20)
-      })
-
-      expect(result.current.error).toBeFalsy()
-      expect(result.current.loading).toBeFalsy()
-      expect(result.current.docs).toHaveLength(4)
+      expect(result.current.error).toBeFalsy();
+      expect(result.current.docs).toHaveLength(4);
+      expect(result.current.loading).toBeFalsy();
 
       await act(async () => {
         await myPouch.put({
-          _id: 'Sendung mit der Maus',
-          captain: 'Käpt’n Blaubär',
+          _id: "aa",
+          captain: "Captain Hook",
+        });
+        await sleep(20);
+      });
+
+      expect(result.current.error).toBeFalsy();
+      expect(result.current.loading).toBeFalsy();
+      expect(result.current.docs).toHaveLength(4);
+
+      await act(async () => {
+        await myPouch.put({
+          _id: "Sendung mit der Maus",
+          captain: "Käpt’n Blaubär",
           aired: 1991,
-        })
-        await sleep(20)
-      })
+        });
+        await sleep(20);
+      });
 
-      await waitForLoadingChange(result, false)
+      await waitForLoadingChange(result, false);
 
-      expect(result.current.loading).toBeFalsy()
-      expect(result.current.error).toBeFalsy()
-      expect(result.current.docs).toHaveLength(5)
-    })
-  })
-})
+      expect(result.current.loading).toBeFalsy();
+      expect(result.current.error).toBeFalsy();
+      expect(result.current.docs).toHaveLength(5);
+    });
+  });
+});
 
-describe('options', () => {
-  test('should only return fields in fields', async () => {
-    await createDocs()
+describe("options", () => {
+  test("should only return fields in fields", async () => {
+    await createDocs();
 
     const { result, rerender } = renderHook(
       (fields: string[]) =>
         useFind({
           index: {
-            fields: ['captain'],
+            fields: ["captain"],
           },
           selector: {
             captain: { $gt: null },
           },
-          sort: ['captain'],
+          sort: ["captain"],
           fields,
         }),
       {
-        initialProps: ['captain'],
+        initialProps: ["captain"],
         pouchdb: myPouch,
-      }
-    )
+      },
+    );
 
-    await waitForLoadingChange(result, false)
-
-    expect(result.current.docs).toEqual([
-      { captain: 'Benjamin Sisko' },
-      { captain: 'James T. Kirk' },
-      { captain: 'Jean-Luc Picard' },
-      { captain: 'Jonathan Archer' },
-      { captain: 'Kathryn Janeway' },
-    ])
-
-    rerender(['_id', 'aired'])
-
-    await waitForLoadingChange(result, false)
+    await waitForLoadingChange(result, false);
 
     expect(result.current.docs).toEqual([
-      { _id: 'DS9', aired: 1993 },
-      { _id: 'TOS', aired: 1966 },
-      { _id: 'TNG', aired: 1987 },
-      { _id: 'ENT', aired: 2001 },
-      { _id: 'VOY', aired: 1995 },
-    ])
-  })
+      { captain: "Benjamin Sisko" },
+      { captain: "James T. Kirk" },
+      { captain: "Jean-Luc Picard" },
+      { captain: "Jonathan Archer" },
+      { captain: "Kathryn Janeway" },
+    ]);
 
-  test('should handle the deletion of result docs if _id in not in fields', async () => {
-    await createDocs()
+    rerender(["_id", "aired"]);
+
+    await waitForLoadingChange(result, false);
+
+    expect(result.current.docs).toEqual([
+      { _id: "DS9", aired: 1993 },
+      { _id: "TOS", aired: 1966 },
+      { _id: "TNG", aired: 1987 },
+      { _id: "ENT", aired: 2001 },
+      { _id: "VOY", aired: 1995 },
+    ]);
+  });
+
+  test("should handle the deletion of result docs if _id in not in fields", async () => {
+    await createDocs();
 
     const { result } = renderHook(
       () =>
         useFind({
           index: {
-            fields: ['captain'],
+            fields: ["captain"],
           },
           selector: {
             captain: { $gt: null },
           },
-          sort: ['captain'],
-          fields: ['captain'],
+          sort: ["captain"],
+          fields: ["captain"],
         }),
       {
         pouchdb: myPouch,
-      }
-    )
+      },
+    );
 
-    await waitForLoadingChange(result, false)
+    await waitForLoadingChange(result, false);
 
-    expect(result.current.docs).toHaveLength(5)
+    expect(result.current.docs).toHaveLength(5);
 
-    const doc = await myPouch.get('TOS')
+    const doc = await myPouch.get("TOS");
     act(() => {
-      myPouch.remove(doc._id, doc._rev)
-    })
+      myPouch.remove(doc._id, doc._rev);
+    });
 
-    await waitForLoadingChange(result, false)
-    await waitForNextUpdate(result)
+    await waitForLoadingChange(result, false);
+    await waitForNextUpdate(result);
 
-    expect(result.current.docs).toHaveLength(4)
-  })
+    expect(result.current.docs).toHaveLength(4);
+  });
 
-  test('should handle limit', async () => {
-    await createDocs()
+  test("should handle limit", async () => {
+    await createDocs();
 
     const { result, rerender } = renderHook(
       (limit: number) =>
         useFind({
           index: {
-            fields: ['captain'],
+            fields: ["captain"],
           },
           selector: {
             captain: { $gt: null },
           },
-          sort: ['captain'],
+          sort: ["captain"],
           limit,
         }),
       {
         initialProps: 4,
         pouchdb: myPouch,
-      }
-    )
+      },
+    );
 
-    await waitForLoadingChange(result, false)
+    await waitForLoadingChange(result, false);
 
-    expect(result.current.docs).toHaveLength(4)
+    expect(result.current.docs).toHaveLength(4);
     expect(result.current.docs[3]).toEqual({
-      _id: 'ENT',
+      _id: "ENT",
       _rev: expect.anything(),
       aired: 2001,
-      captain: 'Jonathan Archer',
-      name: 'Enterprise',
-    })
+      captain: "Jonathan Archer",
+      name: "Enterprise",
+    });
 
-    rerender(2)
+    rerender(2);
 
-    await waitForLoadingChange(result, false)
+    await waitForLoadingChange(result, false);
 
-    expect(result.current.docs).toHaveLength(2)
-    expect(result.current.docs[1]._id).toBe('TOS')
-  })
+    expect(result.current.docs).toHaveLength(2);
+    expect(result.current.docs[1]._id).toBe("TOS");
+  });
 
-  test('should handle skip', async () => {
-    await createDocs()
+  test("should handle skip", async () => {
+    await createDocs();
 
     const { result, rerender } = renderHook(
       (skip: number) =>
         useFind({
           index: {
-            fields: ['captain'],
+            fields: ["captain"],
           },
           selector: {
             captain: { $gt: null },
           },
-          sort: ['captain'],
+          sort: ["captain"],
           skip,
         }),
       {
         initialProps: 4,
         pouchdb: myPouch,
-      }
-    )
+      },
+    );
 
-    await waitForLoadingChange(result, false)
+    await waitForLoadingChange(result, false);
 
-    expect(result.current.docs).toHaveLength(1)
+    expect(result.current.docs).toHaveLength(1);
     expect(result.current.docs).toEqual([
       {
-        _id: 'VOY',
+        _id: "VOY",
         _rev: expect.anything(),
         aired: 1995,
-        captain: 'Kathryn Janeway',
-        name: 'Voyager',
+        captain: "Kathryn Janeway",
+        name: "Voyager",
       },
-    ])
+    ]);
 
-    rerender(2)
+    rerender(2);
 
-    await waitForLoadingChange(result, false)
+    await waitForLoadingChange(result, false);
 
-    expect(result.current.docs).toHaveLength(3)
+    expect(result.current.docs).toHaveLength(3);
     expect(result.current.docs[0]).toEqual({
-      _id: 'TNG',
+      _id: "TNG",
       _rev: expect.anything(),
       aired: 1987,
-      captain: 'Jean-Luc Picard',
-      name: 'The Next Generation',
-    })
-  })
+      captain: "Jean-Luc Picard",
+      name: "The Next Generation",
+    });
+  });
 
-  test('should support the selection of a database in the context to be used', async () => {
-    const other = new PouchDB('other', { adapter: 'memory' })
+  test("should support the selection of a database in the context to be used", async () => {
+    const other = new PouchDB("other", { adapter: "memory" });
 
     await myPouch.put({
-      _id: 'test',
-      value: 'myPouch',
-    })
+      _id: "test",
+      value: "myPouch",
+    });
 
     await other.put({
-      _id: 'test',
-      value: 'other',
-    })
+      _id: "test",
+      value: "other",
+    });
 
     const { result, rerender } = renderHookWithMultiDbContext(
       (name?: string) =>
         useFind({
           index: {
-            fields: ['value'],
+            fields: ["value"],
           },
           selector: {
             value: { $gt: null },
@@ -1349,66 +1352,66 @@ describe('options', () => {
         initialProps: undefined,
         main: myPouch,
         other: other,
-      }
-    )
+      },
+    );
 
-    await waitForLoadingChange(result, false)
+    await waitForLoadingChange(result, false);
 
     // No db selection
-    expect(result.current.loading).toBeFalsy()
+    expect(result.current.loading).toBeFalsy();
     expect(result.current.docs).toEqual([
       {
-        _id: 'test',
+        _id: "test",
         _rev: expect.anything(),
-        value: 'myPouch',
+        value: "myPouch",
       },
-    ])
+    ]);
 
     // selecting a database that is not the default
-    rerender('other')
-    expect(result.current.loading).toBeTruthy()
-    await waitForLoadingChange(result, false)
+    rerender("other");
+    expect(result.current.loading).toBeTruthy();
+    await waitForLoadingChange(result, false);
 
-    expect(result.current.loading).toBeFalsy()
+    expect(result.current.loading).toBeFalsy();
     expect(result.current.docs).toEqual([
       {
-        _id: 'test',
+        _id: "test",
         _rev: expect.anything(),
-        value: 'other',
+        value: "other",
       },
-    ])
+    ]);
 
     // selecting the default db by it's name
-    rerender('main')
-    expect(result.current.loading).toBeTruthy()
-    await waitForLoadingChange(result, false)
+    rerender("main");
+    expect(result.current.loading).toBeTruthy();
+    await waitForLoadingChange(result, false);
 
-    expect(result.current.loading).toBeFalsy()
+    expect(result.current.loading).toBeFalsy();
     expect(result.current.docs).toEqual([
       {
-        _id: 'test',
+        _id: "test",
         _rev: expect.anything(),
-        value: 'myPouch',
+        value: "myPouch",
       },
-    ])
+    ]);
 
     // reset to other db
-    rerender('other')
-    expect(result.current.loading).toBeTruthy()
-    await waitForLoadingChange(result, false)
+    rerender("other");
+    expect(result.current.loading).toBeTruthy();
+    await waitForLoadingChange(result, false);
 
     // selecting by special _default key
-    rerender('_default')
-    await waitForLoadingChange(result, false)
+    rerender("_default");
+    await waitForLoadingChange(result, false);
 
     expect(result.current.docs).toEqual([
       {
-        _id: 'test',
+        _id: "test",
         _rev: expect.anything(),
-        value: 'myPouch',
+        value: "myPouch",
       },
-    ])
+    ]);
 
-    await other.destroy()
-  })
-})
+    await other.destroy();
+  });
+});

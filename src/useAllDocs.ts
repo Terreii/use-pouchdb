@@ -1,8 +1,8 @@
-import { useEffect } from 'react'
+import { useEffect } from "react";
 
-import { useContext } from './context'
-import useStateMachine, { ResultType } from './state-machine'
-import { useDeepMemo, CommonOptions } from './utils'
+import { useContext } from "./context";
+import useStateMachine, { ResultType } from "./state-machine";
+import { useDeepMemo, CommonOptions } from "./utils";
 
 /**
  * Get all docs or a slice of all docs and subscribe to their updates.
@@ -15,9 +15,9 @@ export default function useAllDocs<Content extends {}>(
       | PouchDB.Core.AllDocsWithKeysOptions
       | PouchDB.Core.AllDocsWithinRangeOptions
       | PouchDB.Core.AllDocsOptions
-    )
+    ),
 ): ResultType<PouchDB.Core.AllDocsResponse<Content>> {
-  const { pouchdb: pouch, subscriptionManager } = useContext(options?.db)
+  const { pouchdb: pouch, subscriptionManager } = useContext(options?.db);
 
   const {
     include_docs,
@@ -28,13 +28,13 @@ export default function useAllDocs<Content extends {}>(
     skip,
     descending,
     update_seq,
-  } = options || {}
+  } = options || {};
   const { startkey, endkey, inclusive_end } =
-    (options as PouchDB.Core.AllDocsWithinRangeOptions) || {}
-  const { key } = (options as PouchDB.Core.AllDocsWithKeyOptions) || {}
+    (options as PouchDB.Core.AllDocsWithinRangeOptions) || {};
+  const { key } = (options as PouchDB.Core.AllDocsWithKeyOptions) || {};
   const keys: string[] | undefined = useDeepMemo(
-    (options as PouchDB.Core.AllDocsWithKeysOptions)?.keys
-  )
+    (options as PouchDB.Core.AllDocsWithKeysOptions)?.keys,
+  );
 
   const [state, dispatch, replace] = useStateMachine<
     PouchDB.Core.AllDocsResponse<Content>
@@ -42,12 +42,12 @@ export default function useAllDocs<Content extends {}>(
     rows: [],
     total_rows: 0,
     offset: 0,
-  }))
+  }));
 
   useEffect(() => {
-    let isMounted = true
-    let isFetching = false
-    let shouldUpdateAfter = false
+    let isMounted = true;
+    let isFetching = false;
+    let shouldUpdateAfter = false;
 
     const opt = {
       include_docs,
@@ -63,53 +63,53 @@ export default function useAllDocs<Content extends {}>(
       inclusive_end,
       key,
       keys,
-    }
+    };
 
     const fetch = async () => {
       if (isFetching) {
-        shouldUpdateAfter = true
-        return
+        shouldUpdateAfter = true;
+        return;
       }
-      isFetching = true
-      shouldUpdateAfter = false
-      dispatch({ type: 'loading_started' })
+      isFetching = true;
+      shouldUpdateAfter = false;
+      dispatch({ type: "loading_started" });
 
       try {
-        const result = await pouch.allDocs<Content>(opt)
+        const result = await pouch.allDocs<Content>(opt);
 
         if (isMounted) {
           dispatch({
-            type: 'loading_finished',
+            type: "loading_finished",
             payload: result,
-          })
+          });
         }
       } catch (err) {
         if (isMounted) {
           dispatch({
-            type: 'loading_error',
+            type: "loading_error",
             payload: {
               error: err as PouchDB.Core.Error,
               setResult: false,
             },
-          })
+          });
         }
       } finally {
         // refresh if change did happen while querying
-        isFetching = false
+        isFetching = false;
         if (shouldUpdateAfter && isMounted) {
-          fetch()
+          fetch();
         }
       }
-    }
+    };
 
-    fetch()
+    fetch();
 
-    let keysToSubscribe: null | string[] = null
+    let keysToSubscribe: null | string[] = null;
 
     if (key != null) {
-      keysToSubscribe = [key]
+      keysToSubscribe = [key];
     } else if (keys != null) {
-      keysToSubscribe = keys
+      keysToSubscribe = keys;
     }
 
     const unsubscribe = subscriptionManager.subscribeToDocs(
@@ -119,29 +119,29 @@ export default function useAllDocs<Content extends {}>(
           !isMounted ||
           !isInRange(id, startkey, endkey, inclusive_end, descending)
         ) {
-          return
+          return;
         }
 
         if (deleted) {
-          replace(result => {
-            const rows = result.rows.filter(row => row.id !== id)
+          replace((result) => {
+            const rows = result.rows.filter((row) => row.id !== id);
             return {
               ...result,
               rows,
               total_rows:
                 result.total_rows - (result.rows.length - rows.length),
-            }
-          })
+            };
+          });
         } else {
-          fetch()
+          fetch();
         }
-      }
-    )
+      },
+    );
 
     return () => {
-      isMounted = false
-      unsubscribe()
-    }
+      isMounted = false;
+      unsubscribe();
+    };
   }, [
     dispatch,
     replace,
@@ -160,9 +160,9 @@ export default function useAllDocs<Content extends {}>(
     key,
     keys,
     update_seq,
-  ])
+  ]);
 
-  return state
+  return state;
 }
 
 /**
@@ -178,20 +178,20 @@ function isInRange(
   startkey: string | undefined,
   endkey: string | undefined,
   inclusive_end: boolean | undefined,
-  descending: boolean | undefined
+  descending: boolean | undefined,
 ): boolean {
   if (
     startkey &&
     ((descending && id > startkey) || (!descending && id < startkey))
   ) {
-    return false
+    return false;
   }
   if (endkey == null) {
-    return true
+    return true;
   }
   if (inclusive_end) {
-    return descending ? id >= endkey : id <= endkey
+    return descending ? id >= endkey : id <= endkey;
   } else {
-    return descending ? id > endkey : id < endkey
+    return descending ? id > endkey : id < endkey;
   }
 }

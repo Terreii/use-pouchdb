@@ -5,36 +5,36 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-const React = require('react')
+const React = require("react");
 
-const CompLibrary = require('../../core/CompLibrary.js')
+const CompLibrary = require("../../core/CompLibrary.js");
 
-const Container = CompLibrary.Container
-const GridBlock = CompLibrary.GridBlock
+const Container = CompLibrary.Container;
+const GridBlock = CompLibrary.GridBlock;
 
 function Help(props) {
-  const { config: siteConfig, language = '' } = props
-  const { baseUrl, docsUrl, repoUrl } = siteConfig
-  const docsPart = `${docsUrl ? `${docsUrl}/` : ''}`
-  const langPart = `${language ? `${language}/` : ''}`
-  const docUrl = doc => `${baseUrl}${docsPart}${langPart}${doc}`
+  const { config: siteConfig, language = "" } = props;
+  const { baseUrl, docsUrl, repoUrl } = siteConfig;
+  const docsPart = `${docsUrl ? `${docsUrl}/` : ""}`;
+  const langPart = `${language ? `${language}/` : ""}`;
+  const docUrl = (doc) => `${baseUrl}${docsPart}${langPart}${doc}`;
 
   const supportLinks = [
     {
       content: `Learn more using the [documentation on this site.](${docUrl(
-        'introduction/quick_start'
+        "introduction/quick_start",
       )})`,
-      title: 'Browse Docs',
+      title: "Browse Docs",
     },
     {
       content: `If your are stuck or have questions, ask them [on twitter](https://twitter.com/terreii) on on [GitHub](${repoUrl}).`,
-      title: 'Ask questions',
+      title: "Ask questions",
     },
     {
-      content: 'Images are provided by [undraw.co](https://undraw.co/).',
-      title: 'Image Source',
+      content: "Images are provided by [undraw.co](https://undraw.co/).",
+      title: "Image Source",
     },
-  ]
+  ];
 
   return (
     <div className="docMainWrapper wrapper">
@@ -51,7 +51,7 @@ function Help(props) {
         </div>
       </Container>
     </div>
-  )
+  );
 }
 
-module.exports = Help
+module.exports = Help;

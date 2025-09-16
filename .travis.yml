@@ -1,10 +1,10 @@
 language: node_js
 
 node_js:
-  - '10'
-  - '12'
-  - '14'
-  - 'node'
+  - "10"
+  - "12"
+  - "14"
+  - "node"
 
 # Trigger a push build on latest. PRs build on every branches.
 # Avoid double build on PRs (See https://github.com/travis-ci/travis-ci/issues/1147)

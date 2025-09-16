@@ -91,24 +91,24 @@ If the index doesn't exist, it will be created.
 This is the recommended usage.
 
 ```jsx
-import React from 'react'
-import { useFind } from 'use-pouchdb'
+import React from "react";
+import { useFind } from "use-pouchdb";
 
 export default function StoryList() {
   const { docs, loading, error } = useFind({
     // Ensure that this index exist, create it if not. And use it.
     index: {
-      fields: ['type', 'title'],
+      fields: ["type", "title"],
       // 'ddoc' and 'name' are not required. PouchDB will check all existing indexes
       // if they match the requirements. And only create a one if none match.
     },
     selector: {
-      type: 'story',
+      type: "story",
       title: { $exists: true },
     },
-    sort: ['title'],
-    fields: ['_id', 'title'],
-  })
+    sort: ["title"],
+    fields: ["_id", "title"],
+  });
 
   return (
     <main>
@@ -122,34 +122,34 @@ export default function StoryList() {
       {loading && docs.length === 0 && <p>loading...</p>}
 
       <ul>
-        {docs.map(doc => (
+        {docs.map((doc) => (
           <li key={doc._id}>
             <a href={`./${doc._id}`}>{doc.title}</a>
           </li>
         ))}
       </ul>
     </main>
-  )
+  );
 }
 ```
 
 ### Use existing index
 
 ```jsx
-import React from 'react'
-import { useFind } from 'use-pouchdb'
+import React from "react";
+import { useFind } from "use-pouchdb";
 
 export default function StoryList() {
   const { docs, loading, error } = useFind({
     // index is here like use_index in db.find()
-    index: ['ddoc_name', 'index_name'],
+    index: ["ddoc_name", "index_name"],
     selector: {
-      type: 'story',
+      type: "story",
       title: { $exists: true },
     },
-    sort: ['title'],
-    fields: ['_id', 'title'],
-  })
+    sort: ["title"],
+    fields: ["_id", "title"],
+  });
 
   return (
     <main>
@@ -163,36 +163,36 @@ export default function StoryList() {
       {loading && docs.length === 0 && <p>loading...</p>}
 
       <ul>
-        {docs.map(doc => (
+        {docs.map((doc) => (
           <li key={doc._id}>
             <a href={`./${doc._id}`}>{doc.title}</a>
           </li>
         ))}
       </ul>
     </main>
-  )
+  );
 }
 ```
 
 ### Select a database
 
 ```jsx
-import React from 'react'
-import { useFind } from 'use-pouchdb'
+import React from "react";
+import { useFind } from "use-pouchdb";
 
 export default function StoryList({ isLocalReady }) {
   const { docs, loading, error } = useFind({
     // index is here like use_index in db.find()
-    index: ['ddoc_name', 'index_name'],
+    index: ["ddoc_name", "index_name"],
     selector: {
-      type: 'story',
+      type: "story",
       title: { $exists: true },
     },
-    sort: ['title'],
-    fields: ['_id', 'title'],
+    sort: ["title"],
+    fields: ["_id", "title"],
     // Select the database used
-    db: isLocalReady ? 'local' : 'remote',
-  })
+    db: isLocalReady ? "local" : "remote",
+  });
 
   return (
     <main>
@@ -206,13 +206,13 @@ export default function StoryList({ isLocalReady }) {
       {loading && docs.length === 0 && <p>loading...</p>}
 
       <ul>
-        {docs.map(doc => (
+        {docs.map((doc) => (
           <li key={doc._id}>
             <a href={`./${doc._id}`}>{doc.title}</a>
           </li>
         ))}
       </ul>
     </main>
-  )
+  );
 }
 ```

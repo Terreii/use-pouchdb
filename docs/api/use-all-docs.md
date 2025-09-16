@@ -91,24 +91,24 @@ If a document, that fall into this range, gets added, updated or deleted, then t
 accordingly.
 
 ```jsx
-import React from 'react'
-import { useAllDocs } from 'use-pouchdb'
-import { ErrorMessage } from './ErrorMessage'
+import React from "react";
+import { useAllDocs } from "use-pouchdb";
+import { ErrorMessage } from "./ErrorMessage";
 
 export function Comments({ id }) {
-  const commentsPrefix = `comments_${id}`
+  const commentsPrefix = `comments_${id}`;
   const { rows, loading, state, error } = useAllDocs({
     startkey: commentsPrefix,
-    endkey: commentsPrefix + '\ufff0',
+    endkey: commentsPrefix + "\ufff0",
     include_docs: true,
-  })
+  });
 
-  if (state === 'error') {
-    return <ErrorMessage error={error} />
+  if (state === "error") {
+    return <ErrorMessage error={error} />;
   }
 
   if (loading && rows.length === 0) {
-    return null
+    return null;
   }
 
   return (
@@ -116,16 +116,16 @@ export function Comments({ id }) {
       <h4>Comments</h4>
 
       <div>
-        {rows.map(row => (
+        {rows.map((row) => (
           <section key={row.id}>
             <h5>{row.doc.username} commented</h5>
-            {!row.value.rev.startsWith('1-') && <span>Edited</span>}
+            {!row.value.rev.startsWith("1-") && <span>Edited</span>}
             <p>{row.doc.comment}</p>
           </section>
         ))}
       </div>
     </div>
-  )
+  );
 }
 ```
 
@@ -134,22 +134,22 @@ export function Comments({ id }) {
 `useAllDocs` can also load multiple documents by their IDs.
 
 ```jsx
-import React from 'react'
-import { useAllDocs } from 'use-pouchdb'
-import { ErrorMessage } from './ErrorMessage'
+import React from "react";
+import { useAllDocs } from "use-pouchdb";
+import { ErrorMessage } from "./ErrorMessage";
 
 export function Related({ doc }) {
   const { rows, loading, state, error } = useAllDocs({
     keys: doc.related || [], // doc.related is an Array of IDs.
     include_docs: true,
-  })
+  });
 
-  if (state === 'error') {
-    return <ErrorMessage error={error} />
+  if (state === "error") {
+    return <ErrorMessage error={error} />;
   }
 
   if (loading && rows.length === 0) {
-    return null
+    return null;
   }
 
   return (
@@ -157,12 +157,12 @@ export function Related({ doc }) {
       <h4>Read more</h4>
 
       <ul>
-        {rows.map(row => (
+        {rows.map((row) => (
           <li key={row.id}>{row.doc.title}</li>
         ))}
       </ul>
     </div>
-  )
+  );
 }
 ```
 
@@ -171,34 +171,34 @@ export function Related({ doc }) {
 It is imported to remember that `options.startkey` and `options.endkey` switch, when `options.descending` is `true`.
 
 ```jsx
-import React from 'react'
-import { useAllDocs } from 'use-pouchdb'
-import ms from 'milliseconds'
-import { ErrorMessage } from './ErrorMessage'
+import React from "react";
+import { useAllDocs } from "use-pouchdb";
+import ms from "milliseconds";
+import { ErrorMessage } from "./ErrorMessage";
 
 export function LastBookings() {
-  const midnight = new Date()
-  midnight.setHours(0)
-  midnight.setMinutes(0)
-  midnight.setSeconds(0)
+  const midnight = new Date();
+  midnight.setHours(0);
+  midnight.setMinutes(0);
+  midnight.setSeconds(0);
 
   // this goes from midnight to 7 days ago.
   const { rows, loading, state, error } = useAllDocs({
     // start midnight
-    startkey: 'bookings_' + midnight.toJSON(),
+    startkey: "bookings_" + midnight.toJSON(),
     // End at endkey
     // the date 7 days ago is the end.
-    endkey: 'bookings_' + new Date(midnight.getTime() - ms.days(7)).toJSON(),
+    endkey: "bookings_" + new Date(midnight.getTime() - ms.days(7)).toJSON(),
     include_docs: true,
     descending: true,
-  })
+  });
 
-  if (state === 'error') {
-    return <ErrorMessage error={error} />
+  if (state === "error") {
+    return <ErrorMessage error={error} />;
   }
 
   if (loading && rows.length === 0) {
-    return null
+    return null;
   }
 
   return (
@@ -206,40 +206,40 @@ export function LastBookings() {
       <h4>Bookings</h4>
 
       <ul>
-        {rows.map(row => (
+        {rows.map((row) => (
           <li key={row.id}>
             {row.doc.amount}€ from {row.doc.partner}
           </li>
         ))}
       </ul>
     </div>
-  )
+  );
 }
 ```
 
 ### Select a database
 
 ```jsx
-import React from 'react'
-import { useAllDocs } from 'use-pouchdb'
-import { ErrorMessage } from './ErrorMessage'
+import React from "react";
+import { useAllDocs } from "use-pouchdb";
+import { ErrorMessage } from "./ErrorMessage";
 
 export function Comments({ id, isLocalReady }) {
-  const commentsPrefix = `comments_${id}`
+  const commentsPrefix = `comments_${id}`;
   const { rows, loading, state, error } = useAllDocs({
     startkey: commentsPrefix,
-    endkey: commentsPrefix + '\ufff0',
+    endkey: commentsPrefix + "\ufff0",
     include_docs: true,
     // Select the database used
-    db: isLocalReady ? 'local' : 'remote',
-  })
+    db: isLocalReady ? "local" : "remote",
+  });
 
-  if (state === 'error') {
-    return <ErrorMessage error={error} />
+  if (state === "error") {
+    return <ErrorMessage error={error} />;
   }
 
   if (loading && rows.length === 0) {
-    return null
+    return null;
   }
 
   return (
@@ -247,15 +247,15 @@ export function Comments({ id, isLocalReady }) {
       <h4>Comments</h4>
 
       <div>
-        {rows.map(row => (
+        {rows.map((row) => (
           <section key={row.id}>
             <h5>{row.doc.username} commented</h5>
-            {!row.value.rev.startsWith('1-') && <span>Edited</span>}
+            {!row.value.rev.startsWith("1-") && <span>Edited</span>}
             <p>{row.doc.comment}</p>
           </section>
         ))}
       </div>
     </div>
-  )
+  );
 }
 ```

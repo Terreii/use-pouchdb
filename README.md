@@ -36,7 +36,7 @@ npm install use-pouchdb
 yarn add use-pouchdb
 ```
 
-You'll also need to [install PouchDB](https://pouchdb.com/guides/setup-pouchdb.html 'PouchDBs installation guide').
+You'll also need to [install PouchDB](https://pouchdb.com/guides/setup-pouchdb.html "PouchDBs installation guide").
 There is also a special [browser version](https://www.npmjs.com/package/pouchdb-browser):
 
 ```sh
@@ -70,22 +70,22 @@ usePouchDB exports a `<Provider />` to make one or multiple PouchDB databases av
 components sub-tree.
 
 ```jsx
-import React from 'react'
-import ReactDOM from 'react-dom'
-import PouchDB from 'pouchdb-browser'
+import React from "react";
+import ReactDOM from "react-dom";
+import PouchDB from "pouchdb-browser";
 
-import { Provider } from 'use-pouchdb'
+import { Provider } from "use-pouchdb";
 
-import App from './App'
+import App from "./App";
 
-const db = new PouchDB('local')
+const db = new PouchDB("local");
 
 ReactDOM.render(
   <Provider pouchdb={db}>
     <App />
   </Provider>,
-  document.getElementById('root')
-)
+  document.getElementById("root"),
+);
 ```
 
 ### Hooks
@@ -113,18 +113,18 @@ is the hook version of [`db.get`](https://pouchdb.com/api.html#fetch_document), 
 subscribes to updates of that document and automatically loads the new version.
 
 ```jsx
-import React from 'react'
-import { useDoc } from 'use-pouchdb'
+import React from "react";
+import { useDoc } from "use-pouchdb";
 
 export default function Post({ postId }) {
-  const { doc, loading, error } = useDoc(postId)
+  const { doc, loading, error } = useDoc(postId);
 
   if (error && !loading) {
-    return <div>something went wrong: {error.name}</div>
+    return <div>something went wrong: {error.name}</div>;
   }
 
   if (doc == null && loading) {
-    return null
+    return null;
   }
 
   return (
@@ -134,7 +134,7 @@ export default function Post({ postId }) {
         <p>{doc.text}</p>
       </div>
     </article>
-  )
+  );
 }
 ```
 

@@ -51,13 +51,13 @@ following form: `userdb-{hex encoded username}`. Or in code:
  * @param {string} name     - The username.
  * @param {string} [prefix] - Prefix, can be changed with config [couch_peruser] database_prefix
  */
-function getUserDatabaseName(name, prefix = 'userdb-') {
-  const encoder = new TextEncoder()
-  const buffy = encoder.encode(name)
-  const bytes = Array.from(buffy).map(byte =>
-    byte.toString(16).padStart(2, '0')
-  )
-  return prefix + bytes.join('')
+function getUserDatabaseName(name, prefix = "userdb-") {
+  const encoder = new TextEncoder();
+  const buffy = encoder.encode(name);
+  const bytes = Array.from(buffy).map((byte) =>
+    byte.toString(16).padStart(2, "0"),
+  );
+  return prefix + bytes.join("");
 }
 ```
 
@@ -84,8 +84,8 @@ To access a remote database, create a new instance of PouchDB with a url-string 
 ```javascript
 const remoteDB = new PouchDB(
   `http://127.0.0.1:5984/${getUserDatabaseName(username)}`,
-  { skip_setup: true }
-)
+  { skip_setup: true },
+);
 
 // Or if you already know the username and password:
 // const remoteDB = new PouchDB(
@@ -112,18 +112,18 @@ To [sign up a new user you `put`](https://docs.couchdb.org/en/stable/intro/secur
 const response = await fetch(
   `https://couchdb.example.com/_users/org.couchdb.user:${username}`,
   {
-    method: 'PUT',
+    method: "PUT",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       name: username,
       password: password, // will be hashed by CouchDB. Isn't CouchDB awesome!
       roles: [],
-      type: 'user',
+      type: "user",
     }),
-  }
-)
+  },
+);
 ```
 
 ### Log in and out
@@ -151,12 +151,12 @@ You can add the login credentials by adding it to the URL or with the `auth` opt
 instance.
 
 ```javascript
-const url = new URL('https://couchdb.example.com/')
-url.pathname += getUserDatabaseName(username)
-url.username = username
-url.password = password
+const url = new URL("https://couchdb.example.com/");
+url.pathname += getUserDatabaseName(username);
+url.username = username;
+url.password = password;
 
-const remote = new PouchDB(url.href)
+const remote = new PouchDB(url.href);
 
 // or
 
@@ -167,8 +167,8 @@ const remoteDB = new PouchDB(
       username: username,
       password: password,
     },
-  }
-)
+  },
+);
 ```
 
 It is inefficient, though. Because CouchDB has to re-hash the password on every request!
@@ -182,27 +182,27 @@ CouchDB's API is `POST`, `GET` and `DELETE` on `/_session`.
 
 ```javascript
 // Login
-const response = await fetch('https://couchdb.example.com/_session', {
-  method: 'POST',
+const response = await fetch("https://couchdb.example.com/_session", {
+  method: "POST",
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
   body: JSON.stringify({
     name: username,
     password: password,
   }),
-})
+});
 
 // get session info
-const response = await fetch('https://couchdb.example.com/_session', {
-  credentials: 'include', // or 'same-origin' if it is
-})
+const response = await fetch("https://couchdb.example.com/_session", {
+  credentials: "include", // or 'same-origin' if it is
+});
 
 // log out
-const response = await fetch('https://couchdb.example.com/_session', {
-  method: 'DELETE',
-  credentials: 'include', // or 'same-origin' if it is
-})
+const response = await fetch("https://couchdb.example.com/_session", {
+  method: "DELETE",
+  credentials: "include", // or 'same-origin' if it is
+});
 ```
 
 ### PouchDB Authentication
@@ -227,11 +227,11 @@ but with the given options added.
 
 ```javascript
 const HTTPPouch = PouchDB.defaults({
-  prefix: 'https://expample.com/db',
-})
+  prefix: "https://expample.com/db",
+});
 
 // will be located at https://expample.com/db/myDb
-const remoteDB = new HTTPPouch('myDb')
+const remoteDB = new HTTPPouch("myDb");
 ```
 
 > Note! `remoteDB.signUp` will not work with **CouchDB v3**!
@@ -264,73 +264,73 @@ yarn add -D pouchdb-authentication
 
 ```jsx
 // Session.js
-import React, { useState, useEffect, useRef } from 'react'
-import { usePouch } from 'use-pouchdb'
-import PouchDB from 'pouchdb-browser'
-import PouchAuth from 'pouchdb-authentication'
+import React, { useState, useEffect, useRef } from "react";
+import { usePouch } from "use-pouchdb";
+import PouchDB from "pouchdb-browser";
+import PouchAuth from "pouchdb-authentication";
 
-PouchDB.plugin(PouchAuth)
+PouchDB.plugin(PouchAuth);
 
 const sessionStates = {
   loading: 0,
   loggedIn: 1,
   loggedOut: 2,
-}
+};
 
-const dbBaseUrl = new URL('/db/', window.location.href)
+const dbBaseUrl = new URL("/db/", window.location.href);
 const HTTPPouch = PouchDB.defaults({
   prefix: dbBaseUrl.href,
-})
+});
 
 export default function Session() {
-  const db = usePouch()
+  const db = usePouch();
 
-  const remoteDbRef = useRef(null)
+  const remoteDbRef = useRef(null);
   if (remoteDbRef.current == null) {
     // create a default remote db
-    remoteDbRef.current = new HTTPPouch('_users', {
+    remoteDbRef.current = new HTTPPouch("_users", {
       skip_setup: true, // prevents PouchDB from checking if the DB exists.
-    })
+    });
   }
 
-  const [sessionState, setSessionState] = useState(sessionStates.loading)
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
+  const [sessionState, setSessionState] = useState(sessionStates.loading);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
   useEffect(() => {
     // On first render: check if we are logged in
-  }, [])
+  }, []);
 
   useEffect(() => {
     // sync effect
     if (sessionState === sessionStates.loggedIn) {
       // we will implement it later
     }
-  }, [sessionState, db])
+  }, [sessionState, db]);
 
   const doLogIn = async () => {
     // we will implement it later
-  }
+  };
 
-  const doSignUp = async event => {
-    event.preventDefault()
-
-    // we will implement it later
-  }
-
-  const doLogOut = async event => {
-    event.preventDefault()
+  const doSignUp = async (event) => {
+    event.preventDefault();
 
     // we will implement it later
-  }
+  };
+
+  const doLogOut = async (event) => {
+    event.preventDefault();
+
+    // we will implement it later
+  };
 
   switch (sessionState) {
     case sessionStates.loggedOut:
       return (
         <form
-          onSubmit={event => {
-            event.preventDefault()
-            doLogIn()
+          onSubmit={(event) => {
+            event.preventDefault();
+            doLogIn();
           }}
         >
           <label>
@@ -341,8 +341,8 @@ export default function Session() {
               minLength="2"
               required
               value={username}
-              onChange={event => {
-                setUsername(event.target.value)
+              onChange={(event) => {
+                setUsername(event.target.value);
               }}
             />
           </label>
@@ -354,8 +354,8 @@ export default function Session() {
               minLength="2"
               required
               value={password}
-              onChange={event => {
-                setPassword(event.target.value)
+              onChange={(event) => {
+                setPassword(event.target.value);
               }}
             />
           </label>
@@ -364,7 +364,7 @@ export default function Session() {
             Sign Up
           </button>
         </form>
-      )
+      );
 
     case sessionStates.loggedIn:
       return (
@@ -374,21 +374,21 @@ export default function Session() {
             Log out
           </button>
         </div>
-      )
+      );
 
     case sessionStates.loading:
     default:
-      return null
+      return null;
   }
 }
 
-function getUserDatabaseName(name, prefix = 'userdb-') {
-  const encoder = new TextEncoder()
-  const buffy = encoder.encode(name)
-  const bytes = Array.from(buffy).map(byte =>
-    byte.toString(16).padStart(2, '0')
-  )
-  return prefix + bytes.join('')
+function getUserDatabaseName(name, prefix = "userdb-") {
+  const encoder = new TextEncoder();
+  const buffy = encoder.encode(name);
+  const bytes = Array.from(buffy).map((byte) =>
+    byte.toString(16).padStart(2, "0"),
+  );
+  return prefix + bytes.join("");
 }
 ```
 
@@ -423,24 +423,24 @@ export default function Session() {
     // On first render: check if we are logged in
     remoteDbRef.current
       .getSession()
-      .then(sessionInfo => {
-        const name = sessionInfo.userCtx.name
+      .then((sessionInfo) => {
+        const name = sessionInfo.userCtx.name;
         if (name) {
-          setSessionState(sessionStates.loggedIn)
-          setUsername(name)
+          setSessionState(sessionStates.loggedIn);
+          setUsername(name);
         } else {
-          setSessionState(sessionStates.loggedOut)
-          setUsername('')
-          setPassword('')
+          setSessionState(sessionStates.loggedOut);
+          setUsername("");
+          setPassword("");
         }
       })
-      .catch(err => {
-        console.error(err)
-        setSessionState(sessionStates.loggedOut)
-        setUsername('')
-        setPassword('')
-      })
-  }, [])
+      .catch((err) => {
+        console.error(err);
+        setSessionState(sessionStates.loggedOut);
+        setUsername("");
+        setPassword("");
+      });
+  }, []);
 
   // ...
 }
@@ -459,26 +459,26 @@ Next we implement `doSignUp`:
 export default function Session() {
   // ...
 
-  const doSignUp = async event => {
-    event.preventDefault()
+  const doSignUp = async (event) => {
+    event.preventDefault();
 
-    if (username.length === 0 || password.length === 0) return
+    if (username.length === 0 || password.length === 0) return;
 
     try {
-      const response = await remoteDbRef.current.signUp(username, password)
+      const response = await remoteDbRef.current.signUp(username, password);
       if (response.ok) {
-        doLogIn()
+        doLogIn();
       }
     } catch (err) {
-      if (err.name === 'conflict') {
+      if (err.name === "conflict") {
         // an user with that username already exists, choose another username
-      } else if (err.name === 'forbidden') {
+      } else if (err.name === "forbidden") {
         // invalid username
       } else {
         // HTTP error, etc.
       }
     }
-  }
+  };
 
   // ...
 }
@@ -503,28 +503,28 @@ export default function Session() {
   // ...
 
   const doLogIn = async () => {
-    if (username.length === 0) return
+    if (username.length === 0) return;
 
     try {
-      const response = await remoteDbRef.current.logIn(username, password)
+      const response = await remoteDbRef.current.logIn(username, password);
       if (response.ok) {
         // Close the active remote db.
-        await remoteDbRef.current.close()
+        await remoteDbRef.current.close();
         // Create the users db instance
-        remoteDbRef.current = new HTTPPouch(getUserDatabaseName(response.name))
+        remoteDbRef.current = new HTTPPouch(getUserDatabaseName(response.name));
 
-        setSessionState(sessionStates.loggedIn)
-        setUsername(response.name)
-        setPassword('')
+        setSessionState(sessionStates.loggedIn);
+        setUsername(response.name);
+        setPassword("");
       }
     } catch (err) {
-      if (err.name === 'unauthorized' || err.name === 'forbidden') {
+      if (err.name === "unauthorized" || err.name === "forbidden") {
         // name or password incorrect
       } else {
         // HTTP error, etc.
       }
     }
-  }
+  };
 
   // ...
 }
@@ -543,30 +543,30 @@ To end a session, update `doLogOut`:
 export default function Session() {
   // ...
 
-  const doLogOut = async event => {
-    event.preventDefault()
+  const doLogOut = async (event) => {
+    event.preventDefault();
 
     try {
-      const response = await remoteDbRef.current.logOut()
+      const response = await remoteDbRef.current.logOut();
 
       if (response.ok) {
         // Close the active remote db.
-        await remoteDbRef.current.close()
+        await remoteDbRef.current.close();
 
         // remove the current remote db.
-        remoteDbRef.current = null
+        remoteDbRef.current = null;
 
         // destroy local database, to remove all local data
-        await db.destroy()
+        await db.destroy();
 
-        setSessionState(sessionStates.loggedOut)
-        setUsername('')
-        setPassword('')
+        setSessionState(sessionStates.loggedOut);
+        setUsername("");
+        setPassword("");
       }
     } catch (err) {
       // network error
     }
-  }
+  };
 
   // ...
 }
@@ -598,13 +598,13 @@ export default function Session() {
       const sync = db.sync(remoteDbRef.current, {
         retry: true,
         live: true,
-      })
+      });
       return () => {
         // and cancel syncing whenever our sessionState changes
-        sync.cancel()
-      }
+        sync.cancel();
+      };
     }
-  }, [sessionState, db])
+  }, [sessionState, db]);
 
   // ...
 }
@@ -629,61 +629,61 @@ Your `Session.js` should look something like this:
 
 ```jsx
 // Session.js
-import React, { useState, useEffect, useRef } from 'react'
-import { usePouch } from 'use-pouchdb'
-import PouchDB from 'pouchdb-browser'
-import PouchAuth from 'pouchdb-authentication'
+import React, { useState, useEffect, useRef } from "react";
+import { usePouch } from "use-pouchdb";
+import PouchDB from "pouchdb-browser";
+import PouchAuth from "pouchdb-authentication";
 
-PouchDB.plugin(PouchAuth)
+PouchDB.plugin(PouchAuth);
 
 const sessionStates = {
   loading: 0,
   loggedIn: 1,
   loggedOut: 2,
-}
+};
 
-const dbBaseUrl = new URL('/db/', window.location.href)
+const dbBaseUrl = new URL("/db/", window.location.href);
 const HTTPPouch = PouchDB.defaults({
   prefix: dbBaseUrl.href,
-})
+});
 
 export default function Session() {
-  const db = usePouch()
+  const db = usePouch();
 
-  const remoteDbRef = useRef(null)
+  const remoteDbRef = useRef(null);
   if (remoteDbRef.current == null) {
     // create a default remote db
-    remoteDbRef.current = new HTTPPouch('_users', {
+    remoteDbRef.current = new HTTPPouch("_users", {
       skip_setup: true, // prevents PouchDB from checking if the DB exists.
-    })
+    });
   }
 
-  const [sessionState, setSessionState] = useState(sessionStates.loading)
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
+  const [sessionState, setSessionState] = useState(sessionStates.loading);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
   useEffect(() => {
     // On first render: check if we are logged in
     remoteDbRef.current
       .getSession()
-      .then(sessionInfo => {
-        const name = sessionInfo.userCtx.name
+      .then((sessionInfo) => {
+        const name = sessionInfo.userCtx.name;
         if (name) {
-          setSessionState(sessionStates.loggedIn)
-          setUsername(name)
+          setSessionState(sessionStates.loggedIn);
+          setUsername(name);
         } else {
-          setSessionState(sessionStates.loggedOut)
-          setUsername('')
-          setPassword('')
+          setSessionState(sessionStates.loggedOut);
+          setUsername("");
+          setPassword("");
         }
       })
-      .catch(err => {
-        console.error(err)
-        setSessionState(sessionStates.loggedOut)
-        setUsername('')
-        setPassword('')
-      })
-  }, [])
+      .catch((err) => {
+        console.error(err);
+        setSessionState(sessionStates.loggedOut);
+        setUsername("");
+        setPassword("");
+      });
+  }, []);
 
   useEffect(() => {
     // sync effect
@@ -694,91 +694,91 @@ export default function Session() {
       const sync = db.sync(remoteDbRef.current, {
         retry: true,
         live: true,
-      })
+      });
       return () => {
         // and cancel syncing whenever our sessionState changes
-        sync.cancel()
-      }
+        sync.cancel();
+      };
     }
-  }, [sessionState, db])
+  }, [sessionState, db]);
 
   const doLogIn = async () => {
-    if (username.length === 0) return
+    if (username.length === 0) return;
 
     try {
-      const response = await remoteDbRef.current.logIn(username, password)
+      const response = await remoteDbRef.current.logIn(username, password);
       if (response.ok) {
         // Close the active remote db.
-        await remoteDbRef.current.close()
+        await remoteDbRef.current.close();
         // Create the users db instance
-        remoteDbRef.current = new HTTPPouch(getUserDatabaseName(response.name))
+        remoteDbRef.current = new HTTPPouch(getUserDatabaseName(response.name));
 
-        setSessionState(sessionStates.loggedIn)
-        setUsername(response.name)
-        setPassword('')
+        setSessionState(sessionStates.loggedIn);
+        setUsername(response.name);
+        setPassword("");
       }
     } catch (err) {
-      if (err.name === 'unauthorized' || err.name === 'forbidden') {
+      if (err.name === "unauthorized" || err.name === "forbidden") {
         // name or password incorrect
       } else {
         // HTTP error, etc.
       }
     }
-  }
+  };
 
-  const doSignUp = async event => {
-    event.preventDefault()
+  const doSignUp = async (event) => {
+    event.preventDefault();
 
-    if (username.length === 0 || password.length === 0) return
+    if (username.length === 0 || password.length === 0) return;
 
     try {
-      const response = await remoteDbRef.current.signUp(username, password)
+      const response = await remoteDbRef.current.signUp(username, password);
       if (response.ok) {
-        doLogIn()
+        doLogIn();
       }
     } catch (err) {
-      if (err.name === 'conflict') {
+      if (err.name === "conflict") {
         // an user with that username already exists, choose another username
-      } else if (err.name === 'forbidden') {
+      } else if (err.name === "forbidden") {
         // invalid username
       } else {
         // HTTP error, etc.
       }
     }
-  }
+  };
 
-  const doLogOut = async event => {
-    event.preventDefault()
+  const doLogOut = async (event) => {
+    event.preventDefault();
 
     try {
-      const response = await remoteDbRef.current.logOut()
+      const response = await remoteDbRef.current.logOut();
 
       if (response.ok) {
         // Close the active remote db.
-        await remoteDbRef.current.close()
+        await remoteDbRef.current.close();
 
         // remote the current remote db.
-        remoteDbRef.current = null
+        remoteDbRef.current = null;
 
         // destroy local database, to remove all local data
-        await db.destroy()
+        await db.destroy();
 
-        setSessionState(sessionStates.loggedOut)
-        setUsername('')
-        setPassword('')
+        setSessionState(sessionStates.loggedOut);
+        setUsername("");
+        setPassword("");
       }
     } catch (err) {
       // network error
     }
-  }
+  };
 
   switch (sessionState) {
     case sessionStates.loggedOut:
       return (
         <form
-          onSubmit={event => {
-            event.preventDefault()
-            doLogIn()
+          onSubmit={(event) => {
+            event.preventDefault();
+            doLogIn();
           }}
         >
           <label>
@@ -789,8 +789,8 @@ export default function Session() {
               minLength="2"
               required
               value={username}
-              onChange={event => {
-                setUsername(event.target.value)
+              onChange={(event) => {
+                setUsername(event.target.value);
               }}
             />
           </label>
@@ -802,8 +802,8 @@ export default function Session() {
               minLength="2"
               required
               value={password}
-              onChange={event => {
-                setPassword(event.target.value)
+              onChange={(event) => {
+                setPassword(event.target.value);
               }}
             />
           </label>
@@ -812,7 +812,7 @@ export default function Session() {
             Sign Up
           </button>
         </form>
-      )
+      );
 
     case sessionStates.loggedIn:
       return (
@@ -822,21 +822,21 @@ export default function Session() {
             Log out
           </button>
         </div>
-      )
+      );
 
     case sessionStates.loading:
     default:
-      return null
+      return null;
   }
 }
 
-function getUserDatabaseName(name, prefix = 'userdb-') {
-  const encoder = new TextEncoder()
-  const buffy = encoder.encode(name)
-  const bytes = Array.from(buffy).map(byte =>
-    byte.toString(16).padStart(2, '0')
-  )
-  return prefix + bytes.join('')
+function getUserDatabaseName(name, prefix = "userdb-") {
+  const encoder = new TextEncoder();
+  const buffy = encoder.encode(name);
+  const bytes = Array.from(buffy).map((byte) =>
+    byte.toString(16).padStart(2, "0"),
+  );
+  return prefix + bytes.join("");
 }
 ```
 

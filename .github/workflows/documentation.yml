@@ -10,8 +10,8 @@ jobs:
   checks:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: '22.x'
       - name: Lint
@@ -29,8 +29,8 @@ jobs:
     # Waits for test jobs for each Node.js version to complete
     needs: checks
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: '22.x'
       - name: Release to GitHub Pages

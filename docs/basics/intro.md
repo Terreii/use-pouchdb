@@ -1,7 +1,7 @@
 ---
 id: intro
 title: Basics
-sidebar_label: 'Basic Tutorial: Intro'
+sidebar_label: "Basic Tutorial: Intro"
 ---
 
 Oh good, I didn't scare you away! Thanks for sticking around.

@@ -157,7 +157,7 @@ site.
 When you are there enter in your browsers console:
 
 ```javascript
-PouchDB.version
+PouchDB.version;
 ```
 
 And you should get something like `"6.2.0"`.
@@ -187,21 +187,21 @@ $ yarn add pouchdb
 You can now use it in `node`.
 
 ```javascript
-const PouchDB = require('pouchdb')
+const PouchDB = require("pouchdb");
 ```
 
 To use it in your browser you have to bundle it. If you use [create-react-app](https://create-react-app.dev/) all
 you have to to is import `pouchdb`.
 
 ```javascript
-import PouchDB from 'pouchdb'
+import PouchDB from "pouchdb";
 ```
 
 For the browser there is a special [`pouchdb-browser`](https://www.npmjs.com/package/pouchdb-browser) package. It
 only ships with stuff for the browser.
 
 ```javascript
-import PouchDB from 'pouchdb-browser'
+import PouchDB from "pouchdb-browser";
 ```
 
 ### Create a database
@@ -209,7 +209,7 @@ import PouchDB from 'pouchdb-browser'
 The PouchDB export is a constructor/class. To create a local database instantiate it with a none URL like string:
 
 ```javascript
-const db = new PouchDB('myDB')
+const db = new PouchDB("myDB");
 ```
 
 `db` is the database instance.
@@ -218,21 +218,21 @@ If you want to access a remote database, then change the name to the url of the 
 object, a string:
 
 ```javascript
-const remote = new PouchDB('https://example.com/myDB')
+const remote = new PouchDB("https://example.com/myDB");
 
 // or with username and password:
 
-const remote2 = new PouchDB('https://example.com/myDB', {
+const remote2 = new PouchDB("https://example.com/myDB", {
   auth: {
-    username: 'tester',
-    password: 'geheim',
+    username: "tester",
+    password: "geheim",
   },
-})
+});
 
 // or use a prefix
-const remote3 = new PouchDB('myDB', {
-  prefix: 'https://example.com/',
-})
+const remote3 = new PouchDB("myDB", {
+  prefix: "https://example.com/",
+});
 ```
 
 More in the [PouchDB guide](https://pouchdb.com/guides/databases.html) or
@@ -251,18 +251,18 @@ const syncHandler = localDB
     live: true, // continuously sync between local and remote.
     retry: true, // Retry on connection lost.
   })
-  .on('paused', info => {
+  .on("paused", (info) => {
     // replication was paused, usually because of a lost connection.
   })
-  .on('active', info => {
+  .on("active", (info) => {
     // replication was resumed.
   })
-  .on('change', change => {
+  .on("change", (change) => {
     // something did change.
-  })
+  });
 
 // cancel replication/sync
-syncHandler.cancel()
+syncHandler.cancel();
 ```
 
 You can also sync between two local or two remote databases.
@@ -270,8 +270,8 @@ You can also sync between two local or two remote databases.
 If you only what to sync in one direction there is also:
 
 ```javascript
-localDB.replicate.to(remoteDB) // push data from localDB to remoteDB
-localDB.replicate.from(remoteDB) // pull data from remoteDB to localDB
+localDB.replicate.to(remoteDB); // push data from localDB to remoteDB
+localDB.replicate.from(remoteDB); // pull data from remoteDB to localDB
 ```
 
 They have the same options as sync.
@@ -293,11 +293,11 @@ are named after HTTP methods, because that's what CouchDB uses.
 ```javascript
 try {
   const response = await db.put({
-    _id: 'myDoc',
-    title: 'Welcome, to PouchDB!',
-  })
+    _id: "myDoc",
+    title: "Welcome, to PouchDB!",
+  });
 } catch (err) {
-  console.error(err)
+  console.error(err);
 }
 ```
 
@@ -305,15 +305,15 @@ try {
 
 ```javascript
 db.put({
-  _id: 'myDoc',
-  title: 'Welcome, to PouchDB!',
+  _id: "myDoc",
+  title: "Welcome, to PouchDB!",
 })
-  .then(response => {
+  .then((response) => {
     // handle response
   })
-  .catch(err => {
-    console.error(err)
-  })
+  .catch((err) => {
+    console.error(err);
+  });
 ```
 
 <!--Callbacks-->
@@ -321,17 +321,17 @@ db.put({
 ```javascript
 db.put(
   {
-    _id: 'myDoc',
-    title: 'Welcome, to PouchDB!',
+    _id: "myDoc",
+    title: "Welcome, to PouchDB!",
   },
   (err, response) => {
     if (err) {
-      console.error(err)
+      console.error(err);
     } else {
       // handle response
     }
-  }
-)
+  },
+);
 ```
 
 <!--END_DOCUSAURUS_CODE_TABS-->
@@ -392,34 +392,34 @@ Now lets read a doc:
 
 ```javascript
 try {
-  const doc = await db.get('myDoc')
+  const doc = await db.get("myDoc");
 } catch (err) {
-  console.error(err)
+  console.error(err);
 }
 ```
 
 <!--Promises-->
 
 ```javascript
-db.get('myDoc')
-  .then(doc => {
+db.get("myDoc")
+  .then((doc) => {
     // handle doc
   })
-  .catch(err => {
-    console.error(err)
-  })
+  .catch((err) => {
+    console.error(err);
+  });
 ```
 
 <!--Callbacks-->
 
 ```javascript
-db.get('myDoc', (err, doc) => {
+db.get("myDoc", (err, doc) => {
   if (err) {
-    console.error(err)
+    console.error(err);
   } else {
     // handle doc
   }
-})
+});
 ```
 
 <!--END_DOCUSAURUS_CODE_TABS-->

@@ -62,25 +62,25 @@ recommend that you create a new PouchDB database before each test. And that db s
 
 ```javascript
 // Using jest
-import PouchDB from 'pouchdb'
-import memory from 'pouchdb-adapter-memory'
+import PouchDB from "pouchdb";
+import memory from "pouchdb-adapter-memory";
 
 // add the adapter to PouchDB
-PouchDB.plugin(memory)
+PouchDB.plugin(memory);
 
-let myPouch = null
+let myPouch = null;
 
 beforeEach(() => {
   // before each test, create a new DB with the memory adapter.
   // nothing will be saved on disc!
-  myPouch = new PouchDB('test', { adapter: 'memory' })
-})
+  myPouch = new PouchDB("test", { adapter: "memory" });
+});
 
 afterEach(async () => {
   // Destroy the database after each test,
   // so that no data will be left from the previous test.
-  await myPouch.destroy()
-})
+  await myPouch.destroy();
+});
 ```
 
 Also remember, that you must add all needed document before/during the test!
@@ -92,65 +92,65 @@ All hooks must be in child components of [`<Provider />`](../api/provider.md).
 For **React Testing Library** you can warp your component with `<Provider />`:
 
 ```jsx
-import React from 'react'
-import { render } from '@testing-library/react'
-import PouchDB from 'pouchdb'
-import memory from 'pouchdb-adapter-memory'
+import React from "react";
+import { render } from "@testing-library/react";
+import PouchDB from "pouchdb";
+import memory from "pouchdb-adapter-memory";
 
-import TodoList from './TodoList'
+import TodoList from "./TodoList";
 
-PouchDB.plugin(memory)
+PouchDB.plugin(memory);
 
-let myPouch = null
+let myPouch = null;
 
 beforeEach(() => {
-  myPouch = new PouchDB('test', { adapter: 'memory' })
-})
+  myPouch = new PouchDB("test", { adapter: "memory" });
+});
 
 afterEach(async () => {
-  await myPouch.destroy()
-})
+  await myPouch.destroy();
+});
 
-test('Test Component', async () => {
+test("Test Component", async () => {
   // Add needed documents
   const putResult = await myPouch.bulkDocs([
     {
       _id: new Date(2020, 4, 30, 22, 03, 45, 0).toJSON(),
-      type: 'todo',
-      text: 'a todo',
+      type: "todo",
+      text: "a todo",
       done: false,
     },
     {
       _id: new Date(2020, 4, 30, 21, 03, 45, 0).toJSON(),
-      type: 'todo',
-      text: 'moar todo',
+      type: "todo",
+      text: "moar todo",
       done: false,
     },
-  ])
+  ]);
 
   // Render the Component
   const { queryByByText } = render(
     <Provider pouchdb={db}>
       <TodoList />
-    </Provider>
-  )
+    </Provider>,
+  );
 
-  const first = queryByByText('moar todo')
-  expect(first).toBeTruthy()
-  expect(first.nodeName).toBe('SPAN')
-  expect(first.parentNode.nodeName).toBe('LI')
-  expect(first.previousElementSibling.nodeName).toBe('INPUT')
-  expect(first.previousElementSibling.nodeName.type).toBe('checkbox')
+  const first = queryByByText("moar todo");
+  expect(first).toBeTruthy();
+  expect(first.nodeName).toBe("SPAN");
+  expect(first.parentNode.nodeName).toBe("LI");
+  expect(first.previousElementSibling.nodeName).toBe("INPUT");
+  expect(first.previousElementSibling.nodeName.type).toBe("checkbox");
 
-  const second = queryByByText('a todo')
-  expect(second).toBeTruthy()
-  expect(second.nodeName).toBe('SPAN')
-  expect(second.parentNode.nodeName).toBe('LI')
-  expect(second.previousElementSibling.nodeName).toBe('INPUT')
-  expect(second.previousElementSibling.nodeName.type).toBe('checkbox')
+  const second = queryByByText("a todo");
+  expect(second).toBeTruthy();
+  expect(second.nodeName).toBe("SPAN");
+  expect(second.parentNode.nodeName).toBe("LI");
+  expect(second.previousElementSibling.nodeName).toBe("INPUT");
+  expect(second.previousElementSibling.nodeName.type).toBe("checkbox");
 
-  expect(second.parentNode.previousElementSibling).toBe(first.parentNode)
-})
+  expect(second.parentNode.previousElementSibling).toBe(first.parentNode);
+});
 ```
 
 [`myPouch.bulkDocs`](https://pouchdb.com/api.html#batch_create) is a method to create/update
@@ -168,72 +168,72 @@ Let's test the addTodo from [**Add Todos**](./add-todo.md) extracted into a hook
 
 ```javascript
 // hooks.js
-import { useCallback } from 'react'
-import { usePouch } from 'use-pouchdb'
+import { useCallback } from "react";
+import { usePouch } from "use-pouchdb";
 
 // This hook returns a function, which we then call with the todo's text.
 export function useAddDoc() {
-  const db = usePouch()
+  const db = usePouch();
 
   return useCallback(
-    text => {
+    (text) => {
       const doc = {
         _id: new Date().toJSON(),
-        type: 'todo',
+        type: "todo",
         text: text,
         done: false,
-      }
+      };
 
-      return db.put(doc)
+      return db.put(doc);
     },
-    [db]
-  )
+    [db],
+  );
 }
 ```
 
 ```jsx
-import React from 'react'
-import { renderHook } from '@testing-library/react-hooks'
-import PouchDB from 'pouchdb'
-import memory from 'pouchdb-adapter-memory'
-import { Provider } from 'use-pouchdb'
+import React from "react";
+import { renderHook } from "@testing-library/react-hooks";
+import PouchDB from "pouchdb";
+import memory from "pouchdb-adapter-memory";
+import { Provider } from "use-pouchdb";
 
-import { useAddDoc } from './hooks'
+import { useAddDoc } from "./hooks";
 
-PouchDB.plugin(memory)
+PouchDB.plugin(memory);
 
-let myPouch = null
+let myPouch = null;
 
 beforeEach(() => {
-  myPouch = new PouchDB('test', { adapter: 'memory' })
-})
+  myPouch = new PouchDB("test", { adapter: "memory" });
+});
 
 afterEach(async () => {
-  await myPouch.destroy()
-})
+  await myPouch.destroy();
+});
 
-test('add document', async () => {
+test("add document", async () => {
   const wrapper = ({ children }) => (
     <Provider pouchdb={myPouch}>{children}</Provider>
-  )
+  );
   const { result } = renderHook(() => useAddDoc(), {
     wrapper,
-  })
+  });
 
-  expect(typeof result.current).toBe('function')
+  expect(typeof result.current).toBe("function");
 
-  await result.current('test todo')
+  await result.current("test todo");
 
-  const { rows } = await myPouch.allDocs({ include_docs: true })
-  expect(rows).toHaveLength(1)
+  const { rows } = await myPouch.allDocs({ include_docs: true });
+  expect(rows).toHaveLength(1);
   expect(rows[0]).toEqual({
     _id: expect.any(String),
     _rev: expect.any(String),
-    type: 'todo',
-    text: 'test todo',
+    type: "todo",
+    text: "test todo",
     done: false,
-  })
-})
+  });
+});
 ```
 
 Now we are finished with our Todo example. All Todos are replicated, users can sign up and log in.

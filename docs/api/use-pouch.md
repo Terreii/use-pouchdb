@@ -32,54 +32,54 @@ Access the pouchdb instance to start sync to another database. Read more about
 [PouchDB's Replication guide](https://pouchdb.com/guides/replication.html).
 
 ```jsx
-import React, { useState, useEffect } from 'react'
-import PouchDB from 'pouchdb-browser'
-import { usePouch } from 'use-pouchdb'
+import React, { useState, useEffect } from "react";
+import PouchDB from "pouchdb-browser";
+import { usePouch } from "use-pouchdb";
 
 export function SyncComponent({ username, password }) {
   // get the database you want to sync
-  const db = usePouch()
+  const db = usePouch();
 
-  const [isSyncing, setIsSyncing] = useState(false)
+  const [isSyncing, setIsSyncing] = useState(false);
 
   useEffect(() => {
     if (!username || !password) {
-      return
+      return;
     }
 
-    const url = new URL('/db', window.location.href)
+    const url = new URL("/db", window.location.href);
     // create the remote database with authentication
     const remote = new PouchDB(url.href, {
       auth: {
         username,
         password,
       },
-    })
+    });
 
     // start syncing
     const sync = db
       .sync(remote, { live: true, retry: true })
-      .on('paused', () => {
-        setIsSyncing(false)
+      .on("paused", () => {
+        setIsSyncing(false);
       })
-      .on('active', () => {
-        setIsSyncing(true)
+      .on("active", () => {
+        setIsSyncing(true);
       })
-      .on('denied', err => {
+      .on("denied", (err) => {
         // handle permission errors
-      })
+      });
 
     return () => {
       // stop syncing
-      sync.cancel()
-    }
-  }, [db, username, password])
+      sync.cancel();
+    };
+  }, [db, username, password]);
 
   if (!isSyncing) {
-    return null
+    return null;
   }
 
-  return <div>syncing your data</div>
+  return <div>syncing your data</div>;
 }
 ```
 
@@ -88,52 +88,52 @@ export function SyncComponent({ username, password }) {
 With access to the database, you can create your own hooks.
 
 ```javascript
-import { useCallback } from 'react'
-import { usePouch } from 'use-pouchdb'
+import { useCallback } from "react";
+import { usePouch } from "use-pouchdb";
 
 export function useAddBooking() {
-  const db = usePouch()
+  const db = usePouch();
 
   return useCallback(
     async (amount, name) => {
-      if (typeof amount !== 'number') {
-        throw new TypeError('amount must be a number!')
+      if (typeof amount !== "number") {
+        throw new TypeError("amount must be a number!");
       }
 
       const doc = {
         _id: `booking_${new Date().toJSON()}`,
-        type: 'booking',
-        name: name || 'unknown',
+        type: "booking",
+        name: name || "unknown",
         amount: amount,
-      }
+      };
 
-      const result = await db.put(doc)
+      const result = await db.put(doc);
 
-      return result
+      return result;
     },
-    [db]
-  )
+    [db],
+  );
 }
 ```
 
 and then in your component:
 
 ```jsx
-import React, { useState } from 'react'
+import React, { useState } from "react";
 
-import { useAddBooking } from './hooks'
+import { useAddBooking } from "./hooks";
 
 export function NewBooking() {
-  const addBooking = useAddBooking()
+  const addBooking = useAddBooking();
 
-  const [name, setName] = useState()
-  const [amount, setAmount] = useState(0)
+  const [name, setName] = useState();
+  const [amount, setAmount] = useState(0);
 
   return (
     <form
-      onSubmit={event => {
-        event.preventDefault()
-        addBooking(amount, name)
+      onSubmit={(event) => {
+        event.preventDefault();
+        addBooking(amount, name);
       }}
     >
       <label>
@@ -141,8 +141,8 @@ export function NewBooking() {
         <input
           type="text"
           value={name}
-          onChange={event => {
-            setName(event.target.value)
+          onChange={(event) => {
+            setName(event.target.value);
           }}
         />
       </label>
@@ -153,39 +153,39 @@ export function NewBooking() {
           type="number"
           required
           value={amount}
-          onChange={event => {
-            setAmount(event.target.value)
+          onChange={(event) => {
+            setAmount(event.target.value);
           }}
         />
       </label>
 
       <button>add</button>
     </form>
-  )
+  );
 }
 ```
 
 ### Select a database
 
 ```javascript
-import { useEffect } from 'react'
-import { usePouch } from 'use-pouchdb'
+import { useEffect } from "react";
+import { usePouch } from "use-pouchdb";
 
 function useSync(shouldSync) {
-  const localDb = usePouch('local')
-  const remoteDb = usePouch('remote')
+  const localDb = usePouch("local");
+  const remoteDb = usePouch("remote");
 
   useEffect(() => {
     if (shouldSync) {
       const sync = localDb.sync(remoteDb, {
         live: true,
         retry: true,
-      })
+      });
 
       return () => {
-        sync.cancel()
-      }
+        sync.cancel();
+      };
     }
-  }, [localDb, remoteDb, shouldSync])
+  }, [localDb, remoteDb, shouldSync]);
 }
 ```

@@ -5,22 +5,22 @@
 
 version: 2
 updates:
-  - package-ecosystem: 'npm' # See documentation for possible values
+  - package-ecosystem: "npm" # See documentation for possible values
     directories: # Location of package manifests
-      - '/'
-      - '/website'
+      - "/"
+      - "/website"
     schedule:
       interval: weekly
     versioning-strategy: increase
     groups:
       non-breaking-updates:
         patterns:
-          - '*' # All dependecies that are minor or patch.
+          - "*" # All dependecies that are minor or patch.
         update-types:
-          - 'minor'
-          - 'patch'
+          - "minor"
+          - "patch"
 
-  - package-ecosystem: 'github-actions'
-    directory: '/'
+  - package-ecosystem: "github-actions"
+    directory: "/"
     schedule:
       interval: monthly

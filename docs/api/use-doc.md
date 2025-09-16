@@ -53,16 +53,16 @@ of `options.open_revs` not being supported. Options descriptions are copied from
 ### Getting a document
 
 ```jsx
-import React from 'react'
-import ReactMarkdown from 'react-markdown'
-import { useDoc } from 'use-pouchdb'
-import { ErrorMessage } from './ErrorMessage'
+import React from "react";
+import ReactMarkdown from "react-markdown";
+import { useDoc } from "use-pouchdb";
+import { ErrorMessage } from "./ErrorMessage";
 
 export function PostViewer({ id }) {
-  const { doc, loading, state, error } = useDoc(id)
+  const { doc, loading, state, error } = useDoc(id);
 
-  if (state === 'error') {
-    return <ErrorMessage error={error} />
+  if (state === "error") {
+    return <ErrorMessage error={error} />;
   }
 
   if (loading && doc == null) {
@@ -72,7 +72,7 @@ export function PostViewer({ id }) {
           <h1>loading ...</h1>
         </hgroup>
       </article>
-    )
+    );
   }
 
   return (
@@ -83,35 +83,35 @@ export function PostViewer({ id }) {
       </hgroup>
       <ReactMarkdown source={doc.text} />
     </article>
-  )
+  );
 }
 ```
 
 ### Options
 
 ```jsx
-import React from 'react'
-import ReactMarkdown from 'react-markdown'
-import { useDoc } from 'use-pouchdb'
-import { ErrorMessage } from './ErrorMessage'
+import React from "react";
+import ReactMarkdown from "react-markdown";
+import { useDoc } from "use-pouchdb";
+import { ErrorMessage } from "./ErrorMessage";
 
-import { DocRenderer } from './DocRenderer'
+import { DocRenderer } from "./DocRenderer";
 
 export function ConflictResolver({ id }) {
   const { doc: winning, loading: winningIsLoading } = useDoc(id, {
     conflicts: true,
-  })
+  });
 
   const { doc: loosing, loading: loosingIsLoading } = useDoc(id, {
     rev: winning._conflict.length > 0 ? winning._conflict[0] : undefined,
-  })
+  });
 
   if (winningIsLoading || loosingIsLoading) {
-    return <div>loading ...</div>
+    return <div>loading ...</div>;
   }
 
   if (winning._rev === loosing._rev) {
-    return <div>No conflict!</div>
+    return <div>No conflict!</div>;
   }
 
   return (
@@ -119,7 +119,7 @@ export function ConflictResolver({ id }) {
       <DocRenderer doc={winning} />
       <DocRenderer doc={loosing} />
     </div>
-  )
+  );
 }
 ```
 
@@ -128,21 +128,21 @@ export function ConflictResolver({ id }) {
 If the `initialValue` is set, then the `options` must also be set (it can be an `object` or `null`).
 
 ```jsx
-import React from 'react'
-import ReactMarkdown from 'react-markdown'
-import { useDoc } from 'use-pouchdb'
-import { ErrorMessage } from './ErrorMessage'
+import React from "react";
+import ReactMarkdown from "react-markdown";
+import { useDoc } from "use-pouchdb";
+import { ErrorMessage } from "./ErrorMessage";
 
 export function PostViewer({ id }) {
   const { doc, state, error } = useDoc(id, null, () => ({
     _id: id,
-    title: '...',
-    author: '...',
-    text: 'loading ...',
-  }))
+    title: "...",
+    author: "...",
+    text: "loading ...",
+  }));
 
-  if (state === 'error') {
-    return <ErrorMessage error={error} />
+  if (state === "error") {
+    return <ErrorMessage error={error} />;
   }
 
   return (
@@ -153,7 +153,7 @@ export function PostViewer({ id }) {
       </hgroup>
       <ReactMarkdown source={doc.text} />
     </article>
-  )
+  );
 }
 ```
 
@@ -163,18 +163,18 @@ initial value and edit it. Once it is saved/created, `useDoc` will fetch the new
 ### Select a database
 
 ```jsx
-import React from 'react'
-import ReactMarkdown from 'react-markdown'
-import { useDoc } from 'use-pouchdb'
-import { ErrorMessage } from './ErrorMessage'
+import React from "react";
+import ReactMarkdown from "react-markdown";
+import { useDoc } from "use-pouchdb";
+import { ErrorMessage } from "./ErrorMessage";
 
 export function PostViewer({ id, isLocalReady }) {
   const { doc, loading, state, error } = useDoc(id, {
-    db: isLocalReady ? 'local' : 'remote',
-  })
+    db: isLocalReady ? "local" : "remote",
+  });
 
-  if (state === 'error') {
-    return <ErrorMessage error={error} />
+  if (state === "error") {
+    return <ErrorMessage error={error} />;
   }
 
   if (loading && doc == null) {
@@ -184,7 +184,7 @@ export function PostViewer({ id, isLocalReady }) {
           <h1>loading ...</h1>
         </hgroup>
       </article>
-    )
+    );
   }
 
   return (
@@ -195,6 +195,6 @@ export function PostViewer({ id, isLocalReady }) {
       </hgroup>
       <ReactMarkdown source={doc.text} />
     </article>
-  )
+  );
 }
 ```

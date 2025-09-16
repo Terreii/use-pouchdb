@@ -12,33 +12,33 @@ the `App.js` component.
 
 ```jsx
 // App.js
-import React, { useState, useEffect } from 'react'
-import './App.css'
+import React, { useState, useEffect } from "react";
+import "./App.css";
 
-import PouchDB from 'pouchdb-browser'
-import { Provider } from 'use-pouchdb'
+import PouchDB from "pouchdb-browser";
+import { Provider } from "use-pouchdb";
 
 export default function App() {
-  const [db, setDB] = useState(() => new PouchDB('local'))
+  const [db, setDB] = useState(() => new PouchDB("local"));
 
   useEffect(() => {
-    const listener = dbName => {
-      if (dbName === 'local') {
-        setDB(new PouchDB('local'))
+    const listener = (dbName) => {
+      if (dbName === "local") {
+        setDB(new PouchDB("local"));
       }
-    }
+    };
 
-    PouchDB.on('destroyed', listener)
+    PouchDB.on("destroyed", listener);
     return () => {
-      PouchDB.removeListener('destroyed', listener)
-    }
-  }, [])
+      PouchDB.removeListener("destroyed", listener);
+    };
+  }, []);
 
   return (
     <Provider pouchdb={db}>
       <div className="App">Add the future components here</div>
     </Provider>
-  )
+  );
 }
 ```
 

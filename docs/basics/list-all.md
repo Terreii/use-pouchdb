@@ -10,22 +10,22 @@ Our `<Todo />` component takes the todo document as props and displays it.
 
 ```jsx
 // TodoList.js
-import React from 'react'
-import { useAllDocs } from 'use-pouchdb'
-import Todo from './Todo'
+import React from "react";
+import { useAllDocs } from "use-pouchdb";
+import Todo from "./Todo";
 
 export default function TodoList() {
   const { rows: todos, loading } = useAllDocs({
     include_docs: true, // Load all document bodies
-  })
+  });
 
   return (
     <ul className="todo-list">
       {(todos && todos.length) || loading
-        ? todos.map(todo => <Todo key={todo.key} todo={todo.doc} />)
-        : 'No todos, yay!'}
+        ? todos.map((todo) => <Todo key={todo.key} todo={todo.doc} />)
+        : "No todos, yay!"}
     </ul>
-  )
+  );
 }
 ```
 
@@ -64,14 +64,14 @@ Now to the `<Todo />` component:
 
 ```jsx
 // Todo.js
-import React from 'react'
+import React from "react";
 
 export default function Todo({ todo }) {
   return (
     <li className="todo-item">
       <span className="todo-item__text">{todo.text}</span>
     </li>
-  )
+  );
 }
 ```
 

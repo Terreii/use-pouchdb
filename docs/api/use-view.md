@@ -116,21 +116,21 @@ If you use a tag system and want to list all documents with a tag, then use `use
 
 ```javascript
 var designDoc = {
-  _id: '_design/app',
+  _id: "_design/app",
   views: {
     tags: {
       map: function tagsMap(doc) {
         if (isArray(doc.tags)) {
           doc.tags.forEach(function (tag) {
             // emit tag as the key and the doc title as the value
-            emit(tag, doc.title)
-          })
+            emit(tag, doc.title);
+          });
         }
       }.toString(),
-      reduce: '_count',
+      reduce: "_count",
     },
   },
-}
+};
 ```
 
 ```jsx
@@ -170,21 +170,21 @@ This example counts the number of documents with a tag.
 
 ```javascript
 var designDoc = {
-  _id: '_design/app',
+  _id: "_design/app",
   views: {
     tags: {
       map: function tagsMap(doc) {
         if (isArray(doc.tags)) {
           doc.tags.forEach(function (tag) {
             // emit tag as the key and the doc title as the value
-            emit(tag, doc.title)
-          })
+            emit(tag, doc.title);
+          });
         }
       }.toString(),
-      reduce: '_count',
+      reduce: "_count",
     },
   },
-}
+};
 ```
 
 ```jsx
@@ -226,13 +226,13 @@ In this example you can sum the changes to a bank account in a time frame.
 
 ```javascript
 var designDoc = {
-  _id: '_design/accounting',
+  _id: "_design/accounting",
   views: {
     change: {
       map: function accountChangeMap(doc) {
         // only if it is the correct doc type
-        if (doc.type === 'booking') {
-          var time = new Date(doc.timestamp)
+        if (doc.type === "booking") {
+          var time = new Date(doc.timestamp);
 
           // use a complex key. Here an array
           emit(
@@ -244,14 +244,14 @@ var designDoc = {
               time.getUTCMinutes(),
               time.getUTCSeconds(),
             ],
-            doc.amount
-          )
+            doc.amount,
+          );
         }
       }.toString(),
-      reduce: '_sum',
+      reduce: "_sum",
     },
   },
-}
+};
 ```
 
 ```jsx
@@ -289,21 +289,21 @@ export function BankAccountChange({ year }) {
 
 ```javascript
 var designDoc = {
-  _id: '_design/app',
+  _id: "_design/app",
   views: {
     tags: {
       map: function tagsMap(doc) {
         if (isArray(doc.tags)) {
           doc.tags.forEach(function (tag) {
             // emit tag as the key and the doc title as the value
-            emit(tag, doc.title)
-          })
+            emit(tag, doc.title);
+          });
         }
       }.toString(),
-      reduce: '_count',
+      reduce: "_count",
     },
   },
-}
+};
 ```
 
 ```jsx

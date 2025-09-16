@@ -58,21 +58,21 @@ In the Examples below `<App />` is the top most component, that contains all of 
 ### Vanilla React Example
 
 ```jsx
-import React from 'react'
-import ReactDOM from 'react-dom'
-import PouchDB from 'pouchdb-browser'
-import { Provider } from 'use-pouchdb'
+import React from "react";
+import ReactDOM from "react-dom";
+import PouchDB from "pouchdb-browser";
+import { Provider } from "use-pouchdb";
 
-import { App } from './App'
+import { App } from "./App";
 
-const db = new PouchDB('local')
+const db = new PouchDB("local");
 
 ReactDOM.render(
   <Provider pouchdb={db}>
     <App />
   </Provider>,
-  document.getElementById('root')
-)
+  document.getElementById("root"),
+);
 ```
 
 ### Multiple databases
@@ -89,16 +89,16 @@ But sync in the background. Once all data is locally available, fetch all used v
 the local db, which will start the indexing. And then switch to the local db.
 
 ```jsx
-import React from 'react'
-import ReactDOM from 'react-dom'
-import PouchDB from 'pouchdb-browser'
+import React from "react";
+import ReactDOM from "react-dom";
+import PouchDB from "pouchdb-browser";
 
-import { Provider } from 'use-pouchdb'
+import { Provider } from "use-pouchdb";
 
-import App from './App'
+import App from "./App";
 
-const db = new PouchDB('local_data')
-const remoteDb = new PouchDB('https://example.com/db')
+const db = new PouchDB("local_data");
+const remoteDb = new PouchDB("https://example.com/db");
 
 ReactDOM.render(
   <Provider
@@ -110,8 +110,8 @@ ReactDOM.render(
   >
     <App />
   </Provider>,
-  document.getElementById('root')
-)
+  document.getElementById("root"),
+);
 ```
 
 ### Usage with React Router
@@ -120,18 +120,18 @@ I recommend using `usePouchDB` with an routing solution, like
 [React Router](https://reacttraining.com/react-router/).
 
 ```jsx
-import React from 'react'
-import ReactDOM from 'react-dom'
-import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
-import PouchDB from 'pouchdb-browser'
-import { Provider } from 'use-pouchdb'
+import React from "react";
+import ReactDOM from "react-dom";
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import PouchDB from "pouchdb-browser";
+import { Provider } from "use-pouchdb";
 
-import { App } from './App'
-import { Other } from './Other'
-import { More } from './More'
-import { Header } from './Header'
+import { App } from "./App";
+import { Other } from "./Other";
+import { More } from "./More";
+import { Header } from "./Header";
 
-const db = new PouchDB('local')
+const db = new PouchDB("local");
 
 ReactDOM.render(
   <Provider pouchdb={db}>
@@ -153,8 +153,8 @@ ReactDOM.render(
       </Switch>
     </Router>
   </Provider>,
-  document.getElementById('root')
-)
+  document.getElementById("root"),
+);
 ```
 
 ### With Redux and React-Redux
@@ -165,18 +165,18 @@ There are also some [Redux-PouchDB packages](https://pouchdb.com/external.html#f
 Read more about [Redux](https://redux.js.org/) and [React-Redux](https://react-redux.js.org/) at their sites.
 
 ```jsx
-import React from 'react'
-import ReactDOM from 'react-dom'
-import { Provider } from 'react-redux'
-import PouchDB from 'pouchdb-browser'
-import { Provider as PouchProvider } from 'use-pouchdb'
+import React from "react";
+import ReactDOM from "react-dom";
+import { Provider } from "react-redux";
+import PouchDB from "pouchdb-browser";
+import { Provider as PouchProvider } from "use-pouchdb";
 
-import { App } from './App'
-import createStore from './createReduxStore'
+import { App } from "./App";
+import createStore from "./createReduxStore";
 
-const store = createStore()
+const store = createStore();
 
-const db = new PouchDB('local')
+const db = new PouchDB("local");
 
 ReactDOM.render(
   <Provider store={store}>
@@ -184,8 +184,8 @@ ReactDOM.render(
       <App />
     </PouchProvider>
   </Provider>,
-  document.getElementById('root')
-)
+  document.getElementById("root"),
+);
 ```
 
 While you don't need to use Redux and can build full apps using only usePouchDB.
@@ -199,15 +199,15 @@ You can use both at the same time.
 Databases can be made available to a subtree, while still be able to access all other databases.
 
 ```jsx
-import React from 'react'
-import ReactDOM from 'react-dom'
-import PouchDB from 'pouchdb-browser'
-import { Provider } from 'use-pouchdb'
+import React from "react";
+import ReactDOM from "react-dom";
+import PouchDB from "pouchdb-browser";
+import { Provider } from "use-pouchdb";
 
-import { Main } from './Main'
-import { UserMenu } from './UserMenu'
+import { Main } from "./Main";
+import { UserMenu } from "./UserMenu";
 
-const db = new PouchDB('local')
+const db = new PouchDB("local");
 
 ReactDOM.render(
   <Provider pouchdb={db}>
@@ -216,28 +216,28 @@ ReactDOM.render(
       <UserMenu />
     </div>
   </Provider>,
-  document.getElementById('root')
-)
+  document.getElementById("root"),
+);
 ```
 
 and in UserMenu.js:
 
 ```jsx
-import React from 'react'
-import PouchDB from 'pouchdb-browser'
-import { Provider } from 'use-pouchdb'
+import React from "react";
+import PouchDB from "pouchdb-browser";
+import { Provider } from "use-pouchdb";
 
 // Menu will only have access to the remote database
-import Menu from './Menu'
+import Menu from "./Menu";
 
-const remote = new PouchDB('https://example.com/db')
+const remote = new PouchDB("https://example.com/db");
 
 export function UserMenu() {
   return (
     <Provider pouchdb={remote} name="remote">
       <Menu />
     </Provider>
-  )
+  );
 }
 ```
 
